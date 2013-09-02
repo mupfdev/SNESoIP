@@ -6,7 +6,7 @@
 - 3x 1x5 SMT (X2, X3, X4)
 - 2x 1x2 SMT (X5, X6)
 
-## Capacitor ##
+## Capacitors ##
 - 2x 22pF KER 1206 (C1, C2)
 - 2x 10uF TAN C-6032 (C3, C4)
 
