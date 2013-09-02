@@ -78,7 +78,7 @@ int main() {
 
 
 		// Prepare and store received data.
-    for (int i = 0; i < 8; i++) { // Lo-Byte.
+		for (int i = 0; i < 8; i++) { // Lo-Byte.
 			uint16_t *c = clientData + clientID;
 
 			*c = recvBuffer[0] & (1 << i)
@@ -86,7 +86,7 @@ int main() {
 				: *c & ~(1 << i);
 		}
 
-    for (int i = 0; i < 8; i++) { // Hi-Byte.
+		for (int i = 0; i < 8; i++) { // Hi-Byte.
 			uint16_t *c = clientData + clientID;
 
 			*c = recvBuffer[1] & (1 << i)
@@ -95,7 +95,7 @@ int main() {
 		}
 
     //if (requestCache != clientData[requestID])
-			sendto(sockfd, &clientData[requestID], 2, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
+		sendto(sockfd, &clientData[requestID], 2, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
 
 
 		// Format timestamp.
