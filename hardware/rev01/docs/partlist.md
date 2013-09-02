@@ -25,5 +25,9 @@
 - 1x [ENC28J60 module](enc28j60-module.jpg) from [eBay](http://www.ebay.com/sch/?_nkw=enc28j60)
 - 3x 1x5 Female header (X2, X3, X4)
 - 2x 1x2 Female header (X5, X6)
+- 1x [SNES controller connector](http://www.raphnet-tech.com/products/snes_controller_connector/index.php)
+  or something appropriate (X2)
+- 2x SNES controller plug (e.g. from an extension cable or cheap 3rd
+  party controller) (X3, X4)
 - 1x Tactile Switch (X5)
 - 1x Bi-Color LED rd/gn (X6)
