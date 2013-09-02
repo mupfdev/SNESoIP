@@ -17,20 +17,8 @@ If you find it useful, please consider donating a small amount of money.
 Your donation will be used to support further development of the
 project.
 
-The easiest way to donate is via PayPal, simply click the button below:
-
-<form action="https://www.paypal.com/cgi-bin/webscr"
-	method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="GDFBJDCHFGTCU">
-<input type="image"
-	src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif"
-	border="0" name="submit" alt="PayPal – The safer, easier way to pay
-	online.">
-<img alt="" border="0"
-	src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif"
-	width="1" height="1">
-</form>
+The easiest way to donate is via PayPal, simply click
+[here](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ESZJS7TMYMNNW&lc=GB&item_name=mupfelofen%2ede&item_number=SNESoIP&no_note=1&no_shipping=1&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted).
 
 
 ## Features ##
