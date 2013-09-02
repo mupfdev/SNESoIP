@@ -94,7 +94,6 @@ int main() {
 				: *c & ~(1 << i + 8);
 		}
 
-    //if (requestCache != clientData[requestID])
 		sendto(sockfd, &clientData[requestID], 2, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
 
 
