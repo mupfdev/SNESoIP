@@ -35,7 +35,7 @@ int main() {
 	char*    timestamp;
 
 	snesIO clientData[256];
-	snesIO clientCache = 0xffff, requestCache = 0xffff;
+	snesIO clientCache = 0xffff;
 
 	for (int i = 0; i < 255; i++)
 		clientData[i] = 0xffff;
@@ -74,7 +74,6 @@ int main() {
 		requestID = recvBuffer[3];
 
 		clientCache  = clientData[clientID];
-		requestCache = clientData[requestID];
 
 
 		// Prepare and store received data.
