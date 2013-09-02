@@ -17,7 +17,7 @@
 ## Semiconductors ##
 
 - 1x ATmega8 TQFP-32 (IC1)
-- 1x LM117 3.3V SOT-223 (IC2)
+- 1x LM1117 3.3V SOT-223 (IC2)
 
 ## External components ##
 
