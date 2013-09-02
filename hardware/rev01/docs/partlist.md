@@ -29,5 +29,5 @@
   or something appropriate (X2)
 - 2x SNES controller plug (e.g. from an extension cable or cheap 3rd
   party controller) (X3, X4)
-- 1x Tactile Switch (X5)
+- 1x Tactile switch (X5)
 - 1x Bi-Color LED rd/gn (X6)
