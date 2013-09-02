@@ -21,7 +21,7 @@
 
 ## External components ##
 
-- 1x 2x5 Ribbon cable IDC connectors (X1)
+- 1x 2x5 Ribbon cable with IDC connectors (X1)
 - 1x [ENC28J60 module](enc28j60-module.jpg) from [eBay](http://www.ebay.com/sch/?_nkw=enc28j60)
 - 3x 1x5 Female header (X2, X3, X4)
 - 2x 1x2 Female header (X5, X6)
