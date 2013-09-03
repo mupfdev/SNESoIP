@@ -1,4 +1,4 @@
-/* config.h -*-c++-*-
+/* config.h -*-c-*-
  * SNESoIP configuration.
  * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
  *

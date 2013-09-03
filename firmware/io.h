@@ -1,4 +1,4 @@
-/* io.h -*-c++-*-
+/* io.h -*-c-*-
  * I/O handler.
  * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
  *

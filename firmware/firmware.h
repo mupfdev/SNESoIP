@@ -1,4 +1,4 @@
-/* firmware.h -*-c++-*-
+/* firmware.h -*-c-*-
  * SNESoIP firmware.
  * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
  *
