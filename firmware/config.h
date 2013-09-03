@@ -9,9 +9,6 @@
 #ifndef CONFIG_h
 #define CONFIG_h
 
-#include <avr/io.h>
-#include <util/delay.h>
-
 
 #define CID         0x03 // Own unique device ID.
 #define P2CID       0x00 // Unique ID of the Opponent/Teammate.
