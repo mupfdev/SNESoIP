@@ -30,7 +30,7 @@ The easiest way to donate is via PayPal, simply click
 - DNS lookup of the server hostname,
 - small firmware size (fits on an ATmega8),
 - easy to rebuild (even on a stripboard),
-- low component count,
+- [low component count](hardware/rev01/docs/partlist.md),
 - adaption of other platforms (e.g. Sega Mega Drive) is possible
 - possible cross-platform capability.
 
