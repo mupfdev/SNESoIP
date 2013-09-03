@@ -45,8 +45,8 @@ The easiest way to donate is via PayPal, simply click
 ### Communication ###
 
 The SNESoIP ethernet adapter is continously sending 4-byte data packets
-via UDP to a (remote) server and may receive 2-byte answer packets from
-the (remote) server.
+via UDP to a (remote) server and receive 2-byte answer packets from the
+(remote) server.
 
 A packet sent to the server has the following format:
 
