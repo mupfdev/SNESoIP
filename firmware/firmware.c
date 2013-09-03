@@ -89,7 +89,7 @@ int main(void) {
 	ledOnGreen(); // Connected.
 
 
-	while (1) {	// Main loop start.
+	while (1) { // Main loop start.
 		received = enc28j60PacketReceive(BufferSize, buffer);
 
 
