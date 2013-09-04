@@ -1,5 +1,5 @@
 # -*-makefile-*-
-.PHONY: all clean flash fuses program
+.PHONY: all clean flash
 
 F_CPU   = 8000000UL
 ISP     = usbasp
