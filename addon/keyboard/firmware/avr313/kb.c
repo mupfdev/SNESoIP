@@ -19,15 +19,15 @@ ISR (INT0_vect) {
 	static uint8_t data = 0;            // Holds the received scan code
 	static uint8_t bitCount = 11;       // 0 = neg.  1 = pos.
 
-	if(bitCount < 11 && bitCount > 2) { // Bit 3 to 10 is data. Parity bit,
+	if (bitCount < 11 && bitCount > 2) { // Bit 3 to 10 is data. Parity bit,
 
 		// Start and stop bits are ignored.
 		data = (data >> 1);
-		if(KeyboardDataPIN & (1 << KeyboardData))
+		if (KeyboardDataPIN & (1 << KeyboardData))
 			data = data | 0x80;             // Store a '1'
 	}
 
-	if(--bitCount == 0) {               // All bits received
+	if (--bitCount == 0) {               // All bits received
 		bitCount = 11;
 		decode(data);
 	}
@@ -58,7 +58,7 @@ void decode(uint8_t sc) {
 				if (!shift) {                  // If shift not pressed,
 
 					// do a table look-up.
-					for(i = 0; (ch = pgm_read_byte(&unshifted[i][0])) != sc && ch; i++);
+					for (i = 0; (ch = pgm_read_byte(&unshifted[i][0])) != sc && ch; i++);
 					if (ch == sc)
 						putKbBuff(pgm_read_byte(&unshifted[i][1]));
 
@@ -66,7 +66,7 @@ void decode(uint8_t sc) {
 
 					for (i = 0; (ch = pgm_read_byte(&shifted[i][0])) != sc && ch; i++);
 					if (ch == sc)
-						putKbBuff( pgm_read_byte(&shifted[i][1]));
+						putKbBuff(pgm_read_byte(&shifted[i][1]));
 				}
 			} else {                        // Scan code mode.
 
