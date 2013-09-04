@@ -17,11 +17,11 @@
 #define Port0ClockDDR   DDRB
 #define Port0ClockPORT  PORTB
 #define Port0ClockPIN   PINB
-#define Port0Clock      PB1
+#define Port0Clock      PB0
 
 #define Port0LatchDDR   DDRB
 #define Port0LatchPORT  PORTB
-#define Port0Latch      PB2
+#define Port0Latch      PB1
 
 #define Port0DataDDR    DDRB
 #define Port0DataPORT   PORTB
@@ -29,6 +29,7 @@
 
 
 // Used by kb.c
+// PS/2 clock uses PB2 (INT0).
 #define KeyboardDataPIN PINB
 #define KeyboardData    PB4
 

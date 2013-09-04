@@ -6,25 +6,25 @@
 
 
 void initKeyboard(void) {
-	kbInPtr   =  kbBuffer;  // Initialize buffer.
+	kbInPtr   = kbBuffer;                // Initialize buffer.
 	kbOutPtr  = kbBuffer;
 	kbBuffCnt = 0;
 
-	MCUCR     = (1 << ISC01); // INT0 interrupt on falling edge.
-	GIMSK     = (1 << INT0);    // Enable INT0 interrupt.
+	MCUCR     = (1 << ISC01);            // INT0 interrupt on falling edge.
+	GIMSK     = (1 << INT0);             // Enable INT0 interrupt.
 }
 
 
 ISR (INT0_vect) {
-	static uint8_t data = 0;            // Holds the received scan code
-	static uint8_t bitCount = 11;       // 0 = neg.  1 = pos.
+	static uint8_t data = 0;             // Holds the received scan code
+	static uint8_t bitCount = 11;        // 0 = neg.  1 = pos.
 
 	if (bitCount < 11 && bitCount > 2) { // Bit 3 to 10 is data. Parity bit,
 
 		// Start and stop bits are ignored.
 		data = (data >> 1);
 		if (KeyboardDataPIN & (1 << KeyboardData))
-			data = data | 0x80;             // Store a '1'
+			data = data | 0x80;              // Store a '1'
 	}
 
 	if (--bitCount == 0) {               // All bits received

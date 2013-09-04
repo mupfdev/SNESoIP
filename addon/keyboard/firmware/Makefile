@@ -1,5 +1,5 @@
 # -*-makefile-*-
-.PHONY: all clean flash
+.PHONY: all clean flash fuses program
 
 F_CPU   = 8000000UL
 ISP     = usbasp
@@ -7,7 +7,7 @@ MCU     = attiny25
 OBJ     = firmware.o io.o avr313/gpr.o avr313/kb.o
 PORT    = usb
 PRG     = firmware
-TARGET  = m8
+TARGET  = t25
 
 
 all: $(PRG).hex
@@ -30,3 +30,8 @@ clean:
 
 flash: $(PRG).hex
 	avrdude -c $(ISP) -p $(TARGET) $(PORT) -U flash:w:$(PRG).hex
+
+fuses:
+	avrdude -c ${ISP} -p ${TARGET} ${PORT} -u -U hfuse:w:0xe2:m -U lfuse:w:0xdf:m
+
+program: fuses flash
