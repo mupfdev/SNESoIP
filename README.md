@@ -1,6 +1,6 @@
 # SNESoIP: The SNES ethernet adapter #
 
-![SNESoIP prototype](prototype-small.jpg?raw=true)
+![SNESoIP prototype](hardware/images/prototype-small.jpg?raw=true)
 
 
 ## Introduction ##
