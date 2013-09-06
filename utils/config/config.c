@@ -22,7 +22,7 @@ void  error(char *msg);
 
 int main(int argc, char *argv[]) {
 	struct sockaddr_in serverAddr;
-	char    message[256] = { 0 };
+	char    message[300] = { 0 };
 	int     i            = 0;
 	int     sock         = 0;
 	uint8_t p2cid;
@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	if (strlen(argv[2]) > 128) {
-		puts("ServerVHost exceeds 128 characters.");
+	if (strlen(argv[2]) > 256) {
+		puts("ServerVHost exceeds 256 characters.");
 		return 1;
 	}
 	p2cid = atoi(argv[3]);
