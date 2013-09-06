@@ -72,13 +72,16 @@ int main(int argc, char *argv[]) {
 	i = strlen(message);
 
 	sprintf(message + i, "%d\0", p2cid);
-	printf("%s\n", message); // Debug.
+	printf("Sending UDP magic to %s: %s\n", argv[1], message);
 
 
 	if (sendto(sock, message, strlen(message), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
 		error("Could not send data: ");
 		return 1;
 	}
+
+
+	puts("Done.");
 
 
 	close(sock);
