@@ -35,8 +35,9 @@ int main(void) {
 	ledOnRed();
 
 
-	// Switched mode: B + Y.
+
 	if (configMode == Disabled) {
+		// Switched mode: B + Y.
 		port0 = recvInput();
 		if (port0 == 0xfffc) {
 			switchedMode = Enabled;
