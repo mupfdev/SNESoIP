@@ -23,6 +23,10 @@ project.
 The easiest way to donate is via PayPal, simply click
 [here](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ESZJS7TMYMNNW&lc=GB&item_name=mupfelofen%2ede&item_number=SNESoIP&no_note=1&no_shipping=1&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted).
 
+If you want to help in the development of this project, join us in
+[#retrotardation](http://de.irc2go.com/webchat/?net=euIRC&room=retrotardation)
+on [euIRC](http://www.euirc.net/en/).
+
 
 ## Features ##
 
