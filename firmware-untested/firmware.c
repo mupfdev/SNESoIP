@@ -100,10 +100,10 @@ int main(void) {
 				udp_client_check_for_dns_answer(buffer, received);
 		}
 		dnslkup_get_ip(serverip);
-
-
-		ledOnGreen(); // Connected.
 	}
+
+
+	ledOnGreen(); // Connected.
 
 
 	while (1) { // Main loop start.
