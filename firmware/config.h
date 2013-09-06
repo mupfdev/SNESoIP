@@ -10,10 +10,10 @@
 #define CONFIG_h
 
 
-#define CID         0x03 // Own unique device ID.
-#define P2CID       0x00 // Unique ID of the Opponent/Teammate.
-#define BufferSize   500 // Do NOT change this value.
-#define ServerVHost "snesoip.mupfelofen.de"
+#define CID            0x03 // Own unique device ID.
+#define P2CID          0x00 // Unique ID of the Opponent/Teammate.
+#define BufferSize     500  // Do NOT change this value.
+#define ServerVHost    "snesoip.mupfelofen.de"
 
 
 // Used by io.c

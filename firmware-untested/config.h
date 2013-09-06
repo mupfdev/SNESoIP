@@ -13,8 +13,8 @@
 #include <string.h>
 
 
-#define CID         0x03 // Own unique device ID.
-#define BufferSize   500 // Do NOT change this value.
+#define CID            0x03 // Own unique device ID.
+#define BufferSize     500  // Do NOT change this value.
 
 
 // Used by io.c
