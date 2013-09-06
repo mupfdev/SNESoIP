@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	if (strlen(argv[2]) > 256) {
-		puts("ServerVHost exceeds 256 characters.");
+	if (strlen(argv[2]) > 255) {
+		puts("ServerVHost exceeds 255 characters.");
 		return 1;
 	}
 	p2cid = atoi(argv[3]);
