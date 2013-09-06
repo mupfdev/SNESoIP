@@ -26,7 +26,7 @@ int main(void) {
 	initOutput();
 
 
-	// Config mode:   A + X.
+	// Config mode: A + X.
 	port0 = recvInput();
 	if (port0 == 0xfcff) {
 		configMode = Enabled;
