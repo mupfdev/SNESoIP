@@ -25,7 +25,8 @@ The easiest way to donate is via PayPal, simply click
 
 If you want to help in the development of this project, join us in
 [#retrotardation](http://de.irc2go.com/webchat/?net=euIRC&room=retrotardation)
-on [euIRC](http://www.euirc.net/en/).
+on [euIRC](http://www.euirc.net/en/).  We're also working on a similar
+Gameboy Classic / Super Gameboy project.
 
 
 ## Features ##
