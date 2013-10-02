@@ -28,6 +28,9 @@ If you want to help in the development of this project, join us in
 on [euIRC](http://www.euirc.net/en/).  We're also working on a similar
 Gameboy Classic / Super Gameboy project.
 
+And feel free to contribute to our
+[development wiki](https://github.com/mupfelofen-de/SNESoIP/wiki). Any help is welcome!
+
 
 ## Features ##
 
