@@ -9,7 +9,7 @@ html, body {
 
 }
 
-.login {
+.box {
 	background: #4b4d52;
 	border-radius: 0.8em;
 	color: #d0cabf;
@@ -21,22 +21,22 @@ html, body {
 	-webkit-border-radius: 0.8em;
 }
 
-.login a:link {
+.box a:link {
 	color: #fff;
 	border-bottom: none;
 	text-decoration: none;
 }
 
-.login a:visited {
+.box a:visited {
 	color: #fff;
 }
 
-.login a:hover {
+.box a:hover {
 	color: #fff;
 	border-bottom: solid 3px #fc0c18;
 }
 
-.login button {
+.box button {
 	background: #fc0c18;
 	border: 0;
 	box-shadow: 1px 1px 3px #222;
@@ -52,13 +52,13 @@ html, body {
 	width: 75%;
 }
 
-.login h1 {
+.box h1 {
 	color: #fff;
 	font-size: 2em;
 	text-align: center;
 }
 
-.login h2 {
+.box h2 {
 	color: #fff;
 	font-size: 2em;
 	padding-top: 0.1em;
@@ -71,7 +71,7 @@ html, body {
 	top: 1em;
 }
 
-.login input {
+.box input {
 	background: #fff2e7;
 	border: 0;
 	box-shadow: 0 1px 0 #444;
@@ -88,9 +88,29 @@ html, body {
 	width: 75%;
 }
 
-.login label {
+.box label {
 	display: block;
 	font-size: 1.2em;
+}
+
+.ip input {
+	width: 5ex;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.logout {
+	margin-top: -1.5em;
+}
+
+.box a:hover {
+	color: #fff;
+	border-bottom: solid 1px #fc0c18;
+}
+
+.remid input {
+	width: 5ex;
+	margin: 0;
 }
 
 @font-face{
@@ -114,16 +134,24 @@ html, body {
 		font-size: 11px;
 	}
 
-	.login {
+	.box {
 		margin: 10px;
 		width: auto;
 	}
 
-	.login button {
+	.box button {
 		width: 100%;
 	}
 
-	.login input {
+	.box input {
 		width: 95%;
+	}
+
+	.ip input {
+		width: 4ex;
+	}
+
+	.remid input {
+		width: 4ex;
 	}
 }
