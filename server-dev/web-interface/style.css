@@ -1,0 +1,129 @@
+html, body {
+	background: #fff2e7;
+	font-family: 'Agency FB Bold', Helvetica, Arial, sans-serif;
+	font-style: italic;
+	border: 0;
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+
+}
+
+.login {
+	background: #4b4d52;
+	border-radius: 0.8em;
+	color: #d0cabf;
+	padding: 4ex;
+	width: 60ex;
+	margin: 4% auto 0 auto;
+	-moz-border-radius: 0.8em;
+	position: relative;
+	-webkit-border-radius: 0.8em;
+}
+
+.login a:link {
+	color: #fff;
+	border-bottom: none;
+	text-decoration: none;
+}
+
+.login a:visited {
+	color: #fff;
+}
+
+.login a:hover {
+	color: #fff;
+	border-bottom: solid 3px #fc0c18;
+}
+
+.login button {
+	background: #fc0c18;
+	border: 0;
+	box-shadow: 1px 1px 3px #222;
+	color: #fff2e7;
+	cursor: pointer;
+	font-family: 'Agency FB Bold', Helvetica, Arial, sans-serif;
+	font-size: 2em;
+	font-style: italic;
+	margin-top: 0.5em;
+	-moz-box-shadow: 1px 1px 3px #222;
+	padding: 10px 20px;
+	-webkit-box-shadow: 1px 1px 3px #222;
+	width: 75%;
+}
+
+.login h1 {
+	color: #fff;
+	font-size: 2em;
+	text-align: center;
+}
+
+.login h2 {
+	color: #fff;
+	font-size: 2em;
+	padding-top: 0.1em;
+}
+
+.logo img {
+	height: 3em;
+	position: absolute;
+	right: 2ex;
+	top: 1em;
+}
+
+.login input {
+	background: #fff2e7;
+	border: 0;
+	box-shadow: 0 1px 0 #444;
+	color: #4b4d52;
+	font-family: 'Agency FB Bold', Helvetica, Arial, sans-serif;
+	font-size: 1.5em;
+	font-style: normal;
+	letter-spacing: 2px;
+	margin-top: 0.3em;
+	-moz-box-shadow: 0 1px 0 #444;
+	outline: none;
+	padding: 0.2em 0.5ex;
+	-webkit-box-shadow: 0 1px 0 #444;
+	width: 75%;
+}
+
+.login label {
+	display: block;
+	font-size: 1.2em;
+}
+
+@font-face{
+	font-family: 'Agency FB Bold';
+	src: url('font/agency_fb_bold.eot');
+	src: url('font/agency_fb_bold.eot?#iefix') format('eot'),
+	url('font/agency_fb_bold.woff') format('woff'),
+	url('font/agency_fb_bold.ttf') format('truetype'),
+	url('font/agency_fb_bold.svg#webfontk1DRByuk') format('svg');
+
+	font-style: normal;
+	font-weight: normal;
+}
+
+@media screen and (max-width: 430px) {
+	body {
+		font-size: 11px;
+	}
+
+	button, input, select, textarea {
+		font-size: 11px;
+	}
+
+	.login {
+		margin: 10px;
+		width: auto;
+	}
+
+	.login button {
+		width: 100%;
+	}
+
+	.login input {
+		width: 95%;
+	}
+}
