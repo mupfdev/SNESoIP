@@ -9,6 +9,25 @@ html, body {
 
 }
 
+footer a {
+	color: #777;
+	text-decoration: none;
+}
+
+footer a:hover {
+	text-decoration: underline;
+}
+
+footer a:visited {
+	font-style: normal;
+}
+
+footer p {
+	font-family: "Arial", "Helvetica", sans-serif;
+	font-size: 0.8em;
+	text-align: center;
+}
+
 .box {
 	background: #4b4d52;
 	border-radius: 0.8em;
@@ -27,13 +46,13 @@ html, body {
 	text-decoration: none;
 }
 
-.box a:visited {
-	color: #fff;
-}
-
 .box a:hover {
 	color: #fff;
 	border-bottom: solid 3px #fc0c18;
+}
+
+.box a:visited {
+	color: #fff;
 }
 
 .box button {
