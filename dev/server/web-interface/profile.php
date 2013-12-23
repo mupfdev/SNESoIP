@@ -21,7 +21,7 @@
 			</div>
 
 			<div>
-				<form id="profile" action="profile.html" method="post">
+				<form id="profile" action="profile.php" method="post">
 					<p class="realname">
 						<label for="realname">Real name</label>
 						<input id="realname" type="text" name="realname" value="John Doe" autocomplete="off">
