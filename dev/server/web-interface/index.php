@@ -20,7 +20,7 @@
 			</div>
 
 			<div>
-				<form id="login" action="profile.html" method="post">
+				<form id="login" action="profile.php" method="post">
 					<p>
 						<label for="username" class="username">Username</label>
 						<input type="text" id="username" name="username" value="" autocomplete="off" autofocus required />

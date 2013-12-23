@@ -42,6 +42,21 @@
 						<input type="number" name="ip4" min="0" max="255" value="24" required>
 					</p>
 					<p>
+						Your current IP address:&nbsp;
+						<?php
+						if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
+							$ip = $_SERVER["HTTP_CLIENT_IP"];
+						}
+						elseif (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+							$ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+						}
+						else {
+							$ip = $_SERVER["REMOTE_ADDR"];
+						}
+						echo $ip;
+						?>
+					</p>
+					<p>
 						<button name="save">»&nbsp;&nbsp;Save</button>
 					</p>
 				</form>
