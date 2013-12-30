@@ -29,19 +29,19 @@ int initConfig(char *filename) {
 	if (strlen(hostname) == 0)
 		return ErrorHostnameNotDefined;
 
-  if (! config_lookup_string(&cfg, "username", &username))
+	if (! config_lookup_string(&cfg, "username", &username))
 		return ErrorUsernameNotDefined;
 
 	if (strlen(username) == 0)
 		return ErrorUsernameNotSet;
 
-  if (! config_lookup_string(&cfg, "password", &password))
+	if (! config_lookup_string(&cfg, "password", &password))
 		return ErrorPasswordNotDefined;
 
 	if (strlen(password) == 0)
 		return ErrorPasswordNotSet;
 
-  if (! config_lookup_string(&cfg, "database", &database))
+	if (! config_lookup_string(&cfg, "database", &database))
 		return ErrorDatabaseNotDefined;
 
 	if (strlen(password) == 0)
