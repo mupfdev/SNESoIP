@@ -3,7 +3,8 @@
 
 
 all:
-	gcc -std=c99 -lconfig -o server config.c server.c
+	gcc -std=c99 -lconfig `mysql_config --cflags --libs` -o server \
+	config.c server.c
 
 clean:
 	rm server

@@ -23,28 +23,28 @@ int initConfig(char *filename) {
 	}
 
 
-	if (! config_lookup_string(&cfg, "hostname", &hostname))
+	if (! config_lookup_string(&cfg, "hostname", &dbHostname))
 		return ErrorMissingHostname;
 
-	if (strlen(hostname) == 0)
+	if (strlen(dbHostname) == 0)
 		return ErrorMissingHostname;
 
-	if (! config_lookup_string(&cfg, "username", &username))
+	if (! config_lookup_string(&cfg, "username", &dbUsername))
 		return ErrorMissingUsername;
 
-	if (strlen(username) == 0)
+	if (strlen(dbUsername) == 0)
 		return ErrorMissingUsername;
 
-	if (! config_lookup_string(&cfg, "password", &password))
+	if (! config_lookup_string(&cfg, "password", &dbPassword))
 		return ErrorMissingPassword;
 
-	if (strlen(password) == 0)
+	if (strlen(dbPassword) == 0)
 		return ErrorMissingPassword;
 
-	if (! config_lookup_string(&cfg, "database", &database))
+	if (! config_lookup_string(&cfg, "database", &dbDatabase))
 		return ErrorMissingDatabase;
 
-	if (strlen(password) == 0)
+	if (strlen(dbDatabase) == 0)
 		return ErrorMissingDatabase;
 
 

@@ -20,10 +20,10 @@
 #define ErrorMissingDatabase    -5
 
 
-const char *hostname;
-const char *username;
-const char *password;
-const char *database;
+const char *dbHostname;
+const char *dbUsername;
+const char *dbPassword;
+const char *dbDatabase;
 
 
 int initConfig(char *filename);
