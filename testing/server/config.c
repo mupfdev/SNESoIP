@@ -24,28 +24,28 @@ int initConfig(char *filename) {
 
 
 	if (! config_lookup_string(&cfg, "hostname", &hostname))
-		return ErrorHostnameNotDefined;
+		return ErrorMissingHostname;
 
 	if (strlen(hostname) == 0)
-		return ErrorHostnameNotDefined;
+		return ErrorMissingHostname;
 
 	if (! config_lookup_string(&cfg, "username", &username))
-		return ErrorUsernameNotDefined;
+		return ErrorMissingUsername;
 
 	if (strlen(username) == 0)
-		return ErrorUsernameNotSet;
+		return ErrorMissingUsername;
 
 	if (! config_lookup_string(&cfg, "password", &password))
-		return ErrorPasswordNotDefined;
+		return ErrorMissingPassword;
 
 	if (strlen(password) == 0)
-		return ErrorPasswordNotSet;
+		return ErrorMissingPassword;
 
 	if (! config_lookup_string(&cfg, "database", &database))
-		return ErrorDatabaseNotDefined;
+		return ErrorMissingDatabase;
 
 	if (strlen(password) == 0)
-		return ErrorDatabaseNotSet;
+		return ErrorMissingDatabase;
 
 
 	return 0;

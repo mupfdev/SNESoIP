@@ -14,14 +14,10 @@
 
 
 #define ErrorFileDoesNotExist   -1
-#define ErrorHostnameNotDefined -2
-#define ErrorHostnameNotSet     -3
-#define ErrorUsernameNotDefined -4
-#define ErrorUsernameNotSet     -5
-#define ErrorPasswordNotDefined -6
-#define ErrorPasswordNotSet     -7
-#define ErrorDatabaseNotDefined -8
-#define ErrorDatabaseNotSet     -9
+#define ErrorMissingHostname    -2
+#define ErrorMissingUsername    -3
+#define ErrorMissingPassword    -4
+#define ErrorMissingDatabase    -5
 
 
 const char *hostname;

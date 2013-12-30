@@ -48,24 +48,19 @@ int main(int argc, char* argv[]) {
 	if (initConfig(fconfig) < 0)
 		switch (initConfig(fconfig)) {
 			case ErrorFileDoesNotExist:
-				printf("%s: %s\n", fconfig, _("File does not exist."));
+				printf("%s: %s\n", fconfig, _("file does not exist."));
 				return EXIT_FAILURE;
-			case ErrorHostnameNotDefined:
-				printf("%s: %s\n", fconfig, _("'hostname' not defined."));
-			case ErrorHostnameNotSet:
-				printf("%s: %s\n", fconfig, _("'hostname' not set."));
-			case ErrorUsernameNotDefined:
-				printf("%s: %s\n", fconfig, _("'username' not defined."));
-			case ErrorUsernameNotSet:
-				printf("%s: %s\n", fconfig, _("'username' not set."));
-			case ErrorPasswordNotDefined:
-				printf("%s: %s\n", fconfig, _("'password' not defined."));
-			case ErrorPasswordNotSet:
-				printf("%s: %s\n", fconfig, _("'password' not set."));
-			case ErrorDatabaseNotDefined:
-				printf("%s: %s\n", fconfig, _("'database' not defined."));
-			case ErrorDatabaseNotSet:
-				printf("%s: %s\n", fconfig, _("'database' not defined."));
+			case ErrorMissingHostname:
+				printf("%s: %s\n", fconfig, _("hostname is not set."));
+
+			case ErrorMissingUsername:
+				printf("%s: %s\n", fconfig, _("username is not set."));
+
+			case ErrorMissingPassword:
+				printf("%s: %s\n", fconfig, _("password is not set."));
+
+			case ErrorMissingDatabase:
+				printf("%s: %s\n", fconfig, _("database is not set."));
 
 			default:
 				return EXIT_FAILURE;
