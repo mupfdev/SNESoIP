@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 				return EXIT_SUCCESS;
 			case 'c':
 				fconfig = optarg;
-        break;
+				break;
 		}
 
 
