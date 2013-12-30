@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 	while ((opt = getopt(argc, argv, "c:v")) != -1)
 		switch (opt) {
 			case 'v':
-				printf("SNESoIP server 2.0\n");
+				printf("SNESoIP server %s\n", Version);
 				return EXIT_SUCCESS;
 			case 'c':
 				config = optarg;
@@ -37,20 +37,20 @@ int main(int argc, char* argv[]) {
 	// Iinitialise configuration file.
 	if (initConfig(config) < 0)
 		switch (initConfig(config)) {
-			case ErrorFileDoesNotExist:
-				printf("%s: %s\n", config, _("file does not exist."));
+			case ErrorIO:
+				printf("%s: wrong file format or does not exist.\n", config);
 				return EXIT_FAILURE;
 			case ErrorMissingHostname:
-				printf("%s: %s\n", config, _("hostname is not set."));
+				printf("%s: hostname is not set\n", config);
 
 			case ErrorMissingUsername:
-				printf("%s: %s\n", config, _("username is not set."));
+				printf("%s: username is not set\n", config);
 
 			case ErrorMissingPassword:
-				printf("%s: %s\n", config, _("password is not set."));
+				printf("%s: password is not set\n", config);
 
 			case ErrorMissingDatabase:
-				printf("%s: %s\n", config, _("database is not set."));
+				printf("%s: database is not set\n", config);
 
 			default:
 				return EXIT_FAILURE;
@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
 	puts("-v \t\tprint version and exit.\n");
 
 
+	mysql_close(dbCon);
 	return EXIT_SUCCESS;
 }
 

@@ -13,7 +13,7 @@
 #include <string.h>
 
 
-#define ErrorFileDoesNotExist   -1
+#define ErrorIO                 -1
 #define ErrorMissingHostname    -2
 #define ErrorMissingUsername    -3
 #define ErrorMissingPassword    -4

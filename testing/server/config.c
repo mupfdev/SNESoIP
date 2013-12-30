@@ -19,7 +19,7 @@ int initConfig(char *filename) {
 
 	if (! config_read_file(&cfg, filename)) {
 		config_destroy(&cfg);
-		return ErrorFileDoesNotExist;
+		return ErrorIO;
 	}
 
 

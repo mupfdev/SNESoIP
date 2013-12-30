@@ -14,7 +14,6 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <getopt.h>
-#include <libintl.h>
 #include <mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +24,7 @@
 
 
 #define _(String) gettext(String)
+#define Version "2.0"
 
 
 typedef uint16_t snesIO;
