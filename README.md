@@ -6,7 +6,7 @@
 ## Attention! ##
 
 This branch is for testing/development purposes only and is most likely
-incomplete.  If you're not a developer, check out the master branch.
+incomplete.  If you're not a developer, check out the [master](https://github.com/mupfelofen-de/SNESoIP/tree/master) branch.
 
 
 ## Introduction ##
