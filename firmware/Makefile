@@ -5,7 +5,7 @@
 CID          = 0xff
 ServerVHost  = snesoip.de
 
-# Nothing below this line need be changed.
+# Nothing below this line need to be changed.
 F_CPU   = 16000000UL
 ISP     = usbasp
 MCU     = atmega8
