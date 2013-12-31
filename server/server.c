@@ -10,9 +10,16 @@
 
 
 int main(int argc, char* argv[]) {
-	int  opt;
-	char *config = "server.cfg";
+	struct sockaddr_in clientAddr, serverAddr;
+
+	int    opt, len, received, sockfd;
+
+	char  *configfd = "server.cfg";
 	MYSQL *dbCon = mysql_init(NULL);
+
+	char  *nlpos;
+	time_t ltime;
+	char  *timestamp;
 
 
 	puts(" _______ _______ _______ _______         _______ ______");
@@ -33,32 +40,33 @@ int main(int argc, char* argv[]) {
 	while ((opt = getopt(argc, argv, "c:")) != -1)
 		switch (opt) {
 			case 'c':
-				config = optarg;
+				configfd = optarg;
 				break;
 		}
 
 
 	// Iinitialise configuration file.
-	if (initConfig(config) < 0)
-		switch (initConfig(config)) {
+	if (initConfig(configfd) < 0)
+		switch (initConfig(configfd)) {
 			case ErrorIO:
-				printf("%s: wrong file format or file does not exist.\n", config);
+				printf("%s: wrong file format or file does not exist.\n", configfd);
 				return EXIT_FAILURE;
 			case ErrorMissingHostname:
-				printf("%s: hostname is not set\n", config);
+				printf("%s: hostname is not set\n", configfd);
 
 			case ErrorMissingUsername:
-				printf("%s: username is not set\n", config);
+				printf("%s: username is not set\n", configfd);
 
 			case ErrorMissingPassword:
-				printf("%s: password is not set\n", config);
+				printf("%s: password is not set\n", configfd);
 
 			case ErrorMissingDatabase:
-				printf("%s: database is not set\n", config);
+				printf("%s: database is not set\n", configfd);
 
 			default:
 				return EXIT_FAILURE;
 		}
+	printf("Sucessfully laoded %s.\n", configfd);
 
 
 	// Establish database connection.
@@ -69,18 +77,36 @@ int main(int argc, char* argv[]) {
 		mysql_close(dbCon);
 		return EXIT_FAILURE;
 	}
+	puts("Database connection established.");
+
+
+	// Setting up the server.
+	sockfd                     = socket(AF_INET, SOCK_DGRAM, 0);
+	serverAddr.sin_family      = AF_INET;
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddr.sin_port        = htons(57350);
+
+	if ((bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr))) == -1) {
+		error("Couldn't bind name to socket: ");
+		return EXIT_FAILURE;
+
+	} else
+		puts("Listening on port 57350.\n");
+
+
+	while (1) {
 
 
 
+		// Format timestamp.
+		ltime     = time(NULL);
+		timestamp = ctime(&ltime);
+		nlpos     = strstr(timestamp, "\n");
+		strncpy(nlpos, "\0", 1);
+	}
 
 
-
-
-
-
-
-
-
+	close(sockfd);
 	mysql_close(dbCon);
 	return EXIT_SUCCESS;
 }
@@ -108,39 +134,6 @@ char* uint16_t2bin(uint16_t num) {
 
 
 /*
-	struct sockaddr_in clientAddr, serverAddr;
-	int      len, received, sockfd;
-	int8_t   clientID, requestID;
-	char     recvBuffer[4];
-	char     sendBuffer[2];
-
-	char*    nlpos;
-	time_t   ltime;
-	char*    timestamp;
-
-	snesIO clientData[256];
-	snesIO clientCache = 0xffff;
-
-	for (int i = 0; i < 255; i++)
-		clientData[i] = 0xffff;
-*/
-
-
-/*
-	sockfd                     = socket(AF_INET, SOCK_DGRAM, 0);
-	serverAddr.sin_family      = AF_INET;
-	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serverAddr.sin_port        = htons(57350);
-
-
-	if ((bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr))) == -1) {
-		error("Couldn't bind name to socket: ");
-		return 1;
-
-	} else
-		printf("Listening on port 57350\n\n");
-
-
 	while (1) {
 		len = sizeof(clientAddr);
 		received = recvfrom(sockfd, recvBuffer, 4, 0, (struct sockaddr *)&clientAddr, &len);
@@ -176,16 +169,5 @@ char* uint16_t2bin(uint16_t num) {
 		sendto(sockfd, &clientData[requestID], 2, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
 
 
-		// Format timestamp.
-		ltime     = time(NULL);
-		timestamp = ctime(&ltime);
-		nlpos     = strstr(timestamp, "\n");
-		strncpy(nlpos, "\0", 1);
-
-		if (clientCache != clientData[clientID])
-			printf("%s Client%i: 0b%s\n", timestamp, clientID, uint16_t2bin(clientData[clientID]));
-
 	}
-
-	close(sockfd);
 */
