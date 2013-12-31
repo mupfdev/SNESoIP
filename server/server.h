@@ -23,10 +23,6 @@
 #include "config.h"
 
 
-#define _(String) gettext(String)
-#define Version "2.0"
-
-
 typedef uint16_t snesIO;
 
 
