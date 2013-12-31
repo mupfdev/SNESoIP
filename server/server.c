@@ -15,6 +15,13 @@ int main(int argc, char* argv[]) {
 	MYSQL *dbCon = mysql_init(NULL);
 
 
+	puts(" _______ _______ _______ _______         _______ ______");
+	puts("|     __|    |  |    ___|     __|.-----.|_     _|   __ \\");
+	puts("|__     |       |    ___|__     ||  _  | _|   |_|    __/");
+	puts("|_______|__|____|_______|_______||_____||_______|___|   Server\n");
+	puts("-c <config>\tload specific config file (defalt: server.cfg).\n");
+
+
 	// Initialise database connection.
 	if (! dbCon) {
 		fprintf(stderr, "%s\n", mysql_error(dbCon));
@@ -23,11 +30,8 @@ int main(int argc, char* argv[]) {
 
 
 	// Parse command-line arguments.
-	while ((opt = getopt(argc, argv, "c:v")) != -1)
+	while ((opt = getopt(argc, argv, "c:")) != -1)
 		switch (opt) {
-			case 'v':
-				printf("SNESoIP server %s\n", Version);
-				return EXIT_SUCCESS;
 			case 'c':
 				config = optarg;
 				break;
@@ -38,7 +42,7 @@ int main(int argc, char* argv[]) {
 	if (initConfig(config) < 0)
 		switch (initConfig(config)) {
 			case ErrorIO:
-				printf("%s: wrong file format or does not exist.\n", config);
+				printf("%s: wrong file format or file does not exist.\n", config);
 				return EXIT_FAILURE;
 			case ErrorMissingHostname:
 				printf("%s: hostname is not set\n", config);
@@ -67,12 +71,14 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	puts(" _______ _______ _______ _______         _______ ______");
-	puts("|     __|    |  |    ___|     __|.-----.|_     _|   __ \\");
-	puts("|__     |       |    ___|__     ||  _  | _|   |_|    __/");
-	puts("|_______|__|____|_______|_______||_____||_______|___|   Server\n");
-	puts("-c <config>\tload specific config file (defalt: server.cfg).");
-	puts("-v \t\tprint version and exit.\n");
+
+
+
+
+
+
+
+
 
 
 	mysql_close(dbCon);
