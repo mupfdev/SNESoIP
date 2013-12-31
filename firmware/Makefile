@@ -2,8 +2,8 @@
 .PHONY: all clean flash fuses program
 
 # Basic configuration.
-CID          = 0xff
-ServerVHost  = snesoip.de
+ID      = 0xff
+SERVER  = snesoip.de
 
 # Nothing below this line need to be changed.
 F_CPU   = 16000000UL
@@ -29,7 +29,7 @@ $(PRG).elf: $(OBJ)
 
 %.o: %.c
 	avr-gcc $< -Os -DF_CPU=$(F_CPU) \
-	-DCID=$(CID) -DServerVHost=\"$(ServerVHost)\" \
+	-DCID=$(ID) -DServerVHost=\"$(SERVER)\" \
 	-g -mmcu=$(MCU) -c -o $@
 
 
