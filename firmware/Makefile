@@ -1,6 +1,11 @@
 # -*-makefile-*-
 .PHONY: all clean flash fuses program
 
+# Basic configuration.
+CID          = 0xff
+ServerVHost  = snesoip.de
+
+# Nothing below this line need be changed.
 F_CPU   = 16000000UL
 ISP     = usbasp
 MCU     = atmega8
@@ -23,7 +28,9 @@ $(PRG).elf: $(OBJ)
 	avr-size -A $(PRG).elf
 
 %.o: %.c
-	avr-gcc $< -Os -DF_CPU=$(F_CPU) -g -mmcu=$(MCU) -c -o $@
+	avr-gcc $< -Os -DF_CPU=$(F_CPU) \
+	-DCID=$(CID) -DServerVHost=\"$(ServerVHost)\" \
+	-g -mmcu=$(MCU) -c -o $@
 
 
 clean:

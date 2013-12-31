@@ -12,7 +12,7 @@
 int main(void) {
 	static uint8_t buffer[BufferSize + 1];
 	int8_t   i;
-	uint8_t  message[4] = { 0, 0, CID, P2CID };
+	uint8_t  message[4] = { 0, 0, CID, 1 };
 	uint16_t received;
 	snesIO   port0 = 0xffff, port1 = 0xffff;
 
