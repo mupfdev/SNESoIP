@@ -3,6 +3,12 @@
 ![SNESoIP prototype](hardware/images/prototype-small.jpg?raw=true)
 
 
+## Attention! ##
+
+This branch is for testing/development purposes only and is most likely
+incomplete.  If you're not a developer, check out the master branch.
+
+
 ## Introduction ##
 
 The SNESoIP ethernet adapter for the Super Nintendo Entertainment System

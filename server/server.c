@@ -6,24 +6,102 @@
  * license.  See the file LICENSE for details. */
 
 
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "server.h"
 
 
-typedef uint16_t snesIO;
+int main(int argc, char* argv[]) {
+	int  opt;
+	char *config = "server.cfg";
+	MYSQL *dbCon = mysql_init(NULL);
 
 
-void  error(char *msg);
-char* uint16_t2bin(uint16_t num);
+	// Initialise database connection.
+	if (! dbCon) {
+		fprintf(stderr, "%s\n", mysql_error(dbCon));
+		return EXIT_FAILURE;
+	}
 
 
-int main() {
+	// Parse command-line arguments.
+	while ((opt = getopt(argc, argv, "c:v")) != -1)
+		switch (opt) {
+			case 'v':
+				printf("SNESoIP server %s\n", Version);
+				return EXIT_SUCCESS;
+			case 'c':
+				config = optarg;
+				break;
+		}
+
+
+	// Iinitialise configuration file.
+	if (initConfig(config) < 0)
+		switch (initConfig(config)) {
+			case ErrorIO:
+				printf("%s: wrong file format or does not exist.\n", config);
+				return EXIT_FAILURE;
+			case ErrorMissingHostname:
+				printf("%s: hostname is not set\n", config);
+
+			case ErrorMissingUsername:
+				printf("%s: username is not set\n", config);
+
+			case ErrorMissingPassword:
+				printf("%s: password is not set\n", config);
+
+			case ErrorMissingDatabase:
+				printf("%s: database is not set\n", config);
+
+			default:
+				return EXIT_FAILURE;
+		}
+
+
+	// Establish database connection.
+	if (mysql_real_connect(dbCon, dbHostname, dbUsername, dbPassword,
+			NULL, 0, NULL, 0) == NULL) {
+
+		fprintf(stderr, "%s\n", mysql_error(dbCon));
+		mysql_close(dbCon);
+		return EXIT_FAILURE;
+	}
+
+
+	puts(" _______ _______ _______ _______         _______ ______");
+	puts("|     __|    |  |    ___|     __|.-----.|_     _|   __ \\");
+	puts("|__     |       |    ___|__     ||  _  | _|   |_|    __/");
+	puts("|_______|__|____|_______|_______||_____||_______|___|   Server\n");
+	puts("-c <config>\tload specific config file (defalt: server.cfg).");
+	puts("-v \t\tprint version and exit.\n");
+
+
+	mysql_close(dbCon);
+	return EXIT_SUCCESS;
+}
+
+
+void error(char *msg) {
+	fprintf(stderr, "%s%s\n", msg, strerror(errno));
+}
+
+
+char* uint16_t2bin(uint16_t num) {
+	int   bitStrLen = sizeof(uint16_t) * 8 * sizeof(char);
+	char* bin       = (char*)malloc(bitStrLen);
+
+	for (int i = (bitStrLen - 1); i >= 0; i--) {
+		int k = 1 & num;
+		*(bin + i) = ((k == 1) ? '1' : '0');
+		num >>= 1;
+	}
+
+	bin[16] = '\0';
+
+	return bin;
+}
+
+
+/*
 	struct sockaddr_in clientAddr, serverAddr;
 	int      len, received, sockfd;
 	int8_t   clientID, requestID;
@@ -39,14 +117,10 @@ int main() {
 
 	for (int i = 0; i < 255; i++)
 		clientData[i] = 0xffff;
+*/
 
 
-	puts(" _______ _______ _______ _______         _______ ______");
-	puts("|     __|    |  |    ___|     __|.-----.|_     _|   __ \\");
-	puts("|__     |       |    ___|__     ||  _  | _|   |_|    __/");
-	puts("|_______|__|____|_______|_______||_____||_______|___|   Server\n");
-
-
+/*
 	sockfd                     = socket(AF_INET, SOCK_DGRAM, 0);
 	serverAddr.sin_family      = AF_INET;
 	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -107,28 +181,5 @@ int main() {
 
 	}
 
-
 	close(sockfd);
-	return 0;
-}
-
-
-void error(char *msg) {
-	fprintf(stderr, "%s%s\n", msg, strerror(errno));
-}
-
-
-char* uint16_t2bin(uint16_t num) {
-	int   bitStrLen = sizeof(uint16_t) * 8 * sizeof(char);
-	char* bin       = (char*)malloc(bitStrLen);
-
-	for (int i = (bitStrLen - 1); i >= 0; i--) {
-		int k = 1 & num;
-		*(bin + i) = ((k == 1) ? '1' : '0');
-		num >>= 1;
-	}
-
-	bin[16] = '\0';
-
-	return bin;
-}
+*/
