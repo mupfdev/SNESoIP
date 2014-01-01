@@ -23,6 +23,9 @@
 #include "config.h"
 
 
+#define BufferSize 100
+
+
 typedef uint16_t snesIO;
 
 

@@ -14,6 +14,9 @@ int main(int argc, char* argv[]) {
 
 	int    opt, len, received, sockfd;
 
+	char   recvBuffer[BufferSize];
+	char   sendBuffer[BufferSize];
+
 	char  *configfd = "server.cfg";
 	MYSQL *dbCon = mysql_init(NULL);
 
@@ -25,7 +28,7 @@ int main(int argc, char* argv[]) {
 	puts(" _______ _______ _______ _______         _______ ______");
 	puts("|     __|    |  |    ___|     __|.-----.|_     _|   __ \\");
 	puts("|__     |       |    ___|__     ||  _  | _|   |_|    __/");
-	puts("|_______|__|____|_______|_______||_____||_______|___|   Server\n");
+	puts("|_______|__|____|_______|_______||_____||_______|___|   server\n");
 	puts("-c <config>\tload specific config file (defalt: server.cfg).\n");
 
 
@@ -95,6 +98,17 @@ int main(int argc, char* argv[]) {
 
 
 	while (1) {
+		len = sizeof(clientAddr);
+		received = recvfrom(sockfd, recvBuffer, BufferSize, 0, (struct sockaddr *)&clientAddr, &len);
+
+		if (received == -1) {
+			error("Couldn't receive message: ");
+			continue;
+		}
+
+
+
+		//sendto(sockfd, &data, BufferSize, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
 
 
 
@@ -131,43 +145,3 @@ char* uint16_t2bin(uint16_t num) {
 
 	return bin;
 }
-
-
-/*
-	while (1) {
-		len = sizeof(clientAddr);
-		received = recvfrom(sockfd, recvBuffer, 4, 0, (struct sockaddr *)&clientAddr, &len);
-		if (received == -1) {
-			error("Couldn't receive message: ");
-			continue;
-		}
-
-
-		clientID  = recvBuffer[2];
-		requestID = recvBuffer[3];
-
-		clientCache  = clientData[clientID];
-
-
-		// Prepare and store received data.
-		for (int i = 0; i < 8; i++) { // Lo-Byte.
-			uint16_t *c = clientData + clientID;
-
-			*c = recvBuffer[0] & (1 << i)
-				? *c |  (1 << i)
-				: *c & ~(1 << i);
-		}
-
-		for (int i = 0; i < 8; i++) { // Hi-Byte.
-			uint16_t *c = clientData + clientID;
-
-			*c = recvBuffer[1] & (1 << i)
-				? *c |  (1 << i + 8)
-				: *c & ~(1 << i + 8);
-		}
-
-		sendto(sockfd, &clientData[requestID], 2, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
-
-
-	}
-*/
