@@ -52,19 +52,19 @@ int main(int argc, char* argv[]) {
 	if (initConfig(configfd) < 0)
 		switch (initConfig(configfd)) {
 			case ErrorIO:
-				printf("%s: wrong file format or file does not exist.\n", configfd);
+				fprintf(stderr, "%s: wrong file format or file does not exist.\n", configfd);
 				return EXIT_FAILURE;
 			case ErrorMissingHostname:
-				printf("%s: hostname is not set\n", configfd);
+				fprintf(stderr, "%s: hostname is not set\n", configfd);
 
 			case ErrorMissingUsername:
-				printf("%s: username is not set\n", configfd);
+				fprintf(stderr, "%s: username is not set\n", configfd);
 
 			case ErrorMissingPassword:
-				printf("%s: password is not set\n", configfd);
+				fprintf(stderr, "%s: password is not set\n", configfd);
 
 			case ErrorMissingDatabase:
-				printf("%s: database is not set\n", configfd);
+				fprintf(stderr, "%s: database is not set\n", configfd);
 
 			default:
 				return EXIT_FAILURE;
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 	serverAddr.sin_port        = htons(57350);
 
 	if ((bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr))) == -1) {
-		error("Couldn't bind name to socket: ");
+		fprintf(stderr, "Couldn't bind name to socket: %s\n", strerror(errno));
 		return EXIT_FAILURE;
 
 	} else
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 		received = recvfrom(sockfd, recvBuffer, BufferSize, 0, (struct sockaddr *)&clientAddr, &len);
 
 		if (received == -1) {
-			error("Couldn't receive message: ");
+			fprintf(stderr, "Couldn't receive message: %s\n", strerror(errno));
 			continue;
 		}
 
@@ -123,11 +123,6 @@ int main(int argc, char* argv[]) {
 	close(sockfd);
 	mysql_close(dbCon);
 	return EXIT_SUCCESS;
-}
-
-
-void error(char *msg) {
-	fprintf(stderr, "%s%s\n", msg, strerror(errno));
 }
 
 

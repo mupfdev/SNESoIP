@@ -11,13 +11,10 @@
 
 
 #include <netinet/in.h>
-#include <sys/socket.h>
 #include <errno.h>
 #include <getopt.h>
 #include <mysql.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include "config.h"
@@ -26,10 +23,6 @@
 #define BufferSize 100
 
 
-typedef uint16_t snesIO;
-
-
-void  error(char *msg);
 char* uint16_t2bin(uint16_t num);
 
 
