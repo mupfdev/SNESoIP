@@ -1,9 +1,9 @@
 /* server.c -*-c-*-
  * SNESoIP server.
- * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
  *
- * This program has has been released under the terms of a BSD-like
- * license.  See the file LICENSE for details. */
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
 
 
 #include "server.h"
@@ -14,15 +14,11 @@ int main(int argc, char* argv[]) {
 
 	int    opt, len, received, sockfd;
 
-	char   recvBuffer[BufferSize];
-	char   sendBuffer[BufferSize];
+	char   recvBuffer[6];
+	char   sendBuffer[20];
 
 	char  *configfd = "server.cfg";
 	MYSQL *dbCon = mysql_init(NULL);
-
-	char  *nlpos;
-	time_t ltime;
-	char  *timestamp;
 
 
 	puts(" _______ _______ _______ _______         _______ ______");
@@ -74,13 +70,22 @@ int main(int argc, char* argv[]) {
 
 	// Establish database connection.
 	if (mysql_real_connect(dbCon, dbHostname, dbUsername, dbPassword,
-			NULL, 0, NULL, 0) == NULL) {
+			dbDatabase, 0, NULL, 0) == NULL) {
 
 		fprintf(stderr, "%s\n", mysql_error(dbCon));
 		mysql_close(dbCon);
 		return EXIT_FAILURE;
 	}
 	puts("Database connection established.");
+
+
+
+
+	// Test queries.
+
+
+
+
 
 
 	// Setting up the server.
@@ -108,15 +113,19 @@ int main(int argc, char* argv[]) {
 
 
 
+		//Commands: HELLO[ID] : login
+
+		//getip:   "SELECT currentip FROM snesoip_hw WHERE hwid = %hwid%";
+		//setip:   "UPDATE snesoip_hw SET currentip = '%ip%' WHERE hwid = %hwid%;"
+		//getuser: "
+
+
 		//sendto(sockfd, &data, BufferSize, 0, (struct sockaddr *)&clientAddr, sizeof(clientAddr));
 
 
 
-		// Format timestamp.
-		ltime     = time(NULL);
-		timestamp = ctime(&ltime);
-		nlpos     = strstr(timestamp, "\n");
-		strncpy(nlpos, "\0", 1);
+
+
 	}
 
 
