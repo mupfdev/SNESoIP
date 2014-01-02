@@ -106,6 +106,7 @@ buttons held down.
 ## Special thanks goes to ##
 
 - [lytron](http://pantalytron.com) for testing the initial prototype,
+- Sciurus for his work on the web interface,
 - Farbauti for his code improvements,
 - the [snesfreaks.com](http://snesfreaks.com) community for all the
   support and motivation and
