@@ -1,9 +1,10 @@
 /* config.c -*-c-*-
  * Configuration handler.
- * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
+ * Author: Michael Fitzmayer
  *
- * This program has has been released under the terms of a BSD-like
- * license.  See the file LICENSE for details. */
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
 
 
 #include "config.h"

@@ -1,4 +1,13 @@
 <?php
+/* admin.php -*-web-*-
+ * 
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
+
 require_once "imports.php";
 session_start();
 
@@ -24,7 +33,7 @@ $errors = array();
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
 	$action = intval($_POST["action"]);
-	
+
 	switch ($action)
 	{
 		case 1: // Add new user
@@ -41,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 				{
 					$user->is_admin = $_POST["isadmin"];
 				}
-				
+
 				$userid = $wi->dbConnection->AddUser($user);
 				if ($userid)
-				{				
+				{
 					$profile = new Profile();
 					$profile->email = $_POST["email"];
 					$profile->region = $_POST["region"];
@@ -64,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			$hardware->currentIP = "";
 			$hardware->opponentID = -1;
 			$hardware->owner = $_POST["owner"];
-			
+
 			$wi->dbConnection->AddDevice($hardware);
 			break;
 	}
@@ -96,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 				<h2>Add new user</h2>
 				<form id="addUser" action="admin.php" method="post">
 					<input type="hidden" name="action" id="action" value="1"/>
-					<?php 
+					<?php
 					if (isset($action) && $action == 1 && count($errors) > 0)
 					{
 						foreach ($errors as $error)
@@ -120,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					<p>
 						<label for="isadmin" class="isadmin">Is Admin</label>
 						<input type="checkbox" id="isadmin" name="isadmin" value="1"/>
-					</p>					
+					</p>
 					<p>
 						<label for="email" class="email">E-Mail</label>
 						<input type="text" id="email" name="email" />
@@ -128,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					<p>
 						<label for="realname" class="realname">Realname</label>
 						<input type="text" id="realname" name="realname" />
-					</p>					
+					</p>
 					<p>
 						<label for="region" class="region">Region</label>
 						<input type="text" id="region" name="region" />
@@ -138,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					</p>
 				</form>
 			</div>
-			
+
 			<div>
 				<h2>Add new Device</h2>
 				<form id="addDevice" action="admin.php" method="post">
@@ -150,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					<p>
 						<label for="owner" class="owner">Owner</label>
 						<select id="owner" name="owner" required>
-						<?php 
+						<?php
 							$users = $wi->dbConnection->GetAllUsers();
 							echo HtmlHelper::GetUserComboBoxOptions($users);
 						?>
@@ -161,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					</p>
 				</form>
 			</div>
-			
+
 		</div>
 
 		<footer>

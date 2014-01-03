@@ -1,9 +1,10 @@
 /* config.h -*-c-*-
  * Configuration handler.
- * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
+ * Author: Michael Fitzmayer
  *
- * This program has has been released under the terms of a BSD-like
- * license.  See the file LICENSE for details. */
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
 
 
 #ifndef CONFIG_h
@@ -20,10 +21,10 @@
 #define ErrorMissingDatabase    -5
 
 
-const char *dbHostname;
-const char *dbUsername;
-const char *dbPassword;
-const char *dbDatabase;
+const char  *dbHostname;
+const char  *dbUsername;
+const char  *dbPassword;
+const char  *dbDatabase;
 
 
 int initConfig(char *filename);

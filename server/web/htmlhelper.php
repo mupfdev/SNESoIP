@@ -1,4 +1,13 @@
 <?php
+/* htmlhelper.php -*-web-*-
+ * 
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
+
 class HtmlHelper
 {
 	public static function GetDeviceComboBoxOptions($devices, $selectedID = 0)
@@ -10,14 +19,14 @@ class HtmlHelper
 			$html .= '<option value="'.$device["hw"]->hwID.'"';
 			if (($device["hw"]->hwID == $selectedID))
 			{
-				$html .= "selected";	
+				$html .= "selected";
 			}
 			$html.= '>'.htmlspecialchars($device["owner"]).' ('.  $device["hw"]->hwID. ')</option>';
-			
+
 		}
 		return $html;
 	}
-	
+
 	public static function GetUserComboBoxOptions($users)
 	{
 		$html = "";
@@ -25,7 +34,7 @@ class HtmlHelper
 		{
 			$html .= '<option value="'.$user->id.'">'.htmlspecialchars($user->name). '</option>';
 		}
-		return $html;		
+		return $html;
 	}
 }
 ?>

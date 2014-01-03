@@ -1,67 +1,76 @@
 <?php
+/* DatabaseConnection.php -*-web-*-
+ * 
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
+
 class DatabaseConnection
 {
 	private $connString;
 	private $dbConnection;
 	private $user;
 	private $pass;
-	
+
 	public function __construct($connString,$user,$pass)
 	{
 		$this->connString = $connString;
 		$this->user = $user;
-		$this->pass = $pass;	
+		$this->pass = $pass;
 	}
-	
+
 	public function connect()
 	{
 		if (is_null($this->connString) || $this->connString == "")
 		{
 			return false;
 		}
-		
-		try 
+
+		try
 		{
 			$this->dbConnection = new PDO($this->connString, $this->user, $this->pass);
 			if (DEBUG)
 			{
-				$this->dbConnection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );	
+				$this->dbConnection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 			}
 			return true;
 		}
 		catch (PDOException $e)
-		{		
+		{
 			print "Could not connect to database";
 			print $e->getMessage();
 			return false;
-		}		
+		}
 	}
 
 	public function AddUser(User $user)
 	{
 		try
 		{
-			
+
 			// 1st Step: Create an empty profile for the new user
 			$statement = $this->dbConnection->prepare("INSERT INTO profile (region) VALUES ('unknown')");
 			$statement->execute();
 			$profileID = $this->dbConnection->lastInsertId() ;
-			
+
 			// 2nd Step: Create the user
 			$statement = $this->dbConnection->prepare("INSERT INTO user (username,password,admin,profile_idprofile) VALUES (:username,:password,:admin,:profileid)");
-			
+
 			if (!$statement)
 			{
     			echo "\nPDO::errorInfo():\n";
     			print_r($dbh->errorInfo());
     			die();
 			}
-			
+
 			$statement->bindParam(":username",$user->name);
 			$statement->bindParam(":password",$user->passwordhash);
 			$statement->bindParam(":admin",$user->is_admin);
 			$statement->bindParam(":profileid",$profileID);
-			
+
 			if ($statement->execute())
 			{
 				return $this->dbConnection->lastInsertId();
@@ -75,7 +84,7 @@ class DatabaseConnection
 		{
 			print "Could not add user";
 			print $e->getMessage();
-			
+
 		}
 	}
 
@@ -88,26 +97,26 @@ class DatabaseConnection
 			$statement->bindParam(":opponentid", $hardware->opponentID);
 			$statement->bindParam(":userid", $hardware->owner);
 			$statement->bindParam(":currentip", $hardware->currentIP);
-			
+
 			$statement->execute();
 		}
 		catch (PDOException $e)
 		{
 			print "Could not add user";
 			print $e->getMessage();
-			
+
 		}
 	}
-	
+
 	public function SetPassword($userid, $newPasswordHash)
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("UPDATE user SET password = :password WHERE userid = :userid");
-			
+
 			$statement->bindParam(":password",$newPasswordHash);
 			$statement->bindParam(":userid",$userid);
-						
+
 			if ($statement->execute())
 			{
 				return true;
@@ -122,10 +131,10 @@ class DatabaseConnection
 			print "Could not get user";
 			print $e->getMessage();
 			return false;
-		}				
-		
+		}
+
 	}
-	
+
 	public function GetListOfAllDevices($excludeOwn = false, $ownid = 0)
 	{
 		try
@@ -139,8 +148,8 @@ class DatabaseConnection
 			{
 				$statement = $this->dbConnection->prepare("SELECT snesoip_hw.hwid, snesoip_hw.hwid_opponent, snesoip_hw.currentip, user.username FROM snesoip_hw INNER JOIN user ON snesoip_hw.user_userid = user.userid");
 			}
-			
-			
+
+
 			if ($statement->execute())
 			{
 				$hardware = array();
@@ -167,16 +176,16 @@ class DatabaseConnection
 			print "Could not get list of user hardware";
 			print $e->getMessage();
 		}
-		
+
 	}
-	
+
 	public function GetUserDevices($userid)
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT snesoip_hw.hwid, snesoip_hw.hwid_opponent, snesoip_hw.currentip FROM snesoip_hw WHERE user_userid = :userid");
 			$statement->bindParam(":userid", $userid);
-			
+
 			if ($statement->execute())
 			{
 				$hardware = array();
@@ -201,14 +210,14 @@ class DatabaseConnection
 			print $e->getMessage();
 		}
 	}
-	
+
 	public function GetUserByName($username)
 	{
-		try 
+		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT * FROM user RIGHT JOIN profile ON user.profile_idprofile = profile.idprofile WHERE username = :username");
 			$statement->bindParam(":username",$username);
-			
+
 			if ($statement->execute())
 			{
 				if ($row = $statement->fetch(PDO::FETCH_ASSOC))
@@ -219,12 +228,12 @@ class DatabaseConnection
 					$user->create_time = $row["create_time"];
 					$user->passwordhash = $row["password"];
 					$user->is_admin = $row["admin"];
-					
+
 					$user->profile = new Profile();
 					$user->profile->realName = $row["realname"];
 					$user->profile->region = $row["region"];
 					$user->profile->email = $row["email"];
-					
+
 					return $user;
 				}
 				else
@@ -241,16 +250,16 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
-		}		
+		}
 	}
-	
+
 	public function GetUserByID($userid)
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT * FROM user RIGHT JOIN profile ON user.profile_idprofile = profile.idprofile WHERE userid = :userid");
 			$statement->bindParam(":userid",$userid);
-			
+
 			if ($statement->execute())
 			{
 				if ($row = $statement->fetch(PDO::FETCH_ASSOC))
@@ -261,12 +270,12 @@ class DatabaseConnection
 					$user->create_time = $row["create_time"];
 					$user->passwordhash = $row["password"];
 					$user->is_admin = $row["admin"];
-					
+
 					$user->profile = new Profile();
 					$user->profile->realName = $row["realname"];
 					$user->profile->region = $row["region"];
 					$user->profile->email = $row["email"];
-					
+
 					return $user;
 				}
 				else
@@ -283,16 +292,16 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
-		}		
+		}
 	}
-	
+
 	public function GetProfileID($userid)
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT profile_idprofile FROM user WHERE userid = :userid");
 			$statement->bindParam(":userid",$userid);
-			
+
 			if ($statement->execute())
 			{
 				if ($row = $statement->fetch(PDO::FETCH_ASSOC))
@@ -313,9 +322,9 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
-		}		
+		}
 	}
-	
+
 	public function UpdateProfile($profile, $userid)
 	{
 		try
@@ -329,7 +338,7 @@ class DatabaseConnection
 				$statement->bindParam(":region",$profile->region);
 				$statement->bindParam(":email",$profile->email);
 				$statement->bindParam(":idprofile",$profileID);
-				
+
 				if ($statement->execute())
 				{
 					return true;
@@ -349,15 +358,15 @@ class DatabaseConnection
 			print "Could not get user";
 			print $e->getMessage();
 			return false;
-		}				
+		}
 	}
-	
+
 	public function GetAllUsers()
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT userid, username FROM user");
-			
+
 			if ($statement->execute())
 			{
 				$users = array();
@@ -380,9 +389,9 @@ class DatabaseConnection
 			print "Could not get user";
 			print $e->getMessage();
 			return false;
-		}		
+		}
 	}
-	
+
 	public function SetOpponent($hwID, $opponentID)
 	{
 		try
@@ -390,7 +399,7 @@ class DatabaseConnection
 			$statement = $this->dbConnection->prepare("UPDATE snesoip_hw SET hwid_opponent = :opponent WHERE hwid = :hwid");
 			$statement->bindParam(":opponent",$opponentID);
 			$statement->bindParam(":hwid",$hwID);
-			
+
 			if ($statement->execute())
 			{
 				return true;
@@ -405,15 +414,15 @@ class DatabaseConnection
 			print "Could not get user";
 			print $e->getMessage();
 			return false;
-		}				
+		}
 	}
-	
+
 	public function GetAdminUsers()
 	{
 		try
 		{
 			$statement = $this->dbConnection->prepare("SELECT userid, username FROM user WHERE admin = 1");
-			
+
 			if ($statement->execute())
 			{
 				$users = array();
@@ -438,7 +447,7 @@ class DatabaseConnection
 			return null;
 		}
 	}
-	
+
 	public function CreateTables()
 	{
 		try
@@ -474,7 +483,7 @@ class DatabaseConnection
 			print "Could not get user";
 			print $e->getMessage();
 			return false;
-		}		
+		}
 	}
 }
 ?>
