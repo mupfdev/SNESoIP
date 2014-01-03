@@ -1,4 +1,13 @@
 <?php 
+/* index.php -*-web-*-
+ * 
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
+
 require_once "imports.php";
 $error = false;
 
@@ -17,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	$username = $_POST["username"];
 	$password = $_POST["password"];
-		
+
 	if (empty($username) || empty($password))
 	{
 		$error = true;
@@ -29,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		{
 			die();
 		}
-		
+
 		$user = $wi->dbConnection->GetUserByName($username);
 		if (!is_null($user))
 		{
@@ -50,8 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		}
 	}
 
-	
-	
+
 }
 ?>
 <!doctype html>
@@ -77,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 			<div>
 			<?php if ($error) { ?><p> Username or Password wrong!</p><?php }?>
-			
+
 				<form id="login" action="index.php" method="post">
 					<p>
 						<label for="username" class="username">Username</label>

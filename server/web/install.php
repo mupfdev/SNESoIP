@@ -1,4 +1,12 @@
 <?php
+/* install.php -*-web-*-
+ * Install script.
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
 require_once 'webinterface.php';
 require_once 'DatabaseConnection.php';
 require_once 'user.php';
@@ -27,27 +35,27 @@ if (!$alreadyInstalled && $_SERVER['REQUEST_METHOD'] == 'POST')
 		$dbConnString = DB_CONN_STRING;
 		$dbuser = DB_USER;
 		$dbpass = DB_PASS;
-		
+
 		$wi = new WebInterface();
 		if ($wi->isConnected)
 		{
 			$configFileContent = "<?php\n// Database connection string\ndefine('DB_CONN_STRING','{CONN_STRING}');\n\n// Database user\ndefine('DB_USER','{DB_USER}');\n\n// Databse password\ndefine('DB_PASS','{DB_PASS}');\n\n// Send debug data to the browser\ndefine('DEBUG', false);?>";
 			$configFileWriteable = false;
-	
+
 			if (is_writable("."))
 			{
 				$configFileWriteable = true;
 			}
-			
+
 			// 1st step: write the config file
 			$configFileContent = str_ireplace("{CONN_STRING}", DB_CONN_STRING, $configFileContent);
 			$configFileContent = str_ireplace("{DB_USER}", DB_USER, $configFileContent);
 			$configFileContent = str_ireplace("{DB_PASS}", DB_PASS, $configFileContent);
 
-	
+
 			if ($wi->dbConnection->CreateTables())
 			{
-				
+
 				$user = new User();
 				$user->name = $_POST["username"];
 				$user->passwordhash = password_hash($_POST["password"], PASSWORD_DEFAULT);
@@ -77,9 +85,9 @@ if (!$alreadyInstalled && $_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 	else
 	{
-		$errors[] = "E_PASSWORDSDONOTMATCH";	
+		$errors[] = "E_PASSWORDSDONOTMATCH";
 	}
-	
+
 }
 
 ?>
@@ -117,7 +125,7 @@ if (!$alreadyInstalled && $_SERVER['REQUEST_METHOD'] == 'POST')
 						print "<h3>".$error."</h3>";
 					}
 				}
-				
+
 			?>
 			<form id="install" action="install.php" method="post">
 			<div>
@@ -139,7 +147,7 @@ if (!$alreadyInstalled && $_SERVER['REQUEST_METHOD'] == 'POST')
 						<input type="password" id="dbpassword" name="dbpassword" value="<?php echo $dbpass; ?>" required />
 					</p>
 			</div>
-			
+
 			<div>
 				<h2>Admin user</h2>
 				<div class="logo"><img src="gfx/snes-logo.svg" alt="SNES" /></div>
@@ -158,7 +166,7 @@ if (!$alreadyInstalled && $_SERVER['REQUEST_METHOD'] == 'POST')
 						<input type="password" id="repassword" name="repassword" required />
 					</p>
 			</div>
-			
+
 			<p>
 				<button id="installWI" name="installWI">»&nbsp;&nbsp;Install</button>
 			</p>

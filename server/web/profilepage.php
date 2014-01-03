@@ -1,4 +1,13 @@
-<?php 
+<?php
+/* profilepage.php -*-web-*-
+ * 
+ * Author: Daniel Baumann
+ *
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
+
+
 require_once "imports.php";
 session_start();
 
@@ -36,14 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 				{
 					$passworderror = true;
 				}
-			}		
+			}
 		}
-		
+
 		$updatedProfile = new Profile();
 		$updatedProfile->email = $_POST["email"];
 		$updatedProfile->realName = $_POST["realname"];
 		$updatedProfile->region = $_POST["region"];
-		
+
 		$wi->dbConnection->UpdateProfile($updatedProfile, $_SESSION["currentuser"]);
 	}
 }
@@ -69,7 +78,7 @@ $user = $wi->dbConnection->GetUserByID($_SESSION["currentuser"]);
 			<h1><a href=".">SNESoIP server</a></h1>
 			<div>
 				<h2>Logged in as <?php print htmlspecialchars($user->name); ?> (0)</h2>
-				<p class="logout"><a href="index.php?a=logout">Logout</a> 
+				<p class="logout"><a href="index.php?a=logout">Logout</a>
 				<?php if ($user->is_admin) {?>
 					<a href="admin.php">Admin</a>
 				<?php  } ?>
@@ -110,23 +119,23 @@ $user = $wi->dbConnection->GetUserByID($_SESSION["currentuser"]);
 						<button name="save">»&nbsp;&nbsp;Save</button>
 					</p>
 				</form>
-					<?php 
+					<?php
 						$devices = $wi->dbConnection->GetUserDevices($user->id);
 						foreach ($devices as $device)
 						{
 					?>
 						<form id="setoponnent_<?php print $device->hwID; ?>" action="profilepage.php" method="post">
-							<input type="hidden" name="hwid" value="<?php print $device->hwID; ?>"/> 
+							<input type="hidden" name="hwid" value="<?php print $device->hwID; ?>"/>
 							<p class="hardware">
 								<h3>Your SNESoIPs ID: <?php print $device->hwID; ?></h3>
 								<label for="remid_<?php echo $device->hwID; ?>">Remote ID</label>
 								<select id="remid_<?php echo $device->hwID; ?>" name="opponentid" required>
-								<?php 
+								<?php
 									$otherDevices = $wi->dbConnection->GetListOfAllDevices(false);
 									print HtmlHelper::GetDeviceComboBoxOptions($otherDevices, $device->opponentID);
 								?>
 								</select>
-								
+
 							</p>
 							<p class="ip">
 								<label for="ip_<?php echo $device->hwID; ?>">IP address</label>
@@ -135,9 +144,9 @@ $user = $wi->dbConnection->GetUserByID($_SESSION["currentuser"]);
 							<p>
 								<button name="setoponnent">Set opponent</button>
 							</p>
-						</form>						
+						</form>
 					<?php } ?>
-					
+
 					<p>
 						Your current IP address:&nbsp;
 						<?php
