@@ -10,6 +10,9 @@
 - 2x 22pF KER 1206 (C1, C2)
 - 2x 10uF TAN C-6032 (C3, C4)
 
+## Crystal oscillators ##
+- 1x 16MHz SM-49 (Q1)
+
 ## Resistors ##
 - 2x 220 1206 (R1, R2)
 - 1x 10k 1206 (R3)
