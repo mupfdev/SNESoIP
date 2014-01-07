@@ -28,7 +28,6 @@ int main() {
 	int      len, received, sockfd;
 	int8_t   clientID, requestID;
 	char     recvBuffer[4];
-	char     sendBuffer[2];
 
 	char*    nlpos;
 	time_t   ltime;
