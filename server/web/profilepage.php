@@ -1,6 +1,6 @@
 <?php
 /* profilepage.php -*-web-*-
- * 
+ * User profile settings page 
  * Author: Daniel Baumann
  *
  * This program is part of the SNESoIP project and has has been released

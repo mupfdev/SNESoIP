@@ -1,6 +1,6 @@
 <?php
 /* htmlhelper.php -*-web-*-
- * 
+ * Some helper functions for HTML output
  * Author: Daniel Baumann
  *
  * This program is part of the SNESoIP project and has has been released

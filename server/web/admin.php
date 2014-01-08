@@ -1,6 +1,6 @@
 <?php
 /* admin.php -*-web-*-
- * 
+ * Administrator interface
  * Author: Daniel Baumann
  *
  * This program is part of the SNESoIP project and has has been released

@@ -1,6 +1,6 @@
 <?php
 /* DatabaseConnection.php -*-web-*-
- * 
+ * Interface to database
  * Author: Daniel Baumann
  *
  * This program is part of the SNESoIP project and has has been released

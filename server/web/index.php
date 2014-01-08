@@ -1,6 +1,6 @@
 <?php 
 /* index.php -*-web-*-
- * 
+ * WebInterface entry page
  * Author: Daniel Baumann
  *
  * This program is part of the SNESoIP project and has has been released
@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		}
 		else
 		{
-			print 'no user found';
 			$error = true;
 		}
 	}
