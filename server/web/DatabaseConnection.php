@@ -61,9 +61,9 @@ class DatabaseConnection
 
 			if (!$statement)
 			{
-    			echo "\nPDO::errorInfo():\n";
-    			print_r($dbh->errorInfo());
-    			die();
+    				echo "\nPDO::errorInfo():\n";
+    				print_r($dbh->errorInfo());
+    				die();
 			}
 
 			$statement->bindParam(":username",$user->name);
@@ -84,7 +84,7 @@ class DatabaseConnection
 		{
 			print "Could not add user";
 			print $e->getMessage();
-
+			return false;
 		}
 	}
 
@@ -98,11 +98,11 @@ class DatabaseConnection
 			$statement->bindParam(":userid", $hardware->owner);
 			$statement->bindParam(":currentip", $hardware->currentIP);
 
-			$statement->execute();
+			return $statement->execute();
 		}
 		catch (PDOException $e)
 		{
-			print "Could not add user";
+			print "Could not add device";
 			print $e->getMessage();
 
 		}
@@ -117,14 +117,7 @@ class DatabaseConnection
 			$statement->bindParam(":password",$newPasswordHash);
 			$statement->bindParam(":userid",$userid);
 
-			if ($statement->execute())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return $statement->execute();
 		}
 		catch (PDOException $e)
 		{
@@ -175,6 +168,7 @@ class DatabaseConnection
 		{
 			print "Could not get list of user hardware";
 			print $e->getMessage();
+			return null;
 		}
 
 	}
@@ -208,6 +202,7 @@ class DatabaseConnection
 		{
 			print "Could not get list of user hardware";
 			print $e->getMessage();
+			return null;
 		}
 	}
 
@@ -292,6 +287,7 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
+			return null;
 		}
 	}
 
@@ -322,6 +318,7 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
+			return null;
 		}
 	}
 
@@ -336,15 +333,7 @@ class DatabaseConnection
 				$statement->bindParam(":avatar",$avatar);
 				$statement->bindParam(":idprofile",$profileID);
 
-				if ($statement->execute())
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-
+				return $statement->execute();
 			}
 		}
 		catch (PDOException $e)
@@ -367,15 +356,9 @@ class DatabaseConnection
 				{
 					return $row["avatar"];
 				}
-				else
-				{
-					return null;
-				}
 			}
-			else
-			{
-				return null;
-			}
+
+			return null;
 		}
 		catch (PDOException $e)
 		{
@@ -396,14 +379,7 @@ class DatabaseConnection
 				$statement->bindParam(":email",$profile->email);
 				$statement->bindParam(":idprofile",$profileID);
 
-				if ($statement->execute())
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				return $statement->execute();
 			}
 			else
 			{
@@ -445,7 +421,7 @@ class DatabaseConnection
 		{
 			print "Could not get user";
 			print $e->getMessage();
-			return false;
+			return null;
 		}
 	}
 
@@ -457,14 +433,7 @@ class DatabaseConnection
 			$statement->bindParam(":opponent",$opponentID);
 			$statement->bindParam(":hwid",$hwID);
 
-			if ($statement->execute())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return $statement->execute();
 		}
 		catch (PDOException $e)
 		{
@@ -516,24 +485,10 @@ class DatabaseConnection
 				if ($statement->execute())
 				{
 					$statement = $this->dbConnection->prepare("CREATE TABLE IF NOT EXISTS `snesoip`.`snesoip_hw` (`hwid` INT NOT NULL,`user_userid` INT NOT NULL, `hwid_opponent` INT NULL, `currentip` VARCHAR(128) NULL, `lastping` VARCHAR(45) NULL, PRIMARY KEY (`hwid`, `user_userid`), INDEX `fk_snesoip_hw_user1_idx` (`user_userid` ASC), CONSTRAINT `fk_snesoip_hw_user1`   FOREIGN KEY (`user_userid`)   REFERENCES `snesoip`.`user` (`userid`)   ON DELETE NO ACTION   ON UPDATE NO ACTION) ENGINE = InnoDB;");
-					if ($statement->execute())
-					{
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
+					return $statement->execute();
 				}
 			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 		catch (PDOException $e)
 		{
