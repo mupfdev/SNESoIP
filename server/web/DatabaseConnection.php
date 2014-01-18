@@ -325,6 +325,64 @@ class DatabaseConnection
 		}
 	}
 
+	public function SetAvatar($userid, $avatar)
+	{
+		try
+		{
+			$profileID = $this->GetProfileID($userid);
+			if (!is_null($profileID))
+			{
+				$statement = $this->dbConnection->prepare("UPDATE profile SET avatar = :avatar WHERE idprofile = :idprofile");
+				$statement->bindParam(":avatar",$avatar);
+				$statement->bindParam(":idprofile",$profileID);
+
+				if ($statement->execute())
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+
+			}
+		}
+		catch (PDOException $e)
+		{
+			print $e->getMessage();
+			return false;
+		}
+	}
+	
+	public function GetAvatar($userid)
+	{
+		try
+		{
+			$statement = $this->dbConnection->prepare("SELECT profile.avatar FROM user RIGHT JOIN profile ON user.profile_idprofile = profile.idprofile WHERE userid = :userid");
+			$statement->bindParam(":userid",$userid);
+
+			if ($statement->execute())
+			{
+				if ($row = $statement->fetch(PDO::FETCH_ASSOC))
+				{
+					return $row["avatar"];
+				}
+				else
+				{
+					return null;
+				}
+			}
+			else
+			{
+				return null;
+			}
+		}
+		catch (PDOException $e)
+		{
+			return null;
+		}
+	}
+	
 	public function UpdateProfile($profile, $userid)
 	{
 		try
@@ -332,9 +390,8 @@ class DatabaseConnection
 			$profileID = $this->GetProfileID($userid);
 			if (!is_null($profileID))
 			{
-				$statement = $this->dbConnection->prepare("UPDATE profile SET realname = :realname, avatar = :avatar, region = :region, email = :email WHERE idprofile = :idprofile");
+				$statement = $this->dbConnection->prepare("UPDATE profile SET realname = :realname, region = :region, email = :email WHERE idprofile = :idprofile");
 				$statement->bindParam(":realname",$profile->realName);
-				$statement->bindParam(":avatar",$profile->avatar);
 				$statement->bindParam(":region",$profile->region);
 				$statement->bindParam(":email",$profile->email);
 				$statement->bindParam(":idprofile",$profileID);

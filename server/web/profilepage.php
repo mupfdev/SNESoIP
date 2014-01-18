@@ -48,6 +48,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			}
 		}
 
+		if (isset($_FILES) && isset($_FILES["avatar"]))
+		{
+			if (!is_null($_FILES["avatar"]["tmp_name"]))
+			{
+				if ($_FILES["avatar"]["type"] != "image/bmp")
+				{
+					$wrongFileType = true;
+				}
+				else
+				{
+					$handle = fopen($_FILES["avatar"]["tmp_name"], "rb");
+					$bmp = fread($handle, filesize($_FILES["avatar"]["tmp_name"]));
+					if (is_null($bmp))
+					{
+						$uploadError = true;
+					}
+					else					
+					{
+						$width = unpack('i', substr($bmp,18,4));
+						$height = unpack('i', substr($bmp,22,4));
+						$bpp = unpack('s',substr($bmp,28,2));
+						// Check if the bmp file has only 16 colors and is not larger than 32px x 32px
+						if ($width[1] > 32 || $height[1] > 32 || $bpp[1] > 4)
+						{
+							$fileformaterror = true;
+						}
+						else
+						{
+							$wi->dbConnection->SetAvatar($_SESSION["currentuser"],$bmp);
+						}
+					}
+				}
+			}			
+			
+		}
+
 		$updatedProfile = new Profile();
 		$updatedProfile->email = $_POST["email"];
 		$updatedProfile->realName = $_POST["realname"];
@@ -90,7 +126,20 @@ $user = $wi->dbConnection->GetUserByID($_SESSION["currentuser"]);
 				<?php if (isset($passworderror) && $passworderror) {?>
 					<p>Could not update password!</p>
 				<?php }?>
-				<form id="profile" action="profilepage.php" method="post">
+				
+				<?php if (isset($wrongFileType) && $wrongFileType) {?>
+					<p>Avatar has to be a BMP file!</p>
+				<?php }?>				
+
+				<?php if (isset($fileformaterror) && $fileformaterror) {?>
+					<p>Your avatar must not be larger than 32px in width and height. The maximum color depth is 4 bits per pixel!</p>
+				<?php }?>
+
+				<?php if (isset($uploadError) && $uploadError) {?>
+					<p>Could not upload your avatar. Please contact the server administrator for help.</p>
+				<?php }?>
+							
+				<form id="profile" action="profilepage.php" method="post" enctype="multipart/form-data">
 					<p class="realname">
 						<label for="realname">Real name</label>
 						<input id="realname" type="text" name="realname" value="<?php echo htmlspecialchars($user->profile->realName); ?>" autocomplete="off">
@@ -112,8 +161,12 @@ $user = $wi->dbConnection->GetUserByID($_SESSION["currentuser"]);
 						<label for="repassword">Validate Password</label>
 						<input id="repassword" type="password" name="repassword" value="" autocomplete="off">
 					</p>
+					<p class="avatarupload">
+						<label for="avatar">Avatar</label>
+						<input id="avatar" type="file" name="avatar"/>
+					</p>
 					<p class="avatar">
-						Avatar feature is comming soon!
+						<img src="avatar.php?uid=<?php echo $_SESSION['currentuser'];?>" alt="avatar" class="avatar"/>
 					</p>
 					<p>
 						<button name="save">»&nbsp;&nbsp;Save</button>

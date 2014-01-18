@@ -19,6 +19,28 @@ $dbConnString = "";
 $dbuser = "";
 $dbpass = "";
 
+// Perform compatibility checks
+if (version_compare(phpversion(), "5.3.7", ">="))
+{ 
+	$hash = '$2y$04$usesomesillystringfore7hnbRJHxXVLeakoG8K30oukPsA.ztMG';
+	$test = crypt("password", $hash);
+	$pass = $test == $hash;
+	if (!$pass)
+	{
+		$errors[] = "E_CRYPTERROR";
+	}
+} 
+else
+{ 
+	$errors[] = "E_UNSUPPORTEDPHPVERSION";
+}
+
+if (!extension_loaded('imagick'))
+{
+	$errors[] = "E_IMAGICKNOTINSTALLED";
+}
+
+
 if (file_exists("configuration.php"))
 {
 	$alreadyInstalled = true;

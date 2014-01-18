@@ -7,6 +7,10 @@
  * under the terms of a BSD-like license.  See the file LICENSE for
  * details. */
 
+if (!file_exists("configuration.php"))
+{
+	header("Location: help.php");
+}
 
 require_once "imports.php";
 $error = false;
