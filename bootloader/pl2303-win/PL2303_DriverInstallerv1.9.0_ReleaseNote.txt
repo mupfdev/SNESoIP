@@ -1,0 +1,180 @@
+
+==================================================
+PL2303 Driver Setup Installer, Prolific Edition
+Setup Installer Revision Note History
+==================================================
+
+System Requirement:
+  . USB 1.1/2.0/3.0 Host Controller
+  . Device using PL2303HXA/XA/HXD/EA/RA/SA/TA/TB version chips
+  . Supports the following Windows OS Family:
+	- Windows 2000 SP4
+	- Windows XP SP2 and above (32 & 64 bit)
+	- Windows Server 2003 (32 & 64 bit)
+	- Windows Vista (32 & 64 bit)
+	- Windows 7 (32 & 64 bit)
+	- Windows Server 2008 / 2008 R2 (32 & 64 bit)
+	- Windows 8 (32 & 64 bit) 
+	- Windows 8.1 (32 & 64 bit) 
+	- Windows Server 2012 
+	NOTE: 
+	  - Windows 8 and above OS are NOT supported in PL2303HXA/XA EOL chip versions (discontinued).
+	  - Download latest PL2303 CheckChipVersion tool program to check chip version in Windows 7.
+	  - Windows 98 and ME driver support are discontinued. 
+ 
+Supported device ID and product strings:
+  . VID_067B&PID_2303 for "Prolific USB-to-Serial Comm Port" (PL2303 series)
+  . VID_067B&PID_2304 for "Prolific USB-to-Serial Comm Port" (PL2303TB chip)
+
+
+Driver Versions:
+-------------------
+	- Windows 2000/XP/Server2003 (32 & 64-bit) WDM WHQL Driver: v2.1.51.238 (10/22/2013)
+	- Windows Vista/7/Server2008 (32 & 64-bit) WDF WHQL Driver: v3.4.62.293 (10/17/2013)
+
+
+Release Notes:
+---------------
+PL2303 Driver Installer v1.9.0
+   Installer & Build date: 1.9.0 (2013-10-25)
+	GUID:ECC3713C-08A4-40E3-95F1-7D0704F1CE5E
+
+ 
+   =====================================================================
+   Windows Vista/7/Server2008/Server2008R2/8 Driver Changes v3.4.62.293
+   =====================================================================
+	Driver Change from v3.4.48.272 (Driver Installer v1.8.0 & 1.8.19):
+	------------------------------------------------------------------
+	. Driver will delay 1.5ms when AP execute GET_MODEMSTATUS.
+	. Fixed teraterm timeout/slow response issue.
+	. Fixed GPIO 2 & 3 function for HXD chip.
+	. Add 3250000bps baud support.
+	. GPIO 2,3 set as default input pin.
+	. Add auxiliary GPIO 4~7 driver support for HXD chip.
+	. Fixed modem issue (Disable SerialWdmFileRead).
+	. Add 256000 bps baud support for PL2303TA/TB.
+	. Fixed customer VB AP issue. 
+	. Improve Serial Mouse enumeration.
+
+	Driver Change from v3.4.36.247 (Driver Installer v1.7.0):
+	----------------------------------------------------------
+	. Fixed 110 bps on PL2303RA/SA/EA/TA/TB.
+	. Modify CheckChipVersion API (do not lock VID/PID).
+	. Fixed HXD chip is detected as HXC chip when BCD is written as 0300 instead of 0400.
+	. Added 80bps baud support.
+	. Fixed GPS device will be detected as MS Serial Ballpoint device.
+	. Fixed driver conflict with different VID/PID device. (STATUS_OBJECT_NAME_COLLISION)
+	. Fixed Teraterm loopback timeout issue. 
+
+	Driver Change from v3.4.31.231:
+	------------------------------
+	. Fixed Putty/HTerm BSOD issue in Win7 64-bit. (for HXD chip only)
+	. Fixed HyperTerminal timeout issue when transferring large file. (for HXD chip only)
+	. Fixed Windows HCK logo test for Windows 8, 7, Vista WHQL driver. 
+
+	Driver Change from v3.4.25.218:
+	------------------------------
+	. Added driver support for new chip versions (PL2303EA, RA, SA).
+	. Supports new CheckChipVersion v1.0.0.2 and above program for checking all Prolific chip version.
+	. Fixed COM Port won't disappear when unplug PL2303 during data transfer (Write Timeout issue).
+	. Fixed Putty program BSOD issue on continuous transfer at 115200bps.
+	. Fixed 12Mbps baudrate support for PL2303TB chip version.
+	. Does NOT support Windows 8 for EOL chip versions (PL2303H, PL2303HXA, PL2303XA).
+	. For Windows 8: use PL2303HXD, PL2303TA, PL2303EA, PL2303SA, PL2303RA, PL2303TB.
+
+	Driver Change from v3.3.17.203:
+	------------------------------
+	. Added driver support for Prolific next-gen USB-to-Serial chips (Codename TA/TB).
+	   - old driver will not work on baudrates higher than 115200bps.
+	. No driver functional difference for current H/HX/X chip versions.
+
+	Driver Change from v3.3.11.152:
+	------------------------------
+	. Use different service name in INF file to avoid driver conflict with XP INF driver. 
+	      - change line in INF file to {Serial.SVCDESC = "Prolific Serial port WDFdriver"}
+	. Added USB Selective Suspend power saving feature requested by Notebook PC vendors. 
+	      - Chip will go to sleep mode when idle for 10 seconds and COM port not open. 
+	      - Chip will NOT go to sleep mode when COM port is OPEN.
+	      - requires to write Remote Wakeup in external EEPROM. 
+	. Modify "SerialUndoExternalNaming" routine.
+		- Fix COM port is not removed in registry when device is unplug and program still open. 
+		- update registry HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIAL COMM when unplug and replug.
+	. Added support for TransmitCommChar() function.
+	. Added SpinLock function to fix customer GPS application. 
+
+  ============================================================
+   Windows 2000/XP/Server2003 Driver v2.1.51.238 (10/22/2013) 
+  ============================================================
+	Driver Change from v2.1.44.226 (Driver Installer v1.8.0 & 1.8.19):
+	------------------------------------------------------------------
+	. Driver will delay 1.5ms when AP execute GET_MODEMSTATUS.
+	. Fixed GPIO 2 & 3 function for HXD chip.
+	. Add 3250000bps baud support.
+	. GPIO 2,3 set as default input pin.
+	. Add auxiliary GPIO 4~7 driver support for HXD chip.
+	. Add 256000 bps baud support for PL2303TA/TB.
+	. Improve Serial Mouse enumeration.
+	. Fixed WHQL test using HCK 2.0. 
+
+	Driver Change from v2.1.35.211 (Driver Installer v1.7.0):
+	---------------------------------------------------------
+	. Fixed 110 bps on PL2303RA/SA/EA/TA/TB.
+	. Modify CheckChipVersion API (do not lock VID/PID).
+	. Fixed HXD chip is detected as HXC chip when BCD is written as 0300 instead of 0400.
+	. Added 80bps baud support.
+	. Fixed GPS device will be detected as MS Serial Ballpoint device.
+	. Fixed Disable-Enable device issue in Windows 2000 Device Manager. 
+
+	Driver Change from v2.1.30.193:
+	------------------------------
+	. Fixed write timeout intermittent issue (COM port won't disappear) during USB surprise removal.
+	. Fixed new Windows HCK logo test for XP WHQL driver.
+
+	Driver Change from v2.1.27.185:
+	------------------------------
+	. Added driver support for new chip versions (PL2303EA, RA, SA).
+	. Supports new CheckChipVersion v1.0.0.2 and above program for checking all Prolific chip version.
+	. Fixed COM Port won't disappear when unplug PL2303 during data transfer (Write Timeout issue).
+	. Fixed 12Mbps baudrate support for PL2303TB chip version.
+
+	Driver Change from v2.0.16.166:
+	------------------------------
+	. Added driver support for Prolific next-gen USB-to-Serial chips (Codename TA/TB).
+	   - old driver will not work on baudrates higher than 115200bps.
+	. No driver functional difference for current H/HX/X chip versions.
+
+	Driver Change from v2.0.13.130:
+	------------------------------
+	. Use different service name in INF file to avoid driver conflict with Vista/7 INF driver. 
+	      - change line in INF file to {Serial.SVCDESC = "Prolific Serial port WDMdriver"}
+	. Added 10ms delay (downstream buffer) on close COM port to fix customer MCU application. 	
+   
+
+   Language Support: 
+	- English (default)
+	- Chinese (Traditional) 
+	- Chinese (Simplified)
+	- Japanese
+
+Download Latest Driver here:
+http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=225&pcid=41
+
+=======================
+Counterfeit Warning!!!
+=======================
+Please be warned that counterfeit/fake PL-2303HX Chip Rev A (or PL-2303HXA) USB to Serial Controller ICs using Prolific's trademark logo, brandname, and device drivers, are being sold in the China market. Counterfeit IC products show exactly the same outside chip markings but generally are of poor quality and causes Windows driver compatibility issues (Yellow Mark Error Code 10 in Windows 7 Device Manager). We issue this warning to all our customers and consumers to avoid confusion and false purchase. Only purchase branded cables that provide technical support and warranty service. Prolific does not manufacture nor sell end-product cables. 
+
+
+===========================
+How to Install Driver
+===========================
+1. Unplug any PL2303 USB Device first.
+2. Run Driver Installer EXE program to install. Wait to finish. 
+3. Plug PL2303 USB Device and go to Device Manager to check COM Port number. 
+4. If PL2303 is embedded, you might need to restart Windows or rescan hardware in Device Manager.
+5. Refer to PL2303 Windows Driver User's Manual. 
+
+
+========================================
+Prolific Technology Inc.
+http://www.prolific.com.tw
