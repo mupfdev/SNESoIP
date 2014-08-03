@@ -1,5 +1,0 @@
-2013-08-26  Michael Fitzmayer  <mail@michael-fitzmayer.de>
-	* rev1: Fixed ENC28J60 module pinout.
-
-2013-08-25  Michael Fitzmayer  <mail@michael-fitzmayer.de>
-	* rev0: Initial prototype.

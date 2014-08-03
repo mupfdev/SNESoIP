@@ -1,0 +1,36 @@
+# Project: fboot
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe -D__DEBUG__
+CC   = gcc.exe -D__DEBUG__
+WINDRES = windres.exe
+RES  = 
+OBJ  = modemtest.o readargs.o fboot17a.o $(RES)
+LINKOBJ  = modemtest.o readargs.o fboot17a.o $(RES)
+LIBS =  -L"d:/Dev-Cpp/lib"   -g3 
+INCS =  -I"d:/Dev-Cpp/include" 
+CXXINCS =  -I"d:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"d:/Dev-Cpp/include/c++/3.4.2/backward"  -I"d:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"d:/Dev-Cpp/include/c++/3.4.2"  -I"d:/Dev-Cpp/include" 
+BIN  = fboot.exe
+CXXFLAGS = $(CXXINCS)   -g3
+CFLAGS = $(INCS)   -g3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before fboot.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o "fboot.exe" $(LIBS)
+
+modemtest.o: modemtest.c
+	$(CC) -c modemtest.c -o modemtest.o $(CFLAGS)
+
+readargs.o: readargs.c
+	$(CC) -c readargs.c -o readargs.o $(CFLAGS)
+
+fboot17a.o: fboot17a.c
+	$(CC) -c fboot17a.c -o fboot17a.o $(CFLAGS)

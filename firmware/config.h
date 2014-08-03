@@ -10,10 +10,19 @@
 #define CONFIG_h
 
 
-#define CID            0x03 // Own unique device ID.
-#define P2CID          0x00 // Unique ID of the Opponent/Teammate.
+#ifndef CID
+#define CID            0x00
+#endif
+
+#ifndef P2CID
+#define P2CID          0x00
+#endif
+
+#ifndef ServerVHost
+#define ServerVHost    "snesoip.de"
+#endif
+
 #define BufferSize     500  // Do NOT change this value.
-#define ServerVHost    "snesoip.mupfelofen.de"
 
 
 // Used by io.c
@@ -48,15 +57,15 @@
 #define Port1ClockDDR  DDRD
 #define Port1ClockPORT PORTD
 #define Port1ClockPIN  PIND
-#define Port1Clock     PD2
+#define Port1Clock     PD4
 
 #define Port1LatchDDR  DDRD
 #define Port1LatchPORT PORTD
-#define Port1Latch     PD1
+#define Port1Latch     PD3
 
 #define Port1DataDDR   DDRD
 #define Port1DataPORT  PORTD
-#define Port1Data      PD0
+#define Port1Data      PD2
 
 
 #define LEDgreenDDR    DDRC
@@ -77,7 +86,7 @@
 #define ENC28J60_CONTROL_SCK  PORTB5
 
 
-static uint8_t mymac[6]    = { 0x00, 0x09, 0xbf, 0x49, 0x44, CID };
+static uint8_t mymac[6]    = { 0x00, 0x09, 0xbf, 0x02, 0x00, CID };
 
 // Will be provided by DHCP or DNS lookup.
 static uint8_t gwmac[6];
