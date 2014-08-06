@@ -21,7 +21,7 @@
 #ifndef ENC28J60_H
 #define ENC28J60_H
 #include <inttypes.h>
-#include "../config.h"
+#include "ip_config.h" // we set this ENC28J60_BROADCAST flag from ip_config.h to have one place with all the code optimisation flags
 
 // ENC28J60 Control Registers
 // Control register definitions are a combination of address,
@@ -276,8 +276,10 @@ extern void enc28j60PacketSend(uint16_t len, uint8_t* packet);
 extern uint8_t enc28j60hasRxPkt(void);
 extern uint16_t enc28j60PacketReceive(uint16_t maxlen, uint8_t* packet);
 extern uint8_t enc28j60getrev(void);
+#ifdef ENC28J60_BROADCAST
 extern void enc28j60EnableBroadcast(void);
 extern void enc28j60DisableBroadcast(void);
+#endif
 extern uint8_t enc28j60linkup(void);
 
 #endif

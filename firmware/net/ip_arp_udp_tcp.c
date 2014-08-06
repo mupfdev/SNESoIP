@@ -18,8 +18,6 @@
  * Chip type           : ATMEGA88/168/328/644 with ENC28J60
  *********************************************/
 #include <avr/io.h>
-// http://www.nongnu.org/avr-libc/changes-1.8.html:
-#define __PROG_TYPES_COMPAT__
 #include <avr/pgmspace.h>
 #include <string.h>
 #include <ctype.h>
@@ -28,6 +26,10 @@
 #include "enc28j60.h"
 #include "ip_config.h"
 
+// I use them to debug stuff:
+#define LEDOFF PORTB|=(1<<PORTB1)
+#define LEDON PORTB&=~(1<<PORTB1)
+#define LEDISOFF PORTB&(1<<PORTB1)
 //
 static uint8_t macaddr[6];
 static uint8_t ipaddr[4]={0,0,0,0};
@@ -63,10 +65,10 @@ static uint16_t (*client_tcp_datafill_callback)(uint8_t);
 static uint8_t www_fd=0;
 static uint8_t browsertype=0; // 0 = get, 1 = post
 static void (*client_browser_callback)(uint16_t,uint16_t,uint16_t); // the fields are: uint16_t webstatuscode,uint16_t datapos,uint16_t len; datapos is start of http data and len the the length of that data
-static const char *client_additionalheaderline;
+static const char *client_additionalheaderline_p; // null pointer or pointer to a string in progmem
 static char *client_postval;
-static const char *client_urlbuf;
-static const char *client_urlbuf_var;
+static const char *client_urlbuf_p; // null pointer or pointer to a string in progmem
+static char *client_urlbuf_var;
 static const char *client_hoststr;
 static uint8_t *bufptr=0; // ugly workaround for backward compatibility
 #endif
@@ -93,6 +95,8 @@ static uint16_t info_data_len=0;
 
 #if defined (ALL_clients)
 static uint8_t ipnetmask[4]={255,255,255,255};
+#endif
+#if defined (ALL_clients) || defined (WOL_client)
 static uint8_t ipid=0x2; // IP-identification, it works as well if you do not change it but it is better to fill the field, we count this number up and wrap.
 const char iphdr[] PROGMEM ={0x45,0,0,0x82,0,0,0x40,0,0x20}; // 0x82 is the total len on ip, 0x20 is ttl (time to live), the second 0,0 is IP-identification and may be changed.
 #endif
@@ -640,14 +644,14 @@ void www_server_reply(uint8_t *buf,uint16_t dlen)
 
 #endif // WWW_server
 
-#if defined (ALL_clients)
+#if defined (ALL_clients) || defined (GRATARP) || defined (WOL_client)
 // fill buffer with a prog-mem string
-void fill_buf_p(uint8_t *buf,uint16_t len, const char *progmem_s)
+void fill_buf_p(uint8_t *buf,uint16_t len, const char *progmem_str_p)
 {
         while (len){
-                *buf= pgm_read_byte(progmem_s);
+                *buf= pgm_read_byte(progmem_str_p);
                 buf++;
-                progmem_s++;
+                progmem_str_p++;
                 len--;
         }
 }
@@ -1169,25 +1173,25 @@ uint16_t www_client_internal_datafill_callback(uint8_t fd){
                 if (browsertype==0){
                         // GET
                         len=fill_tcp_data_p(bufptr,0,PSTR("GET "));
-                        len=fill_tcp_data_p(bufptr,len,client_urlbuf);
+                        len=fill_tcp_data_p(bufptr,len,client_urlbuf_p);
                         len=fill_tcp_data(bufptr,len,client_urlbuf_var);
                         // I would prefer http/1.0 but there is a funny
                         // bug in some apache webservers which causes
                         // them to send two packets (fragmented PDU)
                         // if we don't use HTTP/1.1 + Connection: close
                         len=fill_tcp_data_p(bufptr,len,PSTR(" HTTP/1.1\r\nHost: "));
-                        len=fill_tcp_data(bufptr,len,client_hoststr);
+                        len=fill_tcp_data_p(bufptr,len,client_hoststr);
                         len=fill_tcp_data_p(bufptr,len,PSTR("\r\nUser-Agent: tgr/1.1\r\nAccept: text/html\r\n\r\n"));
                 }else{
                         // POST
                         len=fill_tcp_data_p(bufptr,0,PSTR("POST "));
-                        len=fill_tcp_data_p(bufptr,len,client_urlbuf);
+                        len=fill_tcp_data_p(bufptr,len,client_urlbuf_p);
                         len=fill_tcp_data(bufptr,len,client_urlbuf_var);
                         len=fill_tcp_data_p(bufptr,len,PSTR(" HTTP/1.1\r\nHost: "));
-                        len=fill_tcp_data(bufptr,len,client_hoststr);
-                        if (client_additionalheaderline){
+                        len=fill_tcp_data_p(bufptr,len,client_hoststr);
+                        if (client_additionalheaderline_p){
                                 len=fill_tcp_data_p(bufptr,len,PSTR("\r\n"));
-                                len=fill_tcp_data_p(bufptr,len,client_additionalheaderline);
+                                len=fill_tcp_data_p(bufptr,len,client_additionalheaderline_p);
                         }
                         len=fill_tcp_data_p(bufptr,len,PSTR("\r\nUser-Agent: tgr/1.1\r\nAccept: */*\r\n"));
                         len=fill_tcp_data_p(bufptr,len,PSTR("Content-Length: "));
@@ -1250,10 +1254,10 @@ uint8_t www_client_internal_result_callback(uint8_t fd, uint8_t statuscode, uint
 // The string buffers to which urlbuf_varpart and hoststr are pointing
 // must not be changed until the callback is executed.
 //
-void client_browse_url(const char *urlbuf,const char *urlbuf_varpart,const char *hoststr,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac)
+void client_browse_url(const char *urlbuf_p,char *urlbuf_varpart,const char *hoststr,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac)
 {
         if (!enc28j60linkup())return;
-        client_urlbuf=urlbuf;
+        client_urlbuf_p=urlbuf_p;
         client_urlbuf_var=urlbuf_varpart;
         client_hoststr=hoststr;
         browsertype=0;
@@ -1262,19 +1266,19 @@ void client_browse_url(const char *urlbuf,const char *urlbuf_varpart,const char 
 }
 
 // client web browser using http POST operation:
-// additionalheaderline must be set to NULL if not used.
+// additionalheaderline_p must be set to NULL if not used.
 // The string buffers to which urlbuf_varpart and hoststr are pointing
 // must not be changed until the callback is executed.
 // postval is a string buffer which can only be de-allocated by the caller 
 // when the post operation was really done (e.g when callback was executed).
 // postval must be urlencoded.
-void client_http_post(const char *urlbuf, const char *urlbuf_varpart,const char *hoststr, const char *additionalheaderline,char *postval,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac)
+void client_http_post(const char *urlbuf_p, char *urlbuf_varpart,const char *hoststr, const char *additionalheaderline_p,char *postval,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac)
 {
         if (!enc28j60linkup())return;
-        client_urlbuf=urlbuf;
+        client_urlbuf_p=urlbuf_p;
         client_hoststr=hoststr;
         client_urlbuf_var=urlbuf_varpart;
-        client_additionalheaderline=additionalheaderline;
+        client_additionalheaderline_p=additionalheaderline_p;
         client_postval=postval;
         browsertype=1;
         client_browser_callback=callback;
@@ -1372,8 +1376,9 @@ uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
                 make_echo_reply_from_request(buf,plen);
                 return(0);
         }
-        if (plen<54 && buf[IP_PROTO_P]!=IP_PROTO_TCP_V ){
-                // smaller than the smallest TCP packet and not tcp port
+        // this is an important check to avoid working on the wrong packets:
+        if (plen<54 || buf[IP_PROTO_P]!=IP_PROTO_TCP_V ){
+                // smaller than the smallest TCP packet (TCP packet with no options section) or not tcp port
                 return(0);
         }
 #if defined (TCP_client)
@@ -1492,7 +1497,7 @@ uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
         //
 #ifdef WWW_server
         // tcp port web server start
-        if (buf[IP_PROTO_P]==IP_PROTO_TCP_V && buf[TCP_DST_PORT_H_P]==wwwport_h && buf[TCP_DST_PORT_L_P]==wwwport_l){
+        if (buf[TCP_DST_PORT_H_P]==wwwport_h && buf[TCP_DST_PORT_L_P]==wwwport_l){
                 if (buf[TCP_FLAGS_P] & TCP_FLAGS_SYN_V){
                         make_tcp_synack_from_syn(buf);
                         // make_tcp_synack_from_syn does already send the syn,ack

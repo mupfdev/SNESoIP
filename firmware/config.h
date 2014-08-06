@@ -77,15 +77,6 @@
 #define LEDred         PC1
 
 
-// Used by net/enc28j60.c
-#define ENC28J60_CONTROL_PORT PORTB
-#define ENC28J60_CONTROL_DDR  DDRB
-#define ENC28J60_CONTROL_CS   PORTB2
-#define ENC28J60_CONTROL_SO   PORTB4
-#define ENC28J60_CONTROL_SI   PORTB3
-#define ENC28J60_CONTROL_SCK  PORTB5
-
-
 static uint8_t mymac[6]    = { 0x00, 0x09, 0xbf, 0x02, 0x00, CID };
 
 // Will be provided by DHCP or DNS lookup.

@@ -13,12 +13,33 @@
  * Chip type           : ATMEGA88/ATMEGA168/ATMEGA328/ATMEGA644 with ENC28J60
  *********************************************/
 #include <avr/io.h>
-#include <util/delay.h>
+#include "ip_config.h"
 #include "enc28j60.h"
+//
+#define F_CPU 12500000UL  // 12.5 MHz
+#ifndef ALIBC_OLD
+#include <util/delay_basic.h>
+#else
+#include <avr/delay.h>
+#endif
 
 
 static uint8_t Enc28j60Bank;
 static int16_t gNextPacketPtr;
+#define ENC28J60_CONTROL_PORT   PORTB
+#define ENC28J60_CONTROL_DDR    DDRB
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega88P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega328P__) 
+#define ENC28J60_CONTROL_CS PORTB2
+#define ENC28J60_CONTROL_SO PORTB4
+#define ENC28J60_CONTROL_SI PORTB3
+#define ENC28J60_CONTROL_SCK PORTB5
+#endif
+#if defined(__AVR_ATmega644__)||defined(__AVR_ATmega644P__)
+#define ENC28J60_CONTROL_CS PORTB4
+#define ENC28J60_CONTROL_SO PORTB6
+#define ENC28J60_CONTROL_SI PORTB5
+#define ENC28J60_CONTROL_SCK PORTB7
+#endif
 // set CS to 0 = active
 #define CSACTIVE ENC28J60_CONTROL_PORT&=~(1<<ENC28J60_CONTROL_CS)
 // set CS to 1 = passive
@@ -163,10 +184,10 @@ void enc28j60Init(uint8_t* macaddr)
 	CSPASSIVE; // ss=0
         //	
 	ENC28J60_CONTROL_DDR  |= 1<<ENC28J60_CONTROL_SI | 1<<ENC28J60_CONTROL_SCK; // mosi, sck output
-	ENC28J60_CONTROL_DDR|= 1<<ENC28J60_CONTROL_SO; // MISO is input
+	ENC28J60_CONTROL_DDR&=~(1<<ENC28J60_CONTROL_SO); // MISO is input
         //
-        ENC28J60_CONTROL_PORT|= 1<<ENC28J60_CONTROL_SI; // MOSI low
-        ENC28J60_CONTROL_PORT|= 1<<ENC28J60_CONTROL_SCK; // SCK low
+        ENC28J60_CONTROL_PORT&=~(1<<ENC28J60_CONTROL_SI); // MOSI low
+        ENC28J60_CONTROL_PORT&=~(1<<ENC28J60_CONTROL_SCK); // SCK low
 	//
 	// initialize SPI interface
 	// master mode and Fosc/2 clock:
@@ -263,20 +284,16 @@ uint8_t enc28j60getrev(void)
 	return(rev);
 }
 
-// A number of utility functions to enable/disable broadcast 
+// dhcp_client.c needs general broadcast
+#ifdef ENC28J60_BROADCAST
+// A number of utility functions to enable/disable general broadcast (not just arp)
 void enc28j60EnableBroadcast( void ) {
-        uint8_t erxfcon;
-        erxfcon=enc28j60Read(ERXFCON);
-        erxfcon |= ERXFCON_BCEN;
-        enc28j60Write(ERXFCON, erxfcon);
+        enc28j60Write(ERXFCON, (uint8_t)((enc28j60Read(ERXFCON) | ERXFCON_BCEN)));
 }
-
 void enc28j60DisableBroadcast( void ) {
-        uint8_t erxfcon;
-        erxfcon=enc28j60Read(ERXFCON);
-        erxfcon &= (0xff ^ ERXFCON_BCEN);
-        enc28j60Write(ERXFCON, erxfcon);
+        enc28j60Write(ERXFCON, enc28j60Read(ERXFCON) & (0xff ^ ERXFCON_BCEN));
 }
+#endif
 
 // link status
 uint8_t enc28j60linkup(void)

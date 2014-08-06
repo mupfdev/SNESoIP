@@ -14,6 +14,8 @@
 #ifndef DHCP_CLIENT_H
 #define DHCP_CLIENT_H 1
 
+// enc28j60EnableBroadcast/enc28j60DisableBroadcast is needed 
+
 // Lease time renewal and time keeping.
 // you must call this function every 6 seconds (approx 6 sec it can be exact but does not have
 // to be. If in doubt call it very 5 sec rather than every 7 seconds). It is save
@@ -43,8 +45,6 @@ extern uint16_t packetloop_dhcp_renewhandler(uint8_t *buf,uint16_t plen);
 #include <avr/io.h>
 #include <stdlib.h>
 #include <string.h>
-// http://www.nongnu.org/avr-libc/changes-1.8.html:
-#define __PROG_TYPES_COMPAT__
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include "dhcp_client.h"

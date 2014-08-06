@@ -13,8 +13,6 @@
 #ifndef IP_ARP_UDP_TCP_H
 #define IP_ARP_UDP_TCP_H 1
 #include "ip_config.h"
-// http://www.nongnu.org/avr-libc/changes-1.8.html:
-#define __PROG_TYPES_COMPAT__
 #include <avr/pgmspace.h>
 
 // set my own mac address:
@@ -43,7 +41,7 @@ extern uint8_t eth_type_is_ip_and_my_ip(uint8_t *buf,uint16_t len);
 // of the tcp data if there is tcp data part:
 extern uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen);
 // functions to fill the web pages with data:
-extern uint16_t fill_tcp_data_p(uint8_t *buf,uint16_t pos, const char *progmem_s);
+extern uint16_t fill_tcp_data_p(uint8_t *buf,uint16_t pos, const char *progmem_str_p);
 extern uint16_t fill_tcp_data(uint8_t *buf,uint16_t pos, const char *s);
 // fill a binary string of len data into the tcp packet:
 extern uint16_t fill_tcp_data_len(uint8_t *buf,uint16_t pos, const uint8_t *s, uint8_t len);
@@ -138,7 +136,7 @@ extern uint8_t client_tcp_req(uint8_t (*result_callback)(uint8_t fd,uint8_t stat
 // ----- http get
 // The string buffers to which urlbuf_varpart and hoststr are pointing
 // must not be changed until the callback is executed.
-extern void client_browse_url(const char *urlbuf, char *urlbuf_varpart, const char *hoststr,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac);
+extern void client_browse_url(const char *urlbuf_p, char *urlbuf_varpart, const char *hoststr,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac);
 // The callback is a reference to a function which must look like this:
 // void browserresult_callback(uint16_t webstatuscode,uint16_t datapos,uint16_t len)
 // webstatuscode is zero if there was no proper reply from the server (garbage message total communication failure, this is rare).
@@ -153,7 +151,7 @@ extern void client_browse_url(const char *urlbuf, char *urlbuf_varpart, const ch
 // postval is a string buffer which can only be de-allocated by the caller 
 // when the post operation was really done (e.g when callback was executed).
 // postval must be urlencoded.
-extern void client_http_post(const char *urlbuf, char *urlbuf_varpart,const char *hoststr, const char *additionalheaderline,char *postval,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac);
+extern void client_http_post(const char *urlbuf_p, char *urlbuf_varpart,const char *hoststr, const char *additionalheaderline_p,char *postval,void (*callback)(uint16_t,uint16_t,uint16_t),uint8_t *dstip,uint8_t *dstmac);
 // The callback is a reference to a function which must look like this:
 // void browserresult_callback(uint16_t webstatuscode,uint16_t datapos,uint16_t len)
 // webstatuscode is zero if there was no proper reply from the server (garbage message total communication failure, this is rare).
