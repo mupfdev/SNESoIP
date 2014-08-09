@@ -77,6 +77,10 @@
 #define LEDred         PC1
 
 
+// Used by uart.h
+#define UART_BAUD_RATE 115200
+
+
 static uint8_t mymac[6]    = { 0x00, 0x09, 0xbf, 0x02, 0x00, CID };
 
 // Will be provided by DHCP or DNS lookup.

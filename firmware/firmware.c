@@ -17,7 +17,13 @@ int main(void) {
 	snesIO   port0 = 0xffff, port1 = 0xffff;
 
 
+  // Initialise UART.
+  uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
+  sei();
+
+
 	// Initialise basic I/O.
+	uart_puts("Initialise basic I/O.\n\r");
 	initLed();
 	initInput();
 	initOutput();
@@ -26,6 +32,7 @@ int main(void) {
 	// Switched mode: B + Y.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {
+		uart_puts("Switched mode enabled.\n\r");
 		switchedMode = Enabled;
 		ledSignal(5);
 	}
@@ -33,6 +40,7 @@ int main(void) {
 
 
 	// Initialise network interface.
+	uart_puts("Initialise network interface.\n");
 	enc28j60Init(mymac);
 	_delay_ms(100);
 	// Magjack leds configuration, see enc28j60 datasheet, page 11
@@ -44,6 +52,7 @@ int main(void) {
 
 
 	// Get the initial IP via DHCP and configure network.
+	uart_puts("\rGet the initial IP via DHCP and configure network.\n\r");
 	init_mac(mymac);
 	while (i != 1) {
 		received = enc28j60PacketReceive(BufferSize, buffer);
@@ -55,6 +64,7 @@ int main(void) {
 
 
 	// Resolve MAC address from server IP.
+	uart_puts("Resolve MAC address from server IP.\n\r");
 	if (route_via_gw(serverip)) // Must be routed via gateway.
 		get_mac_with_arp(gwip, TransNumGwmac, &arpresolverResultCallback);
 	else                        // Server is on local network.
@@ -68,6 +78,7 @@ int main(void) {
 
 
 	// Lookup DNS of the server hostname.
+	uart_puts("Lookup DNS of the server hostname.\n\r");
 	while (dnslkup_haveanswer() != 1) {
 		uint16_t tmp;
 		received = enc28j60PacketReceive(BufferSize, buffer);
@@ -86,15 +97,13 @@ int main(void) {
 	dnslkup_get_ip(serverip);
 
 
-	ledOnGreen(); // Connected.
+	// Connected.
+	uart_puts("Connected.\n\r");
+	ledOnGreen();
 
 
 	while (1) { // Main loop start.
 		received = enc28j60PacketReceive(BufferSize, buffer);
-
-
-		// Software reset: L + R + Select + Start.
-		if (port0 == 0xf3f3) reset();
 
 
 		// Do something while no packet in queue.
@@ -186,11 +195,4 @@ int main(void) {
 void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
 	if (refnum == TransNumGwmac)
 		memcpy(gwmac, mac, 6);
-}
-
-
-void reset() {
-	wdt_disable();
-	wdt_enable(WDTO_1S);
-	while (1) {}
 }

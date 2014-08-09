@@ -13,7 +13,8 @@ PORT    = /dev/ttyUSB0
 F_CPU   = 16000000UL
 MCU     = atmega168
 OBJ     = firmware.o io.o \
-	net/dhcp_client.o net/dnslkup.o net/enc28j60.o net/ip_arp_udp_tcp.o
+	net/dhcp_client.o net/dnslkup.o net/enc28j60.o net/ip_arp_udp_tcp.o \
+	uart/uart.o
 PRG     = firmware
 
 
@@ -35,7 +36,7 @@ $(PRG).elf: $(OBJ)
 
 
 clean:
-	rm *.o net/*.o *.elf *.hex
+	rm *.o net/*.o uart/*.o *.elf *.hex
 
 flash: $(PRG).hex
 	fboot -d $(PORT) -b 115200 -v -p $(PRG).hex
