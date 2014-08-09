@@ -23,7 +23,7 @@ int main(void) {
 
 
 	// Initialise basic I/O.
-	uart_puts("Initialise basic I/O.\n\r");
+	uart_puts("Initialise basic I/O.\r\n");
 	initLed();
 	initInput();
 	initOutput();
@@ -32,7 +32,7 @@ int main(void) {
 	// Switched mode: B + Y.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {
-		uart_puts("Switched mode enabled.\n\r");
+		uart_puts("Switched mode enabled.\r\n");
 		switchedMode = Enabled;
 		ledSignal(5);
 	}
@@ -52,7 +52,7 @@ int main(void) {
 
 
 	// Get the initial IP via DHCP and configure network.
-	uart_puts("\rGet the initial IP via DHCP and configure network.\n\r");
+	uart_puts("\rGet the initial IP via DHCP and configure network.\r\n");
 	init_mac(mymac);
 	while (i != 1) {
 		received = enc28j60PacketReceive(BufferSize, buffer);
@@ -64,7 +64,7 @@ int main(void) {
 
 
 	// Resolve MAC address from server IP.
-	uart_puts("Resolve MAC address from server IP.\n\r");
+	uart_puts("Resolve MAC address from server IP.\r\n");
 	if (route_via_gw(serverip)) // Must be routed via gateway.
 		get_mac_with_arp(gwip, TransNumGwmac, &arpresolverResultCallback);
 	else                        // Server is on local network.
@@ -78,7 +78,7 @@ int main(void) {
 
 
 	// Lookup DNS of the server hostname.
-	uart_puts("Lookup DNS of the server hostname.\n\r");
+	uart_puts("Lookup DNS of the server hostname.\r\n");
 	while (dnslkup_haveanswer() != 1) {
 		uint16_t tmp;
 		received = enc28j60PacketReceive(BufferSize, buffer);
@@ -98,7 +98,7 @@ int main(void) {
 
 
 	// Connected.
-	uart_puts("Connected.\n\r");
+	uart_puts("Connected.\r\n");
 	ledOnGreen();
 
 
@@ -140,11 +140,11 @@ int main(void) {
 		}
 
 
-		// Answer to ARP requests.
+		/* Answer to ARP requests.
 		if (eth_type_is_arp_and_my_ip(buffer, received)) {
 			make_arp_answer_from_request(buffer, received);
 			continue;
-		}
+		} */
 
 
 		// Check if IP packets (ICMP or UDP) are for us.
@@ -157,6 +157,7 @@ int main(void) {
 			buffer[IP_PROTO_P]  == IP_PROTO_ICMP_V &&
 			buffer[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V) {
 
+			uart_puts("Pong\r\n");
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}
