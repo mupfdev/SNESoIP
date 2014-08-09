@@ -1,5 +1,5 @@
 # -*-makefile-*-
-.PHONY: all clean flash fuses program
+.PHONY: all clean flash
 
 
 # Basic configuration.
