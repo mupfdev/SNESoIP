@@ -16,7 +16,7 @@
 #include "ip_config.h"
 #include "enc28j60.h"
 //
-#ifndef
+#ifndef F_CPU
 #define F_CPU 12500000UL  // 12.5 MHz
 #endif
 #ifndef ALIBC_OLD
