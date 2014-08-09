@@ -20,6 +20,7 @@ int main(void) {
   // Initialise UART.
   uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
   sei();
+	uart_puts("\r\nWelcome to the SNESoIP debugging interface.\r\n\n");
 
 
 	// Initialise basic I/O.
@@ -52,7 +53,7 @@ int main(void) {
 
 
 	// Get the initial IP via DHCP and configure network.
-	uart_puts("\rGet the initial IP via DHCP and configure network.\r\n");
+	uart_puts("\rGet the initial IP via DHCP and configure network: ");
 	init_mac(mymac);
 	while (i != 1) {
 		received = enc28j60PacketReceive(BufferSize, buffer);
@@ -60,6 +61,13 @@ int main(void) {
 		i = packetloop_dhcp_initial_ip_assignment(buffer, received, mymac[5]);
 	}
 	dhcp_get_my_ip(myip, netmask, gwip);
+
+	uart_puts((char *)itoa(myip[0], buffer, 10)); uart_putc('.');
+	uart_puts((char *)itoa(myip[1], buffer, 10)); uart_putc('.');
+	uart_puts((char *)itoa(myip[2], buffer, 10)); uart_putc('.');
+	uart_puts((char *)itoa(myip[3], buffer, 10));
+	uart_puts("\r\n");
+
 	client_ifconfig(myip, netmask);
 
 
@@ -140,6 +148,7 @@ int main(void) {
 		}
 
 
+		// This fixes a bug of yet unknown reason on hardware revision 2.
 		/* Answer to ARP requests.
 		if (eth_type_is_arp_and_my_ip(buffer, received)) {
 			make_arp_answer_from_request(buffer, received);
@@ -157,7 +166,7 @@ int main(void) {
 			buffer[IP_PROTO_P]  == IP_PROTO_ICMP_V &&
 			buffer[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V) {
 
-			uart_puts("Pong\r\n");
+			uart_puts("Pong.\r\n");
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}

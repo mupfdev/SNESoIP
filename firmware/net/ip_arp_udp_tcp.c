@@ -27,9 +27,9 @@
 #include "ip_config.h"
 
 // I use them to debug stuff:
-#define LEDOFF PORTB|=(1<<PORTB1)
-#define LEDON PORTB&=~(1<<PORTB1)
-#define LEDISOFF PORTB&(1<<PORTB1)
+//#define LEDOFF PORTB|=(1<<PORTB1)
+//#define LEDON PORTB&=~(1<<PORTB1)
+//#define LEDISOFF PORTB&(1<<PORTB1)
 //
 static uint8_t macaddr[6];
 static uint8_t ipaddr[4]={0,0,0,0};
