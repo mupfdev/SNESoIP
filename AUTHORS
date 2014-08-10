@@ -4,8 +4,14 @@ The following contributions warranted legal paper exchanges
 with Michael Fitzmayer:
 
 
-Jan Schmitz  <pw_returner@web.de>
-  Code review and improvements.
+Daniel Baumann  <sciurus@blastprocessing.de>
+  He wrote the entire web interface which can be found in 'server/web'.
+
+
+Daniel Otte  <daniel.otte@rub.de>
+  The author of the AVR-Crypto-Lib.
+  For license information, see:
+  http://www.gnu.org/licenses
 
 
 Guido Socher  <guidosocher@fastmail.fm>
@@ -14,7 +20,15 @@ Guido Socher  <guidosocher@fastmail.fm>
   http://www.opensource.org/licenses/mit-license.html
 
 
+Jan Schmitz  <pw_returner@web.de>
+  Code review and improvements.
+
+
 Peter Fleury  <pfleury@gmx.ch>
   The author of the UART library.
   For license information see:
-  http://opensource.org/licenses/GPL-2.0
+  http://www.gnu.org/licenses
+
+
+saturnu  <root@anpa.nl>
+  Server programming.

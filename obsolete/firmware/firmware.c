@@ -30,6 +30,16 @@ int main(void) {
 	initOutput();
 
 
+	// Switched mode: B + Y.
+	port0 = recvInput();
+	if (port0 == 0xfffc) {
+		uart_puts("Switched mode enabled.\r\n");
+		switchedMode = Enabled;
+		ledSignal(5);
+	}
+	ledOnRed();
+
+
 	// Initialise network interface.
 	uart_puts("Initialise network interface.\n");
 	enc28j60Init(mymac);
@@ -127,11 +137,23 @@ int main(void) {
 
 			send_udp(buffer, message, sizeof(message), 57351, serverip, 57350, gwmac);
 
+
 			// Send controller data to SNES.
+			if (switchedMode == Disabled)
 				sendOutput(port0, port1);
+			else
+				sendOutput(port1, port0);
 
 			continue;
 		}
+
+
+		// This fixes a bug of yet unknown reason on hardware revision 2.
+		/* Answer to ARP requests.
+		if (eth_type_is_arp_and_my_ip(buffer, received)) {
+			make_arp_answer_from_request(buffer, received);
+			continue;
+		} */
 
 
 		// Check if IP packets (ICMP or UDP) are for us.

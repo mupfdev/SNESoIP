@@ -14,13 +14,12 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <string.h>
-#include "libs/uart.h"
-#include "libs/trivium.h"
-#include "libs/net/dhcp_client.h"
-#include "libs/net/dnslkup.h"
-#include "libs/net/enc28j60.h"
-#include "libs/net/ip_arp_udp_tcp.h"
-#include "libs/net/net.h"
+#include "net/dhcp_client.h"
+#include "net/dnslkup.h"
+#include "net/enc28j60.h"
+#include "net/ip_arp_udp_tcp.h"
+#include "net/net.h"
+#include "uart/uart.h"
 #include "config.h"
 #include "io.h"
 

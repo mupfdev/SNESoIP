@@ -39,6 +39,10 @@
 typedef uint16_t snesIO;
 
 
+static uint8_t configMode   = Disabled;
+static uint8_t switchedMode = Disabled;
+
+
 void     initInput();
 void     initOutput();
 
