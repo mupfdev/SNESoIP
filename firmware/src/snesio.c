@@ -1,12 +1,12 @@
-/* io.c -*-c-*-
- * I/O handler.
- * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
+/* snesio.c -*-c-*-
+ * SNES I/O handler.
+ * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
  * license.  See the file LICENSE for details. */
 
 
-#include "io.h"
+#include "snesio.h"
 
 
 void initInput() {
@@ -47,7 +47,6 @@ void initOutput() {
 
 
 snesIO recvInput() {
-	int i;
 	snesIO input = 0;
 
 	// Initialise transmission.
@@ -56,7 +55,7 @@ snesIO recvInput() {
 	InputLatchPORT &= ~(1 << InputLatch);
 
 
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		_delay_us(6);
 		InputClockPORT &= ~(1 << InputClock);
 
@@ -72,8 +71,6 @@ snesIO recvInput() {
 
 
 void sendOutput(snesIO port0, snesIO port1) {
-	int i;
-
 	// Initialise transmission.
 	Port0LatchPORT |= (1 << Port0Latch);
 	Port1LatchPORT |= (1 << Port1Latch);
@@ -82,7 +79,7 @@ void sendOutput(snesIO port0, snesIO port1) {
 	Port1LatchPORT &= ~(1 << Port1Latch);
 
 
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		loop_until_bit_is_clear(Port0ClockPIN, Port0Clock);
 		loop_until_bit_is_clear(Port1ClockPIN, Port1Clock);
 
@@ -99,57 +96,4 @@ void sendOutput(snesIO port0, snesIO port1) {
 		loop_until_bit_is_set(Port0ClockPIN, Port0Clock);
 		loop_until_bit_is_set(Port1ClockPIN, Port1Clock);
 	}
-}
-
-
-void initLed() {
-	LEDgreenDDR |= (1 << LEDgreen);
-	LEDredDDR   |= (1 << LEDred);
-}
-
-
-void ledOff() {
-	LEDgreenPORT &= ~(1 << LEDgreen);
-	LEDredPORT   &= ~(1 << LEDred);
-}
-
-
-void ledOnGreen() {
-	LEDredPORT   &= ~(1 << LEDred);
-	LEDgreenPORT |=  (1 << LEDgreen);
-}
-
-
-void ledOnRed() {
-	LEDgreenPORT &= ~(1 << LEDgreen);
-	LEDredPORT   |=  (1 << LEDred);
-}
-
-
-void ledToggleGreen() {
-	LEDredPORT   &= ~(1 << LEDred);
-	LEDgreenPORT ^= (1 << LEDgreen);
-}
-
-
-void ledToggleRed() {
-	LEDgreenPORT   &= ~(1 << LEDgreen);
-	LEDredPORT   ^= (1 << LEDred);
-}
-
-
-void ledSignal(uint8_t times) {
-	ledOff();
-
-	while (times > 0) {
-		ledToggleGreen();
-		_delay_ms(100);
-		ledToggleGreen();
-		ledToggleRed();
-		_delay_ms(100);
-		ledToggleRed();
-		times--;
-	}
-
-	ledOff();
 }

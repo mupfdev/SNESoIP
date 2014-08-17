@@ -1,31 +1,21 @@
-/* config.h -*-c-*-
- * SNESoIP configuration.
- * Copyright (c) 2013 Michael Fitzmayer.  All rights reserved.
+/* snesio.h -*-c-*-
+ * SNES I/O handler.
+ * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
  * license.  See the file LICENSE for details. */
 
 
-#ifndef CONFIG_h
-#define CONFIG_h
+#ifndef IO_h
+#define IO_h
+
+#include <avr/io.h>
+#include <util/delay.h>
 
 
-#ifndef CID
-#define CID            0x00
-#endif
-
-#ifndef P2CID
-#define P2CID          0x00
-#endif
-
-#ifndef ServerVHost
-#define ServerVHost    "snesoip.de"
-#endif
-
-#define BufferSize     500  // Do NOT change this value.
+#define INIT_IO() initInput(); initOutput()
 
 
-// Used by io.c
 #define InputClockDDR  DDRD
 #define InputClockPORT PORTD
 #define InputClock     PD5
@@ -68,27 +58,14 @@
 #define Port1Data      PD2
 
 
-#define LEDgreenDDR    DDRC
-#define LEDgreenPORT   PORTC
-#define LEDgreen       PC0
-
-#define LEDredDDR      DDRC
-#define LEDredPORT     PORTC
-#define LEDred         PC1
+typedef uint16_t snesIO;
 
 
-// Used by uart.h
-#define UART_BAUD_RATE 115200
+void     initInput(void);
+void     initOutput(void);
 
-
-static uint8_t mymac[6]    = { 0x00, 0x09, 0xbf, 0x02, 0x00, CID };
-
-// Will be provided by DHCP or DNS lookup.
-static uint8_t gwmac[6];
-static uint8_t myip[4];
-static uint8_t gwip[4];
-static uint8_t serverip[4];
-static uint8_t netmask[4];
+snesIO   recvInput(void);
+void     sendOutput(snesIO port0, snesIO port1);
 
 
 #endif
