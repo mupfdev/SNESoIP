@@ -20,21 +20,27 @@
 #include "net/net.h"
 
 
+#define PING buffer[IP_PROTO_P] == IP_PROTO_ICMP_V && buffer[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V
+
+
 #define BUFFER_SIZE     500 // Do NOT change this value.
 #define TRANS_NUM_GWMAC   1
 
 
 void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
 uint8_t *dnsLookup(uint8_t *buffer, char *host);
-void     initNetwork();
+void     initNetwork(uint8_t *mymac);
 uint8_t *resolveMAC(uint8_t *buffer);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
 // To avoid compiler warning about implicit declaration of function:
-void     make_echo_reply_from_request(uint8_t *buf, uint16_t len);
+uint8_t eth_type_is_arp_and_my_ip(uint8_t *buf, uint16_t len);
+void    make_arp_answer_from_request(uint8_t *buf);
+void    make_echo_reply_from_request(uint8_t *buf, uint16_t len);
 
 
+static uint8_t dns[4];
 static uint8_t myip[4];
-static uint8_t mymac[6] = { 0x00, 0x09, 0xbf, 0x02, 0x00, 0x00 };
+static uint8_t mymac[6];
 static uint8_t gwip[4];
 static uint8_t gwmac[6];
 static uint8_t serverip[4];

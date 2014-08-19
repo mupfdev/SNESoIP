@@ -39,7 +39,7 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 }
 
 
-void initNetwork() {
+void initNetwork(uint8_t *mymac) {
 	enc28j60Init(mymac);
 	_delay_ms(100);
 	// Magjack leds configuration, see enc28j60 datasheet, page 11

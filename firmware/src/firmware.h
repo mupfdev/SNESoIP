@@ -10,6 +10,7 @@
 #define FIRMWARE_h
 
 
+#include "config.h"
 #include "debug.h"
 #include "duoled.h"
 #include "network.h"

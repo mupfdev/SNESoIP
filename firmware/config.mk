@@ -9,7 +9,8 @@ PORT    = /dev/ttyUSB0
 # Nothing below this line need to be changed.
 F_CPU   = 16000000UL
 MCU     = atmega168
-OBJ     = src/debug.o \
+OBJ     = src/config.o \
+					src/debug.o \
 					src/duoled.o \
 					src/firmware.o \
 					src/network.o \

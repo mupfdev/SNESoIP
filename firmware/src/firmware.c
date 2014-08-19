@@ -25,9 +25,15 @@ int main(void) {
 	INIT_IO();
 
 
+  // Read and validate device configuration.
+  getConfigParam(mymac, MYMAC, MYMAC_LEN);
+
+
 	// Initialise network interface.
-	uart_puts("Initialise network interface.\n");
-	initNetwork();
+	uart_puts("Initialise network interface: ");
+	initNetwork(mymac);
+	printArray(mymac, 6, 16, ':');
+	uart_puts("\r\n");
 
 
 	// Get the initial IP via DHCP and configure network.
@@ -67,21 +73,25 @@ int main(void) {
 			continue;
 		}
 
+
+		// Answer to ARP requests.
+		if (eth_type_is_arp_and_my_ip(buffer, received)) {
+			make_arp_answer_from_request(buffer);
+			continue;
+		}
+
+
 		// Check if IP packets (ICMP or UDP) are for us.
 		if (eth_type_is_ip_and_my_ip(buffer, received) == 0)
 			continue;
 
 
 		// Answer ping with pong.
-		if (
-			buffer[IP_PROTO_P]  == IP_PROTO_ICMP_V &&
-			buffer[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V) {
-
+		if (PING) {
 			uart_puts("Pong.\r\n");
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}
-
 	}
 
 
