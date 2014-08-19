@@ -25,8 +25,8 @@ int main(void) {
 	INIT_IO();
 
 
-  // Read and validate device configuration.
-  getConfigParam(mymac, MYMAC, MYMAC_LEN);
+	// Read and validate device configuration.
+	getConfigParam(mymac, MYMAC, MYMAC_LEN);
 
 
 	// Initialise network interface.

@@ -19,6 +19,7 @@ $(PRG).elf: $(OBJ)
 %.o: %.c
 	avr-gcc $< -Os \
 	-std=c99 \
+	-Werror \
 	-DUART_BAUD_RATE=$(BAUD) \
 	-DF_CPU=$(F_CPU) \
 	-g -mmcu=$(MCU) -c -o $@
