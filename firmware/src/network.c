@@ -81,12 +81,13 @@ uint8_t *resolveMAC(uint8_t *buffer) {
 
 
 uint8_t *setIPviaDHCP(uint8_t *buffer) {
-	int8_t   i;
+	int8_t   i = 0;
 	uint16_t received;
 
 	while (i != 1) {
 		received = enc28j60PacketReceive(BUFFER_SIZE, buffer);
-		buffer[BUFFER_SIZE] = '\0';
+		//buffer[BUFFER_SIZE] = '\0';
+		memset(buffer,0,BUFFER_SIZE);
 		i = packetloop_dhcp_initial_ip_assignment(buffer, received, mymac[5]);
 	}
 	dhcp_get_my_ip(myip, netmask, gwip);

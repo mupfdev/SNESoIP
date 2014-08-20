@@ -14,13 +14,20 @@ void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 }
 
 
-int8_t ipIsValid(uint8_t *ip) {
+uint8_t initConfigMode() {
+
 
 	return 0;
 }
 
 
-int8_t macIsValid(uint8_t *mac) {
+bool ipIsValid(uint8_t *ip) {
 
-	return 0;
+	return true;
+}
+
+
+bool macIsValid(uint8_t *mac) {
+
+	return true;
 }

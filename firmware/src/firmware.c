@@ -25,10 +25,19 @@ int main(void) {
 	INIT_IO();
 
 
+	// Read EEPROM flags.
+
+
 	// Initialise network interface.
 	uart_puts("Initialise network interface: ");
+
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
+	if (macIsValid(buffer) == false) {
+		uart_puts("MAC not set or invalid.\r\n");
+		initConfigMode();
+	}
 	initNetwork(buffer);
+
 	printArray(buffer, 6, 16, ':');
 	uart_puts("\r\n");
 
