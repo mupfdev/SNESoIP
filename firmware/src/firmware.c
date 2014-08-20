@@ -10,7 +10,7 @@
 
 
 int main(void) {
-	uint8_t  buffer[BUFFER_SIZE + 1];
+	uint8_t buffer[BUFFER_SIZE + 1];
 
 
 	// Initialise UART.
@@ -25,14 +25,11 @@ int main(void) {
 	INIT_IO();
 
 
-	// Read and validate device configuration.
-	getConfigParam(mymac, MYMAC, MYMAC_LEN);
-
-
 	// Initialise network interface.
 	uart_puts("Initialise network interface: ");
-	initNetwork(mymac);
-	printArray(mymac, 6, 16, ':');
+	getConfigParam(buffer, MYMAC, MYMAC_LEN);
+	initNetwork(buffer);
+	printArray(buffer, 6, 16, ':');
 	uart_puts("\r\n");
 
 
@@ -76,6 +73,7 @@ int main(void) {
 
 		// Answer to ARP requests.
 		if (eth_type_is_arp_and_my_ip(buffer, received)) {
+			//uart_puts("ARP request.\r\n");
 			make_arp_answer_from_request(buffer);
 			continue;
 		}

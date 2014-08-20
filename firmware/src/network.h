@@ -1,5 +1,5 @@
 /* network.h -*-c-*-
- * 
+ * Network handler.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
@@ -29,22 +29,13 @@
 
 void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
 uint8_t *dnsLookup(uint8_t *buffer, char *host);
-void     initNetwork(uint8_t *mymac);
+void     initNetwork(uint8_t *mac);
 uint8_t *resolveMAC(uint8_t *buffer);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
 // To avoid compiler warning about implicit declaration of function:
 uint8_t eth_type_is_arp_and_my_ip(uint8_t *buf, uint16_t len);
 void    make_arp_answer_from_request(uint8_t *buf);
 void    make_echo_reply_from_request(uint8_t *buf, uint16_t len);
-
-
-static uint8_t dns[4];
-static uint8_t myip[4];
-static uint8_t mymac[6];
-static uint8_t gwip[4];
-static uint8_t gwmac[6];
-static uint8_t serverip[4];
-static uint8_t netmask[4];
 
 
 #endif

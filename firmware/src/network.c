@@ -1,5 +1,5 @@
 /* network.c -*-c-*-
- * 
+ * Network handler.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
@@ -7,6 +7,14 @@
 
 
 #include "network.h"
+
+
+static uint8_t myip[4];
+static uint8_t mymac[6];
+static uint8_t gwip[4];
+static uint8_t gwmac[6];
+static uint8_t serverip[4];
+static uint8_t netmask[4];
 
 
 void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
@@ -39,7 +47,9 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 }
 
 
-void initNetwork(uint8_t *mymac) {
+void initNetwork(uint8_t *mac) {
+	memcpy(mymac, mac, 6);
+
 	enc28j60Init(mymac);
 	_delay_ms(100);
 	// Magjack leds configuration, see enc28j60 datasheet, page 11
