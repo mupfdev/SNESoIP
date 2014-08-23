@@ -11,6 +11,7 @@
 
 int main(void) {
 	uint8_t buffer[BUFFER_SIZE + 1];
+	memset(buffer, 0, BUFFER_SIZE);
 
 
 	// Initialise UART.
@@ -32,10 +33,12 @@ int main(void) {
 	uart_puts("Initialise network interface: ");
 
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
-	if (macIsValid(buffer) == false) {
+	/*
+	if (macIsValid(buffer) == 0) {
 		uart_puts("MAC not set or invalid.\r\n");
-		initConfigMode();
+		halt();
 	}
+	*/
 	initNetwork(buffer);
 
 	printArray(buffer, 6, 16, ':');

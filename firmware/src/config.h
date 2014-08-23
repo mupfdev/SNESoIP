@@ -10,8 +10,6 @@
 #define CONFIG_h
 
 #include <avr/eeprom.h>
-#include <stdbool.h>
-#include "uart.h"
 
 
 #define FLAGS            0x00
@@ -44,9 +42,10 @@
 
 
 void    getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-uint8_t initConfigMode();
-bool    ipIsValid(uint8_t *ip);
-bool    macIsValid(uint8_t *mac);
+void    halt();
+uint8_t ipIsValid(uint8_t *ip);
+uint8_t macIsValid(uint8_t *mac);
+
 
 
 #endif

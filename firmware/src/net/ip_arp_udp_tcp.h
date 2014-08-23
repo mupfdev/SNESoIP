@@ -179,7 +179,7 @@ extern uint8_t client_ntp_process_answer(uint8_t *buf,uint32_t *time,uint8_t dst
 extern void send_udp_prepare(uint8_t *buf,uint16_t sport, const uint8_t *dip, uint16_t dport,const uint8_t *dstmac);
 extern void send_udp_transmit(uint8_t *buf,uint16_t datalen);
 
-// send_udp sends via gwip, you must call client_set_gwip at startup, datalen must be less than 220 bytes
+// send_udp sends via a given gateway. The dstmac is the MAC of the gateway (note this replaces the client_set_gwip() function of previous versions)
 extern void send_udp(uint8_t *buf,char *data,uint8_t datalen,uint16_t sport, const uint8_t *dip, uint16_t dport,const uint8_t *dstmac);
 #endif
 

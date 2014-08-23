@@ -86,8 +86,7 @@ uint8_t *setIPviaDHCP(uint8_t *buffer) {
 
 	while (i != 1) {
 		received = enc28j60PacketReceive(BUFFER_SIZE, buffer);
-		//buffer[BUFFER_SIZE] = '\0';
-		memset(buffer,0,BUFFER_SIZE);
+		buffer[BUFFER_SIZE] = '\0';
 		i = packetloop_dhcp_initial_ip_assignment(buffer, received, mymac[5]);
 	}
 	dhcp_get_my_ip(myip, netmask, gwip);
