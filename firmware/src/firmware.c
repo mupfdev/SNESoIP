@@ -10,11 +10,10 @@
 
 
 int main(void) {
-	uint8_t buffer[BUFFER_SIZE + 1];
-	memset(buffer, 0, BUFFER_SIZE);
+	INIT_BUFFER;
 
 
-	// Initialise.
+	// Initialise basic I/O.
 	initLed();
 	ledOnRed();
 
@@ -25,11 +24,9 @@ int main(void) {
 	INIT_IO();
 
 
-
 	// Pre-configure device (for testing purposes only).
 	uint8_t testmac[6] = { 0x00, 0x09, 0xBF, 0x02, 0x00, 0x00 };
 	setConfigParam(testmac, MYMAC, MYMAC_LEN);
-
 
 
 	// Initialise network interface.
@@ -56,6 +53,7 @@ int main(void) {
 	uartPuts("Perform DNS lookup of server hostname: ");
 	uartPrintArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
 	uartPuts("\r\n");
+
 
 	// Connected.
 	uartPuts("Connected.\r\n");
@@ -87,7 +85,6 @@ int main(void) {
 		// Check if IP packets (ICMP or UDP) are for us.
 		if (eth_type_is_ip_and_my_ip(buffer, received) == 0)
 			continue;
-
 
 		// Answer ping with pong.
 		if (PING) {

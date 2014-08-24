@@ -20,6 +20,7 @@
 #include "net/net.h"
 
 
+#define INIT_BUFFER uint8_t buffer[BUFFER_SIZE + 1]; memset(buffer, 0, BUFFER_SIZE)
 #define PING buffer[IP_PROTO_P] == IP_PROTO_ICMP_V && buffer[ICMP_TYPE_P] == ICMP_TYPE_ECHOREQUEST_V
 
 

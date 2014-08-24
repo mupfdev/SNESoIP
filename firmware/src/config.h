@@ -41,8 +41,8 @@
 #define SERVERHOST_LEN   0x80
 
 
-void    getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-void    setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 
 
 #endif

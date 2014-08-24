@@ -19,6 +19,15 @@ void initUART(void) {
 }
 
 
+uint8_t uartGetc(void) {
+	uint8_t c = 0;
+
+	// TODO.
+
+	return c;
+}
+
+
 void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter) {
 	char tmp[7];
 
