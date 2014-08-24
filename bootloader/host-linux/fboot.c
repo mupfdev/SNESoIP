@@ -91,6 +91,9 @@ static double   ticks = 1;
 // Filename of the HEX File
 static const char * hexfile = NULL;
 
+// Hide percent bar flag
+static unsigned char hide_progress_bar = 0;
+
 
 typedef struct bootInfo
 {
@@ -497,9 +500,9 @@ long readval(int fd)
 /**
  * Print percentage line
  */
-void print_perc_bar (char          *text,
-                     unsigned long full_val,
-                     unsigned long cur_val)
+void hide_perc_bar(char         *text,
+                   unsigned long full_val,
+                   unsigned long cur_val)
 {
     int         i;
     int         cur_perc;
@@ -565,7 +568,7 @@ int verifyflash (int           fd,
     do
     {
         if ((addr % 16) == 0)
-            print_perc_bar ("Verifying", lastaddr, addr);
+					if (hide_progress_bar != 1) hide_perc_bar("Verifying", lastaddr, addr);
 
         d1 = data[addr];
 
@@ -582,7 +585,7 @@ int verifyflash (int           fd,
     } while (addr++ < lastaddr);
 
 
-    print_perc_bar ("Verifying", 100, 100);
+    if (hide_progress_bar != 1) hide_perc_bar("Verifying", 100, 100);
 
     end_time = times (&timestruct);
     seconds  = (float)(end_time-start_time)/sysconf(_SC_CLK_TCK);
@@ -639,7 +642,7 @@ int programflash (int           fd,
     do
     {
         if ((addr % 16) == 0)
-            print_perc_bar ("Writing", lastaddr, addr);
+            if (hide_progress_bar != 1) hide_perc_bar("Writing", lastaddr, addr);
 
         d1 = data[addr];
 
@@ -673,7 +676,7 @@ int programflash (int           fd,
         }
     } while (addr++ < lastaddr);
 
-    print_perc_bar ("Writing", 100, 100);
+    if (hide_progress_bar != 1) hide_perc_bar("Writing", 100, 100);
 
     end_time = times (&timestruct);
     seconds  = (float)(end_time-start_time)/sysconf(_SC_CLK_TCK);
@@ -719,6 +722,7 @@ void usage(char *name)
            "-p              Program\n"
            "-e              Erase, use together with -p to erase controller,\n"
            "                with -v to check if it is erased\n"
+           "-H              hide progress bar\n"
            "-P pwd          Password\n"
            "-T              enter terminal mode\n"
            "Author: Bernhard Michler (based on code from Andreas Butti)\n", name);
@@ -1425,6 +1429,10 @@ int main(int argc, char *argv[])
             i++;
             if (i < argc)
                 baud = atoi(argv[i]);
+        }
+        else if (strcmp (argv[i], "-H") == 0)
+        {
+					hide_progress_bar = 1;
         }
         else if (strcmp (argv[i], "-v") == 0)
         {
