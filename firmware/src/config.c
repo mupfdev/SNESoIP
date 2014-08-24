@@ -14,18 +14,6 @@ void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 }
 
 
-void halt() {
-	while (1) { }
-}
-
-
-uint8_t ipIsValid(uint8_t *ip) {
-
-	return 1;
-}
-
-
-uint8_t macIsValid(uint8_t *mac) {
-
-	return 1;
+void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
+	eeprom_update_block(param, offset, length);
 }

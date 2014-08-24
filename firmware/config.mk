@@ -3,7 +3,7 @@
 
 # Basic configuration.
 BAUD    = 57600UL
-PORT    = /dev/ttyUSB1
+PORT    = /dev/ttyUSB0
 
 
 # Nothing below this line need to be changed.

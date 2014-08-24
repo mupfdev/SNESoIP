@@ -10,8 +10,8 @@
 
 
 void initUART(void) {
-	UBRR0H  = (BAUDRATE >> 8);
-	UBRR0L  = BAUDRATE;
+	UBRR0H  = (UBRR_VAL >> 8);
+	UBRR0L  =  UBRR_VAL;
 
 	UCSR0B |= (1 << RXEN0);
 	UCSR0B |= (1 << TXEN0);
@@ -19,10 +19,13 @@ void initUART(void) {
 }
 
 
-void uartPrintArray(uint8_t array[], int size, int base, char delimiter) {
+void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter) {
 	char tmp[7];
 
 	for (int i = 0; i < size; i++) {
+		if ( (array[i] <= 0x0F) && (base == 16) )
+			uartPutc('0');
+
 		uartPuts((char *)itoa(array[i], tmp, base));
 		if (i < size - 1) uartPutc(delimiter);
 	}

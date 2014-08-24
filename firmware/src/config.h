@@ -42,10 +42,7 @@
 
 
 void    getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-void    halt();
-uint8_t ipIsValid(uint8_t *ip);
-uint8_t macIsValid(uint8_t *mac);
-
+void    setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 
 
 #endif

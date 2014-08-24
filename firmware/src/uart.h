@@ -16,7 +16,7 @@
 #ifndef F_CPU
 #define F_CPU    16000000UL
 #endif
-#define BAUDRATE ((F_CPU) / (BAUD * 16UL) - 1)
+#define UBRR_VAL ((F_CPU) / (BAUD * 16UL) - 1)
 
 
 #include <stdlib.h>
@@ -25,7 +25,7 @@
 
 
 void initUART(void);
-void uartPrintArray(uint8_t array[], int size, int base, char delimiter);
+void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter);
 void uartPutc(uint8_t c);
 void uartPuts(uint8_t *s);
 

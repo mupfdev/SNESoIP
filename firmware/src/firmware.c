@@ -14,31 +14,27 @@ int main(void) {
 	memset(buffer, 0, BUFFER_SIZE);
 
 
+	// Initialise.
 	initLed();
 	ledOnRed();
 
-
-	// Initialise UART.
 	initUART();
 	uartPuts("\r\nWelcome to the SNESoIP debugging interface.\r\n\n");
 
-
-	// Initialise basic I/O.
 	uartPuts("Initialise basic I/O.\r\n");
 	INIT_IO();
 
 
-	// Read EEPROM flags.
+
+	// Pre-configure device (for testing purposes only).
+	uint8_t testmac[6] = { 0x00, 0x09, 0xBF, 0x02, 0x00, 0x00 };
+	setConfigParam(testmac, MYMAC, MYMAC_LEN);
+
 
 
 	// Initialise network interface.
 	uartPuts("Initialise network interface: ");
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
-	if (macIsValid(buffer) == 0) {
-
-		uartPuts("MAC not set or invalid.\r\n");
-		halt();
-	}
 	initNetwork(buffer);
 	uartPrintArray(buffer, 6, 16, ':');
 	uartPuts("\r\n");
@@ -83,7 +79,6 @@ int main(void) {
 
 		// Answer to ARP requests.
 		if (eth_type_is_arp_and_my_ip(buffer, received)) {
-			uartPuts("ARP request.\r\n");
 			make_arp_answer_from_request(buffer);
 			continue;
 		}
@@ -96,7 +91,7 @@ int main(void) {
 
 		// Answer ping with pong.
 		if (PING) {
-			uartPuts("Pong.\r\n");
+			uartPuts("Pong\r\n");
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}
