@@ -14,15 +14,17 @@ int main(void) {
 	memset(buffer, 0, BUFFER_SIZE);
 
 
+	initLed();
+	ledOnRed();
+
+
 	// Initialise UART.
-	DEBUG_INIT();
-	uart_puts("\r\nWelcome to the SNESoIP debugging interface.\r\n\n");
+	initUART();
+	uartPuts("\r\nWelcome to the SNESoIP debugging interface.\r\n\n");
 
 
 	// Initialise basic I/O.
-	uart_puts("Initialise basic I/O.\r\n");
-	initLed();
-	ledOnRed();
+	uartPuts("Initialise basic I/O.\r\n");
 	INIT_IO();
 
 
@@ -30,41 +32,37 @@ int main(void) {
 
 
 	// Initialise network interface.
-	uart_puts("Initialise network interface: ");
-
+	uartPuts("Initialise network interface: ");
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
-	/*
 	if (macIsValid(buffer) == 0) {
-		uart_puts("MAC not set or invalid.\r\n");
+
+		uartPuts("MAC not set or invalid.\r\n");
 		halt();
 	}
-	*/
 	initNetwork(buffer);
-
-	printArray(buffer, 6, 16, ':');
-	uart_puts("\r\n");
+	uartPrintArray(buffer, 6, 16, ':');
+	uartPuts("\r\n");
 
 
 	// Get the initial IP via DHCP and configure network.
-	uart_puts("\rGet the initial IP via DHCP and configure network: ");
-	printArray(setIPviaDHCP(buffer), 4, 10, '.');
-	uart_puts("\r\n");
+	uartPuts("\rGet the initial IP via DHCP and configure network: ");
+	uartPrintArray(setIPviaDHCP(buffer), 4, 10, '.');
+	uartPuts("\r\n");
 
 
 	// Resolve MAC address from server or gateway.
-	uart_puts("Resolve MAC address from server or gateway: ");
-	printArray(resolveMAC(buffer), 6, 16, ':');
-	uart_puts("\r\n");
+	uartPuts("Resolve MAC address from server or gateway: ");
+	uartPrintArray(resolveMAC(buffer), 6, 16, ':');
+	uartPuts("\r\n");
 
 
 	// Perform DNS lookup of server hostname.
-	uart_puts("Perform DNS lookup of server hostname: ");
-	printArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
-	uart_puts("\r\n");
-
+	uartPuts("Perform DNS lookup of server hostname: ");
+	uartPrintArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
+	uartPuts("\r\n");
 
 	// Connected.
-	uart_puts("Connected.\r\n");
+	uartPuts("Connected.\r\n");
 	ledOnGreen();
 
 
@@ -85,7 +83,7 @@ int main(void) {
 
 		// Answer to ARP requests.
 		if (eth_type_is_arp_and_my_ip(buffer, received)) {
-			//uart_puts("ARP request.\r\n");
+			uartPuts("ARP request.\r\n");
 			make_arp_answer_from_request(buffer);
 			continue;
 		}
@@ -98,7 +96,7 @@ int main(void) {
 
 		// Answer ping with pong.
 		if (PING) {
-			uart_puts("Pong.\r\n");
+			uartPuts("Pong.\r\n");
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}

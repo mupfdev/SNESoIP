@@ -21,7 +21,7 @@ $(PRG).elf: $(OBJ)
 	-std=c99 \
 	-Werror \
 	-O1 \
-	-DUART_BAUD_RATE=$(BAUD) \
+	-DBAUD=$(BAUD) \
 	-DF_CPU=$(F_CPU) \
 	-g -mmcu=$(MCU) -c -o $@
 
@@ -31,4 +31,4 @@ clean:
 
 
 flash: $(PRG).hex
-	fboot -d $(PORT) -b 115200 -v -p $(PRG).hex
+	fboot -d $(PORT) -b $(BAUD) -v -p $(PRG).hex

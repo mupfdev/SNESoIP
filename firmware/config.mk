@@ -2,21 +2,20 @@
 
 
 # Basic configuration.
-BAUD    = 115200
-PORT    = /dev/ttyUSB0
+BAUD    = 57600UL
+PORT    = /dev/ttyUSB1
 
 
 # Nothing below this line need to be changed.
 F_CPU   = 16000000UL
 MCU     = atmega168
 OBJ     = src/config.o \
-					src/debug.o \
 					src/duoled.o \
 					src/firmware.o \
 					src/network.o \
-					src/trivium.o \
 					src/snesio.o \
-					src/uart.o \
+					src/trivium.o \
+          src/uart.o \
 					src/net/dhcp_client.o \
 					src/net/dnslkup.o \
 					src/net/enc28j60.o \

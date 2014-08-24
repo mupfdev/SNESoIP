@@ -11,7 +11,6 @@
 
 
 #include "config.h"
-#include "debug.h"
 #include "duoled.h"
 #include "network.h"
 #include "snesio.h"
