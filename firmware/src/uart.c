@@ -20,11 +20,8 @@ void initUART(void) {
 
 
 uint8_t uartGetc(void) {
-	uint8_t c = 0;
-
-	// TODO.
-
-	return c;
+	while ((UCSR0A & (1 << RXC0)) == 0);
+	return UDR0;
 }
 
 
@@ -42,7 +39,7 @@ void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter) 
 
 
 void uartPutc(uint8_t c) {
-	while (!(UCSR0A & (1 << UDRE0))) {}
+	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = c;
 }
 

@@ -11,6 +11,7 @@
 
 int main(void) {
 	INIT_BUFFER;
+	snesIO port0 = 0xffff;
 
 
 	// Initialise basic I/O.
@@ -22,6 +23,12 @@ int main(void) {
 
 	uartPuts("Initialise basic I/O.\r\n");
 	INIT_IO();
+
+
+	// Command-line interface: B + Y.
+	port0 = recvInput();
+	if (port0 == 0xfffc)
+		initCLI(buffer);
 
 
 	// Pre-configure device (for testing purposes only).
@@ -62,7 +69,6 @@ int main(void) {
 
 	while (1) {
 		uint16_t received;
-		snesIO   port0 = 0xffff;
 		received = enc28j60PacketReceive(BUFFER_SIZE, buffer);
 
 

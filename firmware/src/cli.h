@@ -1,15 +1,18 @@
-/* config.h -*-c-*-
- * Configuration interface.
+/* cli.h -*-c-*-
+ * Command-line interface.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
  * license.  See the file LICENSE for details. */
 
 
-#ifndef CONFIG_h
-#define CONFIG_h
+#ifndef CLI_h
+#define CLI_h
 
+
+#include <string.h>
 #include <avr/eeprom.h>
+#include "uart.h"
 
 
 #define FLAGS            0x00
@@ -40,8 +43,11 @@
 #define UDP_PORT_MAX_LEN 0x02
 #define SERVERHOST_LEN   0x80
 
+#define CMD_LENGTH_LIMIT   64
+
 
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+void initCLI(uint8_t *buffer);
 void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 
 

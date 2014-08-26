@@ -10,7 +10,7 @@
 #define FIRMWARE_h
 
 
-#include "config.h"
+#include "cli.h"
 #include "duoled.h"
 #include "network.h"
 #include "snesio.h"
