@@ -24,28 +24,34 @@ void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 
 void initCLI(uint8_t *buffer) {
 	uint8_t i = 0;
-
 	uartPuts("$ ");
 
 	while (1) {
 		buffer[i] = uartGetc();
 		uartPutc(buffer[i]);
 
-
-		// Delete current command.
+		// Handle backspace.
 		if (buffer[i] == '\b') {
-			clearLine();
+			if (i > 0) {
+				i--;
+				buffer[i] = '\0';
+				clearLine();
+				uartPuts(buffer);
+				continue;
+			}
+
 			i = 0;
+			clearLine();
 			continue;
 		}
 
-
 		// Parse current command.
 		if (buffer[i] == '\r') {
-
-			// Echo test.
 			buffer[i] = '\0';
-			uartPuts("\r\n");
+
+			// Echo last input (test).
+			buffer[i] = '\0';
+			if (buffer[0] != '\0') uartPuts("\r\n");
 			uartPuts(buffer);
 
 			uartPuts("\r\n$ ");

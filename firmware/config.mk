@@ -6,10 +6,11 @@ BAUD    = 57600UL
 PORT    = /dev/ttyUSB0
 
 
+
 # Nothing below this line need to be changed.
 F_CPU   = 16000000UL
 MCU     = atmega168
-OBJ     = src/config.o \
+OBJ     = src/cli.o \
 					src/duoled.o \
 					src/firmware.o \
 					src/network.o \

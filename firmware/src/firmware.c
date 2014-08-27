@@ -27,9 +27,10 @@ int main(void) {
 
 	// Command-line interface: B + Y.
 	port0 = recvInput();
-	if (port0 == 0xfffc)
+	if (port0 == 0xfffc) {
+		uartPuts("Command-line interface.\r\n");
 		initCLI(buffer);
-
+	}
 
 	// Pre-configure device (for testing purposes only).
 	uint8_t testmac[6] = { 0x00, 0x09, 0xBF, 0x02, 0x00, 0x00 };

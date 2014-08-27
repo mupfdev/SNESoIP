@@ -14,4 +14,5 @@ clean:
 
 
 flash: all
-	fboot -d $(PORT) -b 57600 -H -v -p ../$(PRG).hex
+	fboot -d $(PORT) -b 57600 -H -p ../$(PRG).hex
+#	fboot -d $(PORT) -b 57600 -H -v -p ../$(PRG).hex
