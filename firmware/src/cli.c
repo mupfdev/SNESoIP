@@ -42,7 +42,7 @@ void initCLI(uint8_t *buffer) {
 		buffer[i] = uartGetc();
 		uartPutc(buffer[i]);
 
-		// Delete character..
+		// Delete last character.
 		if (buffer[i] == '\b') {
 			if (i > 0) {
 				i--;
@@ -57,11 +57,8 @@ void initCLI(uint8_t *buffer) {
 			continue;
 		}
 
-		// Send command.
+		// Execute command.
 		if (buffer[i] == '\r') {
-			buffer[i] = '\0';
-
-			// Parse current command.
 			buffer[i] = '\0';
 
 			if (buffer[0] != '\0') {
@@ -82,7 +79,7 @@ void initCLI(uint8_t *buffer) {
 			continue;
 		}
 
-		// Max input length reached.
+		// Delete current input if maximum input length reached.
 		i++;
 		if (i > INPUT_MAX_LENGTH) {
 			clearLine();
