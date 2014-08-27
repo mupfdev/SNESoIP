@@ -10,8 +10,8 @@
 #define CLI_h
 
 
-#include <string.h>
 #include <avr/eeprom.h>
+#include <string.h>
 #include "uart.h"
 
 
@@ -43,7 +43,7 @@
 #define UDP_PORT_MAX_LEN 0x02
 #define SERVERHOST_LEN   0x80
 
-#define CMD_LENGTH_LIMIT   64
+#define INPUT_MAX_LENGTH  128
 
 
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);

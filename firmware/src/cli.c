@@ -11,9 +11,21 @@
 
 static void clearLine() {
 	uartPutc('\r');
-	for (uint8_t c = 0; c <= CMD_LENGTH_LIMIT + 2; c++)
+	for (uint8_t c = 0; c <= INPUT_MAX_LENGTH + 2; c++)
 		uartPutc(' ');
 	uartPuts("\r$ ");
+}
+
+
+static uint8_t execCommand(uint8_t *command, uint8_t *param) {
+	if (strcmp(command, "echo") == 0) {
+		uartPuts(param);
+		return 0;
+	}
+
+	uartPuts(command);
+	uartPuts(": command not found.");
+	return 0;
 }
 
 
@@ -30,7 +42,7 @@ void initCLI(uint8_t *buffer) {
 		buffer[i] = uartGetc();
 		uartPutc(buffer[i]);
 
-		// Handle backspace.
+		// Delete character..
 		if (buffer[i] == '\b') {
 			if (i > 0) {
 				i--;
@@ -45,26 +57,38 @@ void initCLI(uint8_t *buffer) {
 			continue;
 		}
 
-		// Parse current command.
+		// Send command.
 		if (buffer[i] == '\r') {
 			buffer[i] = '\0';
 
-			// Echo last input (test).
+			// Parse current command.
 			buffer[i] = '\0';
-			if (buffer[0] != '\0') uartPuts("\r\n");
-			uartPuts(buffer);
+
+			if (buffer[0] != '\0') {
+				uartPuts("\r\n");
+
+				uint8_t tmp;
+				for (tmp = 0; tmp < i; tmp++)
+					if (buffer[tmp] == ' ') {
+						buffer[tmp] = '\0';
+						break;
+					}
+				tmp++;
+				execCommand(buffer, buffer + tmp);
+			}
 
 			uartPuts("\r\n$ ");
 			i = 0;
 			continue;
 		}
 
-
+		// Max input length reached.
 		i++;
-		if (i > CMD_LENGTH_LIMIT) {
+		if (i > INPUT_MAX_LENGTH) {
 			clearLine();
 			i = 0;
 		}
+
 	}
 }
 

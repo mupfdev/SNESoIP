@@ -32,6 +32,7 @@ int main(void) {
 		initCLI(buffer);
 	}
 
+
 	// Pre-configure device (for testing purposes only).
 	uint8_t testmac[6] = { 0x00, 0x09, 0xBF, 0x02, 0x00, 0x00 };
 	setConfigParam(testmac, MYMAC, MYMAC_LEN);
