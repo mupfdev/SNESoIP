@@ -11,6 +11,7 @@
 
 
 #include <avr/eeprom.h>
+#include <ctype.h>
 #include <string.h>
 #include "uart.h"
 
