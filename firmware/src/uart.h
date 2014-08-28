@@ -9,7 +9,6 @@
 #ifndef UART_h
 #define UART_h
 
-
 #ifndef BAUD
 #define BAUD     57600UL
 #endif
@@ -21,6 +20,7 @@
 
 #include <stdlib.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <util/setbaud.h>
 
 
@@ -28,7 +28,7 @@ void    initUART(void);
 uint8_t uartGetc(void);
 void    uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter);
 void    uartPutc(uint8_t c);
-void    uartPuts(uint8_t *s);
+void    uartPuts(const uint8_t *s);
 
 
 #endif

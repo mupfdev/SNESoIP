@@ -9,11 +9,6 @@
 #ifndef DUOLED_h
 #define DUOLED_h
 
-
-#include <avr/io.h>
-#include <util/delay.h>
-
-
 #define LEDgreenDDR   DDRC
 #define LEDgreenPORT  PORTC
 #define LEDgreen      PC0
@@ -21,6 +16,10 @@
 #define LEDredDDR     DDRC
 #define LEDredPORT    PORTC
 #define LEDred        PC1
+
+
+#include <avr/io.h>
+#include <util/delay.h>
 
 
 void initLed(void);

@@ -9,11 +9,6 @@
 #include "cli.h"
 
 
-static void   clearLine();
-static int8_t execCommand(uint8_t *command, uint8_t *param);
-static int8_t isMacValid(uint8_t *mac);
-
-
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 	eeprom_read_block(param, offset, length);
 }

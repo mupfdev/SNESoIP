@@ -9,13 +9,6 @@
 #ifndef CLI_h
 #define CLI_h
 
-
-#include <avr/eeprom.h>
-#include <ctype.h>
-#include <string.h>
-#include "uart.h"
-
-
 #define FLAGS            0x00
 #define MYMAC            0x04
 #define MYIP             0x0A
@@ -47,9 +40,19 @@
 #define INPUT_MAX_LENGTH  128
 
 
+#include <avr/eeprom.h>
+#include <ctype.h>
+#include <string.h>
+#include "uart.h"
+
+
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 void initCLI(uint8_t *buffer);
 void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+
+static void   clearLine();
+static int8_t execCommand(uint8_t *command, uint8_t *param);
+static int8_t isMacValid(uint8_t *mac);
 
 
 #endif

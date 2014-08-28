@@ -9,13 +9,7 @@
 #ifndef IO_h
 #define IO_h
 
-
-#include <avr/io.h>
-#include <util/delay.h>
-
-
 #define INIT_IO() initInput(); initOutput()
-
 
 #define InputClockDDR  DDRD
 #define InputClockPORT PORTD
@@ -57,6 +51,10 @@
 #define Port1DataDDR   DDRD
 #define Port1DataPORT  PORTD
 #define Port1Data      PD2
+
+
+#include <avr/io.h>
+#include <util/delay.h>
 
 
 typedef uint16_t snesIO;

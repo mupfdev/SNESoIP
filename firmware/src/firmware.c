@@ -22,6 +22,9 @@ int main(void) {
  	INIT_IO();
 
 
+	uartPuts(PSTR("Nobody can see me. Why?\r\n"));
+
+
 	// Command-line interface: B + Y.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {
@@ -106,7 +109,7 @@ int main(void) {
 		// Answer ping with pong.
 		if (PING) {
 #if DEBUG
-			uartPuts("Pong.\r\n");
+			uartPuts("Pong\r\n");
 #endif
 			make_echo_reply_from_request(buffer, received);
 			continue;

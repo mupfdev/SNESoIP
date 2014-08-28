@@ -44,7 +44,7 @@ void uartPutc(uint8_t c) {
 }
 
 
-void uartPuts(uint8_t *s) {
+void uartPuts(const uint8_t *s) {
 	while (*s) {
 		uartPutc(*s);
 		s++;
