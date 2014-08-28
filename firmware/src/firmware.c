@@ -11,6 +11,7 @@
 
 int main(void) {
 	INIT_BUFFER;
+	uint8_t debug = DEBUG;
 	snesIO port0 = 0xffff;
 
 
@@ -20,9 +21,6 @@ int main(void) {
 
 	initUART();
  	INIT_IO();
-
-
-	uartPuts(PSTR("Nobody can see me. Why?\r\n"));
 
 
 	// Command-line interface: B + Y.
@@ -40,41 +38,27 @@ int main(void) {
 	// Initialise network interface.
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
 	initNetwork(buffer);
-#if DEBUG
-	uartPuts("\r\nMAC: ");
+	DEBUG_MSG("\r\nMAC: ");
 	uartPrintArray(buffer, 6, 16, ':');
-	uartPuts("\r\n");
-#endif
+	DEBUG_MSG("\r\n");
 
 
 	// Get the initial IP via DHCP and configure network.
-#if DEBUG
-	uartPuts("IP: ");
+	DEBUG_MSG("IP: ");
 	uartPrintArray(setIPviaDHCP(buffer), 4, 10, '.');
-	uartPuts("\r\n");
-#else
-	setIPviaDHCP(buffer);
-#endif
+	DEBUG_MSG("\r\n");
 
 
 	// Resolve MAC address from server or gateway.
-#if DEBUG
-	uartPuts("Gateway MAC: ");
+	DEBUG_MSG("Gateway MAC: ");
 	uartPrintArray(resolveMAC(buffer), 6, 16, ':');
-	uartPuts("\r\n");
-#else
-	resolveMAC(buffer);
-#endif
+	DEBUG_MSG("\r\n");
 
 
 	// Perform DNS lookup of server hostname.
-#if DEBUG
-	uartPuts("Server: ");
+	DEBUG_MSG("Server: ");
 	uartPrintArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
-	uartPuts("\r\n");
-#else
-	dnsLookup(buffer, "snesoip");
-#endif
+	DEBUG_MSG("\r\n");
 
 
 	// Connected.
@@ -108,9 +92,8 @@ int main(void) {
 
 		// Answer ping with pong.
 		if (PING) {
-#if DEBUG
-			uartPuts("Pong\r\n");
-#endif
+			DEBUG_MSG("Pong\r\n");
+
 			make_echo_reply_from_request(buffer, received);
 			continue;
 		}

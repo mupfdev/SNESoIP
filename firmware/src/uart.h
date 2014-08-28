@@ -24,11 +24,15 @@
 #include <util/setbaud.h>
 
 
+#define PUTS_P(s) uartPuts_P(PSTR(s))
+
+
 void    initUART(void);
 uint8_t uartGetc(void);
 void    uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter);
 void    uartPutc(uint8_t c);
-void    uartPuts(const uint8_t *s);
+void    uartPuts(uint8_t *s);
+void    uartPuts_P (const uint8_t *s);
 
 
 #endif

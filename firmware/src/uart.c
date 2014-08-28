@@ -44,9 +44,20 @@ void uartPutc(uint8_t c) {
 }
 
 
-void uartPuts(const uint8_t *s) {
+void uartPuts(uint8_t *s) {
 	while (*s) {
 		uartPutc(*s);
 		s++;
 	}
+}
+
+
+void uartPuts_P (const uint8_t *s) {
+		while (1) {
+			uint8_t c = pgm_read_byte(s);
+			s++;
+			if ('\0' == c)
+				break;
+			uartPutc(c);
+		}
 }

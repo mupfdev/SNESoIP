@@ -9,6 +9,8 @@
 #ifndef FIRMWARE_h
 #define FIRMWARE_h
 
+#define DEBUG_MSG(s) if (debug == 1) PUTS_P(s)
+
 
 #include "cli.h"
 #include "duoled.h"
