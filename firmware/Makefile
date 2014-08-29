@@ -17,7 +17,8 @@ $(PRG).elf: $(OBJ)
 	avr-size -A $(PRG).elf
 
 %.o: %.c
-	avr-gcc $< -Os \
+	avr-gcc $< \
+	-Os \
 	-std=c99 \
 	-Werror \
 	-DBAUD=$(BAUD) \

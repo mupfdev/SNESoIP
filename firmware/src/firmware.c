@@ -12,7 +12,7 @@
 int main(void) {
 	INIT_BUFFER;
 	uint8_t debug = DEBUG;
-	snesIO port0 = 0xffff;
+	snesIO  port0 = 0xffff;
 
 
 	// Initialise basic I/O.
@@ -26,6 +26,7 @@ int main(void) {
 	// Command-line interface: B + Y.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {
+		DEBUG_MSG("\r\nCommand-line interface.");
 		initCLI(buffer);
 	}
 

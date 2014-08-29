@@ -37,8 +37,7 @@
 #define UDP_PORT_MAX_LEN 0x02
 #define SERVERHOST_LEN   0x80
 
-#define INPUT_MAX_LENGTH  128
-
+#define INPUT_MAX_LENGTH   96
 
 #include <avr/eeprom.h>
 #include <ctype.h>
@@ -46,9 +45,9 @@
 #include "uart.h"
 
 
-void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-void initCLI(uint8_t *buffer);
-void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+int8_t initCLI(uint8_t *buffer);
+void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 
 static void   clearLine();
 static int8_t execCommand(uint8_t *command, uint8_t *param);
