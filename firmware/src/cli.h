@@ -41,6 +41,9 @@
 
 #define INPUT_MAX_LENGTH   96
 
+#define INVALID_COMMAND    -1
+#define INVALID_PARAM      -2
+
 #define COMMAND(cmd)  strcmp_PF(command, pgm_get_far_address(cmd)) == 0
 #define SHOW_CMD(cmd) PUTS_P("\r\n"); uartPuts_P(cmd); PUTS_P(":\r\t\t")
 
@@ -57,7 +60,8 @@ void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 
 static void   clearLine();
 static int8_t execCommand(uint8_t *command, uint8_t *param);
-static int8_t isMacValid(uint8_t *mac);
+static int8_t macIsValid(uint8_t *mac);
+static uint8_t hextoi(uint8_t *s);
 
 
 #endif
