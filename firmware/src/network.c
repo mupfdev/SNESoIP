@@ -18,6 +18,7 @@ static uint8_t netmask[4];
 
 
 void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
+	ip = ip;
 	if (refnum == TRANS_NUM_GWMAC)
 		memcpy(gwmac, mac, 6);
 }

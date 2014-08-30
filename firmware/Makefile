@@ -20,7 +20,9 @@ $(PRG).elf: $(OBJ)
 	avr-gcc $< \
 	-Os \
 	-std=c99 \
+	-Wall \
 	-Werror \
+	-Wextra \
 	-DBAUD=$(BAUD) \
 	-DDEBUG=$(DEBUG) \
 	-DF_CPU=$(F_CPU) \

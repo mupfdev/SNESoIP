@@ -23,6 +23,15 @@ int main(void) {
  	INIT_IO();
 
 
+
+
+
+	// Wipe EEPROm on first bootup.
+
+
+
+
+
 	// Command-line interface: B + Y at boot time.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {

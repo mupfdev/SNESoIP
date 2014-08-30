@@ -9,6 +9,33 @@
 #include "cli.h"
 
 
+static void    clearLine();
+static int8_t  execCommand(uint8_t *command, uint8_t *param);
+static uint8_t hextoi(uint8_t *s);
+static int8_t  ipIsValid (const uint8_t *in);
+static int8_t  macIsValid(uint8_t *mac);
+static int8_t  parseIP (const uint8_t *in, unsigned *out);
+//static void    strToIP(uint8_t *ip, uint8_t *buffer);
+
+
+static const char cmd_echo[]       PROGMEM = "echo";
+static const char cmd_showconfig[] PROGMEM = "showconfig"; // TODO
+static const char cmd_quit[]       PROGMEM = "quit";
+static const char cmd_mymac[]      PROGMEM = "mymac";
+static const char cmd_myip[]       PROGMEM = "myip";       // TODO
+static const char cmd_gwip[]       PROGMEM = "gwip";       // TODO
+static const char cmd_netmask[]    PROGMEM = "netmask";    // TODO
+static const char cmd_dns[]        PROGMEM = "dns";        // TODO
+static const char cmd_username[]   PROGMEM = "username";   // TODO
+static const char cmd_password[]   PROGMEM = "password";   // TODO
+static const char cmd_key[]        PROGMEM = "key";        // TODO
+static const char cmd_udpportmin[] PROGMEM = "udpportmin"; // TODO
+static const char cmd_udpportmax[] PROGMEM = "udpportmax"; // TODO
+static const char cmd_serverport[] PROGMEM = "serverport"; // TODO
+static const char cmd_serverhost[] PROGMEM = "serverhost"; // TODO
+static const char cmd_wipe[]       PROGMEM = "wipe";
+
+
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 	eeprom_read_block(param, offset, length);
 }
@@ -96,60 +123,11 @@ static void clearLine() {
 }
 
 
-static const uint8_t cmd_echo[]       PROGMEM = "echo";
-static const uint8_t cmd_showconfig[] PROGMEM = "showconfig"; // TODO
-static const uint8_t cmd_quit[]       PROGMEM = "quit";
-static const uint8_t cmd_mymac[]      PROGMEM = "mymac";      // TODO
-static const uint8_t cmd_myip[]       PROGMEM = "myip";       // TODO
-static const uint8_t cmd_gwip[]       PROGMEM = "gwip";       // TODO
-static const uint8_t cmd_netmask[]    PROGMEM = "netmask";    // TODO
-static const uint8_t cmd_dns[]        PROGMEM = "dns";        // TODO
-static const uint8_t cmd_serverip[]   PROGMEM = "serverip";   // TODO
-static const uint8_t cmd_username[]   PROGMEM = "username";   // TODO
-static const uint8_t cmd_password[]   PROGMEM = "password";   // TODO
-static const uint8_t cmd_key[]        PROGMEM = "key";        // TODO
-static const uint8_t cmd_udpportmin[] PROGMEM = "udpportmin"; // TODO
-static const uint8_t cmd_udpportmax[] PROGMEM = "udpportmax"; // TODO
-static const uint8_t cmd_serverport[] PROGMEM = "serverport"; // TODO
-static const uint8_t cmd_serverhost[] PROGMEM = "serverhost"; // TODO
-static const uint8_t cmd_wipe[]       PROGMEM = "wipe";
-
-
 static int8_t execCommand(uint8_t *command, uint8_t *param) {
 	uint8_t buffer[128];
 
 	if (COMMAND(cmd_echo)) {
 		uartPuts(param);
-		return 0;
-	}
-
-	if (COMMAND(cmd_showconfig)) {
-		SHOW_CMD(cmd_mymac);
-		getConfigParam(buffer, MYMAC, MYMAC_LEN);
-		uartPrintArray(buffer, MYMAC_LEN, 16, ':');
-
-		SHOW_CMD(cmd_myip);
-		getConfigParam(buffer, MYIP, MYIP_LEN);
-		uartPrintArray(buffer, MYIP_LEN, 10, '.');
-
-		SHOW_CMD(cmd_gwip);
-		getConfigParam(buffer, GWIP, GWIP_LEN);
-		uartPrintArray(buffer, GWIP_LEN, 10, '.');
-
-		SHOW_CMD(cmd_netmask);
-		getConfigParam(buffer, NETMASK, NETMASK_LEN);
-		uartPrintArray(buffer, NETMASK_LEN, 10, '.');
-
-		SHOW_CMD(cmd_dns);
-		getConfigParam(buffer, DNS, DNS_LEN);
-		uartPrintArray(buffer, DNS_LEN, 10, '.');
-
-		SHOW_CMD(cmd_serverip);
-		getConfigParam(buffer, SERVERIP, SERVERIP_LEN);
-		uartPrintArray(buffer, SERVERIP_LEN, 10, '.');
-
-		// TODO.
-
 		return 0;
 	}
 
@@ -170,9 +148,22 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		return 0;
 	}
 
+	if (COMMAND(cmd_myip)) {
+		if (ipIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		//strToIP(param, buffer);
+		PUTS_P("\r\n");
+		uartPrintArray(buffer, 4, 10, '.');
+		//setConfigParam(buffer, MYIP, MYIP_LEN);
+
+		return 0;
+	}
+
 	if (COMMAND(cmd_wipe)) {
-		for (uint8_t i = 0; i < 255; i++)
-			eeprom_update_byte(i, 0xFF);
+		for (uint16_t i = 0; i < 1024; i++)
+			eeprom_update_byte(i, 0);
 		return 0;
 	}
 
@@ -180,21 +171,8 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 }
 
 
-static int8_t macIsValid(uint8_t *mac) {
-	if (strlen(mac) != 17) return -1;
-
-	for (uint8_t i = 2; i < 14; i = i + 3)
-		if (mac[i] != ':') return -1;
-
-	for (uint8_t i = 0; i < 16; i++) {
-		if (mac[i] == ':') i++;
-		if (isxdigit(mac[i]) == 0) return -1;
-	}
-
-	return 0;
-}
-
-
+// Attention: no string validation!
+// For pre-validation use macIsValid().
 static uint8_t hextoi(uint8_t *s) {
 	uint8_t val;
 
@@ -205,4 +183,60 @@ static uint8_t hextoi(uint8_t *s) {
 	val = val + (s[1] & 0xf);
 
 	return val;
+}
+
+
+static int8_t ipIsValid (const uint8_t *in)  {
+	uint8_t  c  = 0;
+	unsigned ip = 0;
+
+	for (uint8_t i = 0; in[i] != '\0'; i++)
+		if (in[i] == '.') {
+			c++;
+			if (c > 3) return -1;
+			if (in[i + 1] == '.') return -1;
+		}
+
+	if (!parseIP (in, &ip))
+		return 0;
+	else
+		return -1;
+}
+
+
+static int8_t macIsValid(uint8_t *mac) {
+	if (strlen((char *)mac) != 17) return -1;
+
+	for (uint8_t i = 2; i < 14; i = i + 3)
+		if (mac[i] != ':') return -1;
+
+	for (uint8_t i = 0; i < 17; i++) {
+		if (mac[i] == ':') i++;
+		if (isxdigit(mac[i]) == 0) return -1;
+	}
+
+	return 0;
+}
+
+
+static int8_t parseIP (const uint8_t *in, unsigned *out) {
+	//unsigned ip, seg, exp;
+	//ip = seg = exp = *out = 0;
+	unsigned seg, exp;
+	seg = exp = *out = 0;
+	do {
+		if (*in == '.') {
+			*out = (*out << 8) + seg;
+			seg = 0;
+			exp++;
+
+		} else {
+			seg = 10 * seg + (*in - 0x30);
+			if (*in < 0x30 || *in > 0x39 || seg > 255) return -1;
+		}
+	} while (*++in != '\0');
+	*out = (*out << 8) + seg;
+	if (exp != 3) return -1;
+
+	return 0;
 }

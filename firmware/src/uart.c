@@ -32,7 +32,7 @@ void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter) 
 		if ( (array[i] <= 0x0F) && (base == 16) )
 			uartPutc('0');
 
-		uartPuts((char *)itoa(array[i], tmp, base));
+		uartPuts((uint8_t *)itoa(array[i], tmp, base));
 		if (i < size - 1) uartPutc(delimiter);
 	}
 }
@@ -52,7 +52,7 @@ void uartPuts(uint8_t *s) {
 }
 
 
-void uartPuts_P (const uint8_t *s) {
+void uartPuts_P (const char *s) {
 		while (1) {
 			uint8_t c = pgm_read_byte(s);
 			s++;
