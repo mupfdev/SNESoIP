@@ -23,17 +23,12 @@ int main(void) {
  	INIT_IO();
 
 
-	// Command-line interface: B + Y.
+	// Command-line interface: B + Y at boot time.
 	port0 = recvInput();
 	if (port0 == 0xfffc) {
 		DEBUG_MSG("\r\nCommand-line interface.");
 		initCLI(buffer);
 	}
-
-
-	// Pre-configure device (for testing purposes only).
-	uint8_t testmac[6] = { 0x00, 0x09, 0xBF, 0x02, 0x00, 0x00 };
-	setConfigParam(testmac, MYMAC, MYMAC_LEN);
 
 
 	// Initialise network interface.

@@ -10,17 +10,18 @@
 #define CLI_h
 
 #define FLAGS            0x00
-#define MYMAC            0x04
-#define MYIP             0x0A
-#define GWIP             0x0E
-#define NETMASK          0x12
-#define DNS              0x16
-#define SERVERIP         0x1A
-#define USERNAME         0x1E
-#define PASSWORD         0x3E
-#define KEY              0x5E
-#define UDP_PORT_MIN     0x68
-#define UDP_PORT_MAX     0x6A
+#define MYMAC            0x02
+#define MYIP             0x08
+#define GWIP             0x0C
+#define NETMASK          0x10
+#define DNS              0x14
+#define SERVERIP         0x18
+#define USERNAME         0x1C
+#define PASSWORD         0x3C
+#define KEY              0x5C
+#define UDP_PORT_MIN     0x66
+#define UDP_PORT_MAX     0x68
+#define SERVER_PORT      0x6A
 #define SERVERHOST       0x6C
 
 #define FLAGS_LEN        0x04
@@ -35,9 +36,14 @@
 #define KEY_LEN          0x0A
 #define UDP_PORT_MIN_LEN 0x02
 #define UDP_PORT_MAX_LEN 0x02
+#define SERVER_PORT_LEN  0x02
 #define SERVERHOST_LEN   0x80
 
 #define INPUT_MAX_LENGTH   96
+
+#define COMMAND(cmd)  strcmp_PF(command, pgm_get_far_address(cmd)) == 0
+#define SHOW_CMD(cmd) PUTS_P("\r\n"); uartPuts_P(cmd); PUTS_P(":\r\t\t")
+
 
 #include <avr/eeprom.h>
 #include <ctype.h>

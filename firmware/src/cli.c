@@ -67,7 +67,7 @@ int8_t initCLI(uint8_t *buffer) {
 			continue;
 		}
 
-		// Delete current input if maximum input length reached.
+		// Delete current input if maximum input length is reached.
 		i++;
 		if (i > INPUT_MAX_LENGTH) {
 			clearLine();
@@ -92,31 +92,67 @@ static void clearLine() {
 
 
 static const uint8_t cmd_echo[]       PROGMEM = "echo";
-static const uint8_t cmd_help[]       PROGMEM = "help";       // TODO
-static const uint8_t cmd_setmymac[]   PROGMEM = "setmymac";   // TODO
-static const uint8_t cmd_setgwip[]    PROGMEM = "setgwip";    // TODO
-static const uint8_t cmd_setmyip[]    PROGMEM = "setmyip";    // TODO
-static const uint8_t cmd_setdns[]     PROGMEM = "setdns";     // TODO
 static const uint8_t cmd_showconfig[] PROGMEM = "showconfig"; // TODO
-static const uint8_t cmd_toggledhcp[] PROGMEM = "toggledhcp"; // TODO
-static const uint8_t cmd_toggledns[]  PROGMEM = "toggledns";  // TODO
 static const uint8_t cmd_quit[]       PROGMEM = "quit";
+static const uint8_t cmd_toggledhcp[] PROGMEM = "toggledhcp"; // TODO
+static const uint8_t cmd_mymac[]      PROGMEM = "mymac";      // TODO
+static const uint8_t cmd_myip[]       PROGMEM = "myip";       // TODO
+static const uint8_t cmd_gwip[]       PROGMEM = "gwip";       // TODO
+static const uint8_t cmd_netmask[]    PROGMEM = "netmask";    // TODO
+static const uint8_t cmd_dns[]        PROGMEM = "dns";        // TODO
+static const uint8_t cmd_serverip[]   PROGMEM = "serverip";   // TODO
+static const uint8_t cmd_username[]   PROGMEM = "username";   // TODO
+static const uint8_t cmd_password[]   PROGMEM = "password";   // TODO
+static const uint8_t cmd_key[]        PROGMEM = "key";        // TODO
+static const uint8_t cmd_udpportmin[] PROGMEM = "udpportmin"; // TODO
+static const uint8_t cmd_udpportmax[] PROGMEM = "udpportmax"; // TODO
+static const uint8_t cmd_serverport[] PROGMEM = "serverport"; // TODO
+static const uint8_t cmd_serverhost[] PROGMEM = "serverhost"; // TODO
 
 
 static int8_t execCommand(uint8_t *command, uint8_t *param) {
-	if (strcmp_PF(command, pgm_get_far_address(cmd_echo)) == 0) {
+	uint8_t buffer[128];
+
+	if (COMMAND(cmd_echo)) {
 		uartPuts(param);
 		return 0;
 	}
 
-	if (strcmp_PF(command, pgm_get_far_address(cmd_quit)) == 0)
-		return 1;
+	if (COMMAND(cmd_showconfig)) {
+		SHOW_CMD(cmd_echo);
+		getConfigParam(buffer, MYMAC, MYMAC_LEN);
+		uartPrintArray(buffer, MYMAC_LEN, 16, ':');
 
+		SHOW_CMD(cmd_myip);
+		getConfigParam(buffer, MYIP, MYIP_LEN);
+		uartPrintArray(buffer, MYIP_LEN, 10, '.');
+
+		SHOW_CMD(cmd_gwip);
+		getConfigParam(buffer, GWIP, GWIP_LEN);
+		uartPrintArray(buffer, GWIP_LEN, 10, '.');
+
+		SHOW_CMD(cmd_netmask);
+		getConfigParam(buffer, NETMASK, NETMASK_LEN);
+		uartPrintArray(buffer, NETMASK_LEN, 10, '.');
+
+		SHOW_CMD(cmd_dns);
+		getConfigParam(buffer, DNS, DNS_LEN);
+		uartPrintArray(buffer, DNS_LEN, 10, '.');
+
+		SHOW_CMD(cmd_serverip);
+		getConfigParam(buffer, SERVERIP, SERVERIP_LEN);
+		uartPrintArray(buffer, SERVERIP_LEN, 10, '.');
+
+		return 0;
+	}
+
+	if (COMMAND(cmd_quit)) return 1;
 	return -1;
 }
 
 
 static int8_t isMacValid(uint8_t *mac) {
 	// TODO.
+
 	return 0;
 }
