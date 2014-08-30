@@ -24,11 +24,7 @@ int main(void) {
 
 
 
-
-
-	// Wipe EEPROm on first bootup.
-
-
+	// TODO: Wipe EEPROM on first bootup.
 
 
 

@@ -15,12 +15,13 @@ static uint8_t hextoi(uint8_t *s);
 static int8_t  ipIsValid (const uint8_t *in);
 static int8_t  macIsValid(uint8_t *mac);
 static int8_t  parseIP (const uint8_t *in, unsigned *out);
-//static void    strToIP(uint8_t *ip, uint8_t *buffer);
+static void    strToIP(uint8_t *ip, uint8_t *dst);
 
 
 static const char cmd_echo[]       PROGMEM = "echo";
 static const char cmd_showconfig[] PROGMEM = "showconfig"; // TODO
 static const char cmd_quit[]       PROGMEM = "quit";
+static const char cmd_wipe[]       PROGMEM = "wipe";
 static const char cmd_mymac[]      PROGMEM = "mymac";
 static const char cmd_myip[]       PROGMEM = "myip";       // TODO
 static const char cmd_gwip[]       PROGMEM = "gwip";       // TODO
@@ -33,7 +34,6 @@ static const char cmd_udpportmin[] PROGMEM = "udpportmin"; // TODO
 static const char cmd_udpportmax[] PROGMEM = "udpportmax"; // TODO
 static const char cmd_serverport[] PROGMEM = "serverport"; // TODO
 static const char cmd_serverhost[] PROGMEM = "serverhost"; // TODO
-static const char cmd_wipe[]       PROGMEM = "wipe";
 
 
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
@@ -126,13 +126,23 @@ static void clearLine() {
 static int8_t execCommand(uint8_t *command, uint8_t *param) {
 	uint8_t buffer[128];
 
+	// echo:
 	if (COMMAND(cmd_echo)) {
 		uartPuts(param);
 		return 0;
 	}
 
+	// quit:
 	if (COMMAND(cmd_quit)) return 1;
 
+	// wipe:
+	if (COMMAND(cmd_wipe)) {
+		for (uint16_t i = 0; i < 1024; i++)
+			eeprom_update_byte(i, 0);
+		return 0;
+	}
+
+	// mymac:
 	if (COMMAND(cmd_mymac)) {
 		if (macIsValid(param) == -1)
 			return INVALID_PARAM;
@@ -148,24 +158,80 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		return 0;
 	}
 
+	// myip:
 	if (COMMAND(cmd_myip)) {
 		if (ipIsValid(param) == -1)
 			return INVALID_PARAM;
 
 		uartPuts(param);
-		//strToIP(param, buffer);
-		PUTS_P("\r\n");
-		uartPrintArray(buffer, 4, 10, '.');
-		//setConfigParam(buffer, MYIP, MYIP_LEN);
-
+		strToIP(param, buffer);
+		setConfigParam(buffer, MYIP, MYIP_LEN);
 		return 0;
 	}
 
-	if (COMMAND(cmd_wipe)) {
-		for (uint16_t i = 0; i < 1024; i++)
-			eeprom_update_byte(i, 0);
+	// gwip:
+	if (COMMAND(cmd_gwip)) {
+		if (ipIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		strToIP(param, buffer);
+		setConfigParam(buffer, GWIP, GWIP_LEN);
 		return 0;
 	}
+
+	// netmask:
+	if (COMMAND(cmd_netmask)) {
+		if (ipIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		strToIP(param, buffer);
+		setConfigParam(buffer, NETMASK, NETMASK_LEN);
+		return 0;
+	}
+
+	// dns:
+	if (COMMAND(cmd_dns)) {
+		if (ipIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		strToIP(param, buffer);
+		setConfigParam(buffer, DNS, DNS_LEN);
+		return 0;
+	}
+
+	// username:
+	if (COMMAND(cmd_username)) {
+		if (strlen((const char *)param) > USERNAME_LEN)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		setConfigParam(param, USERNAME, USERNAME_LEN);
+		return 0;
+	}
+
+	// password:
+	if (COMMAND(cmd_password)) {
+		if (strlen((const char *)param) > PASSWORD_LEN)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		setConfigParam(param, PASSWORD, PASSWORD_LEN);
+		return 0;
+	}
+
+	// key:
+	if (COMMAND(cmd_key)) {
+		if (strlen((const char *)param) > KEY_LEN)
+			return INVALID_PARAM;
+
+		uartPuts(param);
+		setConfigParam(param, KEY, KEY_LEN);
+		return 0;
+	}
+
 
 	return -1;
 }
@@ -219,9 +285,7 @@ static int8_t macIsValid(uint8_t *mac) {
 }
 
 
-static int8_t parseIP (const uint8_t *in, unsigned *out) {
-	//unsigned ip, seg, exp;
-	//ip = seg = exp = *out = 0;
+static int8_t parseIP(const uint8_t *in, unsigned *out) {
 	unsigned seg, exp;
 	seg = exp = *out = 0;
 	do {
@@ -239,4 +303,20 @@ static int8_t parseIP (const uint8_t *in, unsigned *out) {
 	if (exp != 3) return -1;
 
 	return 0;
+}
+
+
+// Attention: no string validation!
+// For pre-validation use ipIsValid().
+static void strToIP(uint8_t *ip, uint8_t *dst) {
+	uint8_t i = 0;
+	char   *tmp;
+
+	tmp = strtok((char *)ip, ".");
+
+	while (tmp != NULL) {
+		dst[i] = atoi(tmp);
+		tmp = strtok(NULL, ".");
+		i++;
+	}
 }

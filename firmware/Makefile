@@ -19,7 +19,9 @@ $(PRG).elf: $(OBJ)
 %.o: %.c
 	avr-gcc $< \
 	-Os \
+	-fno-tree-scev-cprop \
 	-std=c99 \
+	-mcall-prologues \
 	-Wall \
 	-Werror \
 	-Wextra \
