@@ -2,7 +2,7 @@
 
 ![SNESoIP prototype](hardware/images/rev02-small.jpg?raw=true)
 
-For images in higher resolution click [here](hardware/rev01/docs/partlist.md).
+For images in higher resolution click [here](hardware/images/).
 
 
 ## Introduction ##
