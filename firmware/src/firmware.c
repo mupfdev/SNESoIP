@@ -23,9 +23,9 @@ int main(void) {
  	INIT_IO();
 
 
-
-	// TODO: Wipe EEPROM on first bootup.
-
+	// Wipe EEPROM on first bootup.
+	getConfigParam(buffer, FLAGS, FLAGS_LEN);
+	if ((buffer[0]) & (1 << (0))) wipeEEPROM();
 
 
 	// Command-line interface: B + Y at boot time.

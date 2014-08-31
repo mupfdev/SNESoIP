@@ -9,31 +9,38 @@
 #include "cli.h"
 
 
-static void    clearLine();
-static int8_t  execCommand(uint8_t *command, uint8_t *param);
-static uint8_t hextoi(uint8_t *s);
-static int8_t  ipIsValid (const uint8_t *in);
-static int8_t  macIsValid(uint8_t *mac);
-static int8_t  parseIP (const uint8_t *in, unsigned *out);
-static void    strToIP(uint8_t *ip, uint8_t *dst);
+#define INPUT_MAX_LENGTH   96
+#define INVALID_COMMAND    -1
+#define INVALID_PARAM      -2
+#define COMMAND(cmd) strcmp_PF((char *)command, pgm_get_far_address(cmd)) == 0
 
 
-static const char cmd_echo[]       PROGMEM = "echo";
-static const char cmd_showconfig[] PROGMEM = "showconfig"; // TODO
-static const char cmd_quit[]       PROGMEM = "quit";
-static const char cmd_wipe[]       PROGMEM = "wipe";
-static const char cmd_mymac[]      PROGMEM = "mymac";
-static const char cmd_myip[]       PROGMEM = "myip";       // TODO
-static const char cmd_gwip[]       PROGMEM = "gwip";       // TODO
-static const char cmd_netmask[]    PROGMEM = "netmask";    // TODO
-static const char cmd_dns[]        PROGMEM = "dns";        // TODO
-static const char cmd_username[]   PROGMEM = "username";   // TODO
-static const char cmd_password[]   PROGMEM = "password";   // TODO
-static const char cmd_key[]        PROGMEM = "key";        // TODO
-static const char cmd_udpportmin[] PROGMEM = "udpportmin"; // TODO
-static const char cmd_udpportmax[] PROGMEM = "udpportmax"; // TODO
-static const char cmd_serverport[] PROGMEM = "serverport"; // TODO
-static const char cmd_serverhost[] PROGMEM = "serverhost"; // TODO
+static void     clearLine();
+static int8_t   execCommand(uint8_t *command, uint8_t *param);
+static uint8_t  hextoi(uint8_t *s);
+static int8_t   ipIsValid(const uint8_t *in);
+static int8_t   macIsValid(uint8_t *mac);
+static int8_t   parseIP(const uint8_t *in, unsigned *out);
+static int8_t   portIsValid(uint8_t *port);
+static void     strToIP(uint8_t *ip, uint8_t *dst);
+static uint32_t strtoint(char* str);
+static uint32_t strntoint(char* str, int n);
+
+
+static const char cmd_quit[]         PROGMEM = "quit";
+static const char cmd_wipe[]         PROGMEM = "wipe";
+static const char cmd_mymac[]        PROGMEM = "mymac";
+static const char cmd_myip[]         PROGMEM = "myip";
+static const char cmd_gwip[]         PROGMEM = "gwip";
+static const char cmd_netmask[]      PROGMEM = "netmask";
+static const char cmd_dns[]          PROGMEM = "dns";
+static const char cmd_username[]     PROGMEM = "username";
+static const char cmd_password[]     PROGMEM = "password";
+static const char cmd_key[]          PROGMEM = "key";
+static const char cmd_udpportmin[]   PROGMEM = "udpportmin";
+static const char cmd_udpportmax[]   PROGMEM = "udpportmax";
+static const char cmd_serverport[]   PROGMEM = "serverport";
+static const char cmd_serverhost[]   PROGMEM = "serverhost";
 
 
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
@@ -115,6 +122,12 @@ void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 }
 
 
+void wipeEEPROM() {
+	for (uint16_t i = 0; i < 1024; i++)
+		eeprom_update_byte(i, 0);
+}
+
+
 static void clearLine() {
 	uartPutc('\r');
 	for (uint8_t c = 0; c <= INPUT_MAX_LENGTH + 2; c++)
@@ -124,21 +137,15 @@ static void clearLine() {
 
 
 static int8_t execCommand(uint8_t *command, uint8_t *param) {
-	uint8_t buffer[128];
-
-	// echo:
-	if (COMMAND(cmd_echo)) {
-		uartPuts(param);
-		return 0;
-	}
+	uint8_t  buffer[128];
+	uint16_t port = 0;
 
 	// quit:
 	if (COMMAND(cmd_quit)) return 1;
 
 	// wipe:
 	if (COMMAND(cmd_wipe)) {
-		for (uint16_t i = 0; i < 1024; i++)
-			eeprom_update_byte(i, 0);
+		wipeEEPROM();
 		return 0;
 	}
 
@@ -163,7 +170,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (ipIsValid(param) == -1)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		strToIP(param, buffer);
 		setConfigParam(buffer, MYIP, MYIP_LEN);
 		return 0;
@@ -174,7 +180,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (ipIsValid(param) == -1)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		strToIP(param, buffer);
 		setConfigParam(buffer, GWIP, GWIP_LEN);
 		return 0;
@@ -185,7 +190,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (ipIsValid(param) == -1)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		strToIP(param, buffer);
 		setConfigParam(buffer, NETMASK, NETMASK_LEN);
 		return 0;
@@ -196,7 +200,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (ipIsValid(param) == -1)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		strToIP(param, buffer);
 		setConfigParam(buffer, DNS, DNS_LEN);
 		return 0;
@@ -207,7 +210,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (strlen((const char *)param) > USERNAME_LEN)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		setConfigParam(param, USERNAME, USERNAME_LEN);
 		return 0;
 	}
@@ -217,7 +219,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (strlen((const char *)param) > PASSWORD_LEN)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		setConfigParam(param, PASSWORD, PASSWORD_LEN);
 		return 0;
 	}
@@ -227,8 +228,52 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (strlen((const char *)param) > KEY_LEN)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		setConfigParam(param, KEY, KEY_LEN);
+		return 0;
+	}
+
+	// udpportmin:
+	if (COMMAND(cmd_udpportmin)) {
+		if (portIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		port = strtoint((char *)param);
+		buffer[0] = (port >> 8);
+		buffer[1] =  port & 0xff;
+		setConfigParam(buffer, UDP_PORT_MIN, UDP_PORT_MIN_LEN);
+		return 0;
+	}
+
+	// udpportmax:
+	if (COMMAND(cmd_udpportmax)) {
+		if (portIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		port = strtoint((char *)param);
+		buffer[0] = (port >> 8);
+		buffer[1] =  port & 0xff;
+		setConfigParam(buffer, UDP_PORT_MAX, UDP_PORT_MAX_LEN);
+		return 0;
+	}
+
+	// serverport:
+	if (COMMAND(cmd_serverport)) {
+		if (portIsValid(param) == -1)
+			return INVALID_PARAM;
+
+		port = strtoint((char *)param);
+		buffer[0] = (port >> 8);
+		buffer[1] =  port & 0xff;
+		setConfigParam(buffer, SERVER_PORT, SERVER_PORT_LEN);
+		return 0;
+	}
+
+	// serverhost:
+	if (COMMAND(cmd_serverhost)) {
+		if (strlen((const char *)param) > SERVER_HOST_LEN)
+			return INVALID_PARAM;
+
+		setConfigParam(param, SERVER_HOST, SERVER_HOST_LEN);
 		return 0;
 	}
 
@@ -306,6 +351,16 @@ static int8_t parseIP(const uint8_t *in, unsigned *out) {
 }
 
 
+static int8_t portIsValid(uint8_t *port) {
+	if (port[0] == '\0') return -1;
+
+	if (strtoint((char *)port) > 65535)
+		return -1;
+
+	return 0;
+}
+
+
 // Attention: no string validation!
 // For pre-validation use ipIsValid().
 static void strToIP(uint8_t *ip, uint8_t *dst) {
@@ -319,4 +374,40 @@ static void strToIP(uint8_t *ip, uint8_t *dst) {
 		tmp = strtok(NULL, ".");
 		i++;
 	}
+}
+
+
+static uint32_t strtoint(char* str) {
+	char* temp = str;
+	uint32_t n = 0;
+	while (*temp != '\0') {
+		n++;
+		temp++;
+	}
+
+	return strntoint(str, n);
+}
+
+
+static uint32_t strntoint(char* str, int n) {
+	uint32_t sign = 1;
+	uint32_t place = 1;
+	uint32_t ret = 0;
+
+	int i;
+	for (i = n-1; i >= 0; i--, place *= 10) {
+		int c = str[i];
+		switch (c) {
+
+			case 45:
+				if (i == 0) sign = -1;
+				else return -1;
+				break;
+			default:
+				if (c >= 48 && c <= 57) ret += (c - 48) * place;
+				else return -1;
+		}
+	}
+
+	return sign * ret;
 }

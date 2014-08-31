@@ -37,13 +37,6 @@
 #define SERVER_PORT_LEN  0x02
 #define SERVER_HOST_LEN  0x40
 
-#define INPUT_MAX_LENGTH   96
-
-#define INVALID_COMMAND    -1
-#define INVALID_PARAM      -2
-
-#define COMMAND(cmd)  strcmp_PF((char *)command, pgm_get_far_address(cmd)) == 0
-
 
 #include <avr/eeprom.h>
 #include <ctype.h>
@@ -54,6 +47,7 @@
 void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 int8_t initCLI(uint8_t *buffer);
 void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
+void   wipeEEPROM();
 
 
 #endif
