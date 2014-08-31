@@ -9,6 +9,7 @@
 #include "cli.h"
 
 
+#if (CLI)
 #define INPUT_MAX_LENGTH   96
 #define INVALID_COMMAND    -1
 #define INVALID_PARAM      -2
@@ -41,6 +42,7 @@ static const char cmd_udpportmin[]   PROGMEM = "udpportmin";
 static const char cmd_udpportmax[]   PROGMEM = "udpportmax";
 static const char cmd_serverport[]   PROGMEM = "serverport";
 static const char cmd_serverhost[]   PROGMEM = "serverhost";
+#endif
 
 
 void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
@@ -48,8 +50,11 @@ void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 }
 
 
+#if (CLI)
 int8_t initCLI(uint8_t *buffer) {
 	int8_t i = 0;
+
+	PUTS_P("\r\nCommand-line interface.");
 	PUTS_P("\r\n$ ");
 
 	while (1) {
@@ -115,6 +120,12 @@ int8_t initCLI(uint8_t *buffer) {
 
 	}
 }
+#else
+int8_t initCLI(uint8_t *buffer) {
+	buffer[0] = '\0';
+	return 0;
+}
+#endif
 
 
 void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
@@ -128,6 +139,7 @@ void wipeEEPROM() {
 }
 
 
+#if (CLI)
 static void clearLine() {
 	uartPutc('\r');
 	for (uint8_t c = 0; c <= INPUT_MAX_LENGTH + 2; c++)
@@ -225,7 +237,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// key:
 	if (COMMAND(cmd_key)) {
-		if (strlen((const char *)param) > KEY_LEN)
+		if (strlen((const char *)param) != KEY_LEN)
 			return INVALID_PARAM;
 
 		setConfigParam(param, KEY, KEY_LEN);
@@ -411,3 +423,4 @@ static uint32_t strntoint(char* str, int n) {
 
 	return sign * ret;
 }
+#endif

@@ -3,6 +3,7 @@
 
 # Basic configuration.
 BAUD    = 57600UL
+CLI     = 0
 DEBUG   = 1
 PORT    = /dev/ttyUSB0
 

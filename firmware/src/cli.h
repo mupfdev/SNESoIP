@@ -37,6 +37,10 @@
 #define SERVER_PORT_LEN  0x02
 #define SERVER_HOST_LEN  0x40
 
+#ifndef CLI
+#define CLI 1
+#endif
+
 
 #include <avr/eeprom.h>
 #include <ctype.h>

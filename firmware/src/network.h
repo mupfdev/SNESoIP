@@ -31,6 +31,7 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host);
 void     initNetwork(uint8_t *mac);
 uint8_t *resolveMAC(uint8_t *buffer);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
+uint8_t tcpResultCallback(uint8_t fd, uint8_t status, uint16_t pos, uint16_t len);
 // To avoid compiler warning about implicit declaration of function:
 uint8_t eth_type_is_arp_and_my_ip(uint8_t *buf, uint16_t len);
 void    make_arp_answer_from_request(uint8_t *buf);

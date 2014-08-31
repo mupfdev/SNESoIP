@@ -95,3 +95,13 @@ uint8_t *setIPviaDHCP(uint8_t *buffer) {
 
 	return myip;
 }
+
+
+uint8_t tcpResultCallback(uint8_t fd, uint8_t status, uint16_t pos, uint16_t len) {
+	fd     = fd;
+	status = status;
+	pos    = pos;
+	len    = len;
+
+	return 1;
+}

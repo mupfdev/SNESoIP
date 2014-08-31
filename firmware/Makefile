@@ -26,6 +26,7 @@ $(PRG).elf: $(OBJ)
 	-Werror \
 	-Wextra \
 	-DBAUD=$(BAUD) \
+	-DCLI=$(CLI) \
 	-DDEBUG=$(DEBUG) \
 	-DF_CPU=$(F_CPU) \
 	-g -mmcu=$(MCU) -c -o $@

@@ -30,10 +30,8 @@ int main(void) {
 
 	// Command-line interface: B + Y at boot time.
 	port0 = recvInput();
-	if (port0 == 0xfffc) {
-		DEBUG_MSG("\r\nCommand-line interface.");
+	if (port0 == 0xfffc)
 		initCLI(buffer);
-	}
 
 
 	// Initialise network interface.
@@ -61,9 +59,17 @@ int main(void) {
 	uartPrintArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
 	DEBUG_MSG("\r\n");
 
+	ledOnGreen();	// Connected.
 
-	// Connected.
-	ledOnGreen();
+
+	// Login test.
+	//uint8_t loginState = 0;
+
+	while (1) {
+
+
+		break;
+	}
 
 
 	while (1) {
