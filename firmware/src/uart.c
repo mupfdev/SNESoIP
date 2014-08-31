@@ -25,14 +25,14 @@ uint8_t uartGetc(void) {
 }
 
 
-void uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter) {
+void uartPrintArray(unsigned char *array, uint8_t size, uint8_t base, char delimiter) {
 	char tmp[7];
 
 	for (int i = 0; i < size; i++) {
 		if ( (array[i] <= 0x0F) && (base == 16) )
 			uartPutc('0');
 
-		uartPuts((uint8_t *)itoa(array[i], tmp, base));
+		uartPuts(itoa(array[i], tmp, base));
 		if (i < size - 1) uartPutc(delimiter);
 	}
 }
@@ -44,7 +44,7 @@ void uartPutc(uint8_t c) {
 }
 
 
-void uartPuts(uint8_t *s) {
+void uartPuts(char *s) {
 	while (*s) {
 		uartPutc(*s);
 		s++;

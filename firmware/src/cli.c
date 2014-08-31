@@ -67,7 +67,7 @@ int8_t initCLI(uint8_t *buffer) {
 				i--;
 				buffer[i] = '\0';
 				clearLine();
-				uartPuts(buffer);
+				uartPuts((char *)buffer);
 				continue;
 			}
 
@@ -93,11 +93,11 @@ int8_t initCLI(uint8_t *buffer) {
 
 				i = execCommand(buffer, buffer + tmp);
 				if (i == INVALID_COMMAND) {
-					uartPuts(buffer);
+					uartPuts((char *)buffer);
 					PUTS_P(": invalid command.");
 				}
 				if (i == INVALID_PARAM) {
-					uartPuts(buffer + tmp);
+					uartPuts((char *)buffer + tmp);
 					PUTS_P(": invalid parameter.");
 				}
 
@@ -166,7 +166,6 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 		if (macIsValid(param) == -1)
 			return INVALID_PARAM;
 
-		uartPuts(param);
 		buffer[0] = hextoi(param);
 		buffer[1] = hextoi(param +  3);
 		buffer[2] = hextoi(param +  6);

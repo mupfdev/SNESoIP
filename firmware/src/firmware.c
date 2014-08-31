@@ -38,25 +38,25 @@ int main(void) {
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
 	initNetwork(buffer);
 	DEBUG_MSG("\r\nMAC: ");
-	uartPrintArray(buffer, 6, 16, ':');
+	uartPrintArray((unsigned char *)buffer, 6, 16, ':');
 	DEBUG_MSG("\r\n");
 
 
 	// Get the initial IP via DHCP and configure network.
 	DEBUG_MSG("IP: ");
-	uartPrintArray(setIPviaDHCP(buffer), 4, 10, '.');
+	uartPrintArray((unsigned char *)setIPviaDHCP(buffer), 4, 10, '.');
 	DEBUG_MSG("\r\n");
 
 
 	// Resolve MAC address from server or gateway.
 	DEBUG_MSG("Gateway MAC: ");
-	uartPrintArray(resolveMAC(buffer), 6, 16, ':');
+	uartPrintArray((unsigned char *)resolveMAC(buffer), 6, 16, ':');
 	DEBUG_MSG("\r\n");
 
 
 	// Perform DNS lookup of server hostname.
 	DEBUG_MSG("Server: ");
-	uartPrintArray(dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
+	uartPrintArray((unsigned char *)dnsLookup(buffer, "snesoip.de"), 4, 10, '.');
 	DEBUG_MSG("\r\n");
 
 	ledOnGreen();	// Connected.

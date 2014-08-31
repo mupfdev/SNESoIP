@@ -29,9 +29,9 @@
 
 void    initUART(void);
 uint8_t uartGetc(void);
-void    uartPrintArray(uint8_t *array, uint8_t size, uint8_t base, char delimiter);
-void    uartPutc(uint8_t c);
-void    uartPuts(uint8_t *s);
+void    uartPrintArray(unsigned char *array, uint8_t size, uint8_t base, char delimiter);
+void    uartPutc(unsigned char c);
+void    uartPuts(char *s);
 void    uartPuts_P (const char *s);
 
 
