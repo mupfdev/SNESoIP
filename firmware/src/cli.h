@@ -23,13 +23,6 @@
 #define SERVER_PORT      0x66
 #define SERVER_HOST      0x68
 
-#define UDP_PORT_MIN_L   0x62
-#define UDP_PORT_MIN_H   0x63
-#define UDP_PORT_MAX_L   0x64
-#define UDP_PORT_MAX_H   0x65
-#define SERVER_PORT_L    0x66
-#define SERVER_PORT_H    0x67
-
 #define FLAGS_LEN        0x04
 #define MYMAC_LEN        0x06
 #define MYIP_LEN         0x04
@@ -47,7 +40,7 @@
 #if (CLI)
   #define CLI_ONLY(x...) x
 #else
-#define CLI_ONLY(x) {}
+  #define CLI_ONLY(x) {}
 #endif
 
 
@@ -60,7 +53,7 @@
 void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 #if (CLI)
-int8_t initCLI(uint8_t *buffer);
+  int8_t initCLI(uint8_t *buffer);
 #endif
 
 

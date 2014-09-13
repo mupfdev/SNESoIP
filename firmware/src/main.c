@@ -11,14 +11,12 @@
 
 int main(void) {
 	INIT_BUFFER;
-	snesIO  port0       = 0xffff;
-	uint8_t tcpPortLow  = 0;
-	uint8_t tcpPortHigh = 0;
-	uint8_t tmp[64];
-	uint8_t *p          = 0;
+	uint8_t  loginState  = 0;
+	uint8_t *p           = 0;
+	snesIO   port0       = 0xffff;
+	uint16_t serverPort  = 0;
+	uint8_t  tmp[64];
 
-	getConfigParam(&tcpPortLow,  SERVER_PORT_L, 1);
-	getConfigParam(&tcpPortHigh, SERVER_PORT_H, 1);
 	memset(tmp, 0, 64);
 
 
@@ -34,6 +32,7 @@ int main(void) {
 	port0 = recvInput();
 	if (port0 == 0xfffc)
 		CLI_ONLY(initCLI(buffer););
+	getConfigParam((uint8_t *)&serverPort,  SERVER_PORT, SERVER_PORT_LEN);
 
 
 	// Initialise network interface.
@@ -85,75 +84,64 @@ int main(void) {
 	END_DEBUG_ONLY;
 
 
-	// Say a friendly HELO and initiate server login.
 	ledOnGreen();
-	// TODO.
+	www_server_port(serverPort);
+	register_ping_rec_callback(&pingCallback);
+
+
+	loginState = 1; // Test.
 
 
 	while (1) {
-		uint16_t received;
+		uint16_t plen;
 		uint16_t datp;
-		received = enc28j60PacketReceive(BUFFER_SIZE, buffer);
 
+		plen = enc28j60PacketReceive(BUFFER_SIZE, buffer);
+		datp = packetloop_arp_icmp_tcp(buffer, plen);
 
 		// Do something while no packet in queue.
-		if (received == 0) {
+		if (datp == 0) {
 			port0 = recvInput();
 
-
-			//sendOutput(port0, port0);
+			sendOutput(port0, port0);
 			continue;
 		}
 
 
-		// Answer to ARP requests.
-		if (eth_type_is_arp_and_my_ip(buffer, received)) {
-			make_arp_answer_from_request(buffer);
-			continue;
+		if (loginState == 1)
+			if (strncmp("HELO client:", (char *)&(buffer[datp]), 12) == 0) {
+				loginState = 2;
+
+				getConfigParam(tmp, USERNAME, USERNAME_LEN);
+				plen = 0;
+				plen = fill_tcp_data_p(buffer, plen, PSTR("USER "));
+				plen = fill_tcp_data(buffer, plen, (const char *)tmp);
+
+				www_server_reply(buffer, plen);
+				continue;
+			}
+
+
+		if (loginState == 2) {
+			DEBUG_ONLY(PUTS_P("Logged in.\r\n"););
 		}
 
 
 		// Check if IP packets (ICMP or UDP) are for us.
-		if (eth_type_is_ip_and_my_ip(buffer, received) == 0)
+		if (eth_type_is_ip_and_my_ip(buffer, plen) == 0)
 			continue;
 
 
-		// Answer ping with pong.
-		IF_PING() {
-			DEBUG_ONLY(PUTS_P("Pong\r\n"););
-
-			make_echo_reply_from_request(buffer, received);
-			continue;
-		}
-
-
-		// Process incoming TCP data.
-		IF_TCP(tcpPortLow, tcpPortHigh) {
-			if (buffer[TCP_FLAGS_P] & TCP_FLAGS_SYN_V){
-				make_tcp_synack_from_syn(buffer);
-				continue;
-			}
-
-			if (buffer[TCP_FLAGS_P] & TCP_FLAGS_ACK_V) {
-				datp = get_tcp_data_len(buffer);
-
-				if (datp == 0) { // No data, just ack.
-					if (buffer[TCP_FLAGS_P] & TCP_FLAGS_FIN_V)
-						make_tcp_ack_from_any(buffer, 0, 0);
-					continue;
-				}
-
-				if (strncmp("HELO ", (char *)&(buffer[datp]), 5) != 0) {
-					DEBUG_ONLY(PUTS_P("HELO\r\n"););
-					make_tcp_ack_from_any(buffer, 0, 0);
-					make_tcp_ack_with_data_noflags(buffer, received);
-					continue;
-				}
-				continue;
-			}
-		}
-
-
+		// UDP placeholder.
 	}
+
+
 	return (0);
+}
+
+
+void pingCallback(uint8_t *ip) {
+	ip = ip;
+
+	DEBUG_ONLY(PUTS_P("Pong\r\n"););
 }

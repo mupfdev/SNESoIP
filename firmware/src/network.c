@@ -16,8 +16,13 @@ static uint8_t  gwmac[6];
 static uint8_t  serverip[4];
 static uint8_t  netmask[4];
 
+static uint8_t *bufptr;
+static uint16_t plen;
 
-static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
+
+static void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
+static uint16_t tcpDatafillCallback(uint8_t fd);
+static uint8_t  tcpResultCallback(uint8_t fd, uint8_t status, uint16_t startPosOfData, uint16_t lenOfData);
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host) {
@@ -41,6 +46,13 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 
 	dnslkup_get_ip(serverip);
 	return serverip;
+}
+
+
+void fillTCPdata_P(uint8_t *buffer, const char *s) {
+	bufptr = buffer;
+
+	plen = fill_tcp_data_p(bufptr, 0, s);
 }
 
 
@@ -77,6 +89,11 @@ uint8_t *resolveMAC(uint8_t *buffer) {
 }
 
 
+uint8_t sendTCPrequest(uint16_t port) {
+	return client_tcp_req(&tcpResultCallback, &tcpDatafillCallback, port, serverip, gwmac);
+}
+
+
 uint8_t *setIPviaDHCP(uint8_t *buffer) {
 	int8_t   i = 0;
 	uint16_t received;
@@ -97,4 +114,22 @@ static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac)
 	ip = ip;
 	if (refnum == TRANS_NUM_GWMAC)
 		memcpy(gwmac, mac, 6);
+}
+
+
+static uint16_t tcpDatafillCallback(uint8_t fd) {
+	if (fd == 0)
+		return plen;
+
+	return 0;
+}
+
+
+static uint8_t tcpResultCallback(uint8_t fd, uint8_t status, uint16_t startPosOfData, uint16_t lenOfData){
+	fd             = fd;
+	status         = status;
+	startPosOfData = startPosOfData;
+	lenOfData      = lenOfData;
+
+	return 0;
 }

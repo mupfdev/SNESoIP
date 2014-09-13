@@ -14,7 +14,7 @@
   #define BEGIN_DEBUG_ONLY if (1) {
   #define END_DEBUG_ONLY }
 #else
-#define DEBUG_ONLY(x) {}
+  #define DEBUG_ONLY(x) {}
   #define BEGIN_DEBUG_ONLY if (0) {
   #define END_DEBUG_ONLY }
 #endif
@@ -26,6 +26,9 @@
 #include "snesio.h"
 #include "trivium.h"
 #include "uart.h"
+
+
+void pingCallback(uint8_t *ip);
 
 
 #endif
