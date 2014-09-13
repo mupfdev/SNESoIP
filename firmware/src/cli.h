@@ -1,5 +1,5 @@
 /* cli.h -*-c-*-
- * Command-line interface.
+ * Command-line/config interface.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
@@ -23,6 +23,13 @@
 #define SERVER_PORT      0x66
 #define SERVER_HOST      0x68
 
+#define UDP_PORT_MIN_L   0x62
+#define UDP_PORT_MIN_H   0x63
+#define UDP_PORT_MAX_L   0x64
+#define UDP_PORT_MAX_H   0x65
+#define SERVER_PORT_L    0x66
+#define SERVER_PORT_H    0x67
+
 #define FLAGS_LEN        0x04
 #define MYMAC_LEN        0x06
 #define MYIP_LEN         0x04
@@ -38,7 +45,7 @@
 #define SERVER_HOST_LEN  0x40
 
 #ifndef CLI
-#define CLI 1
+#define CLI 0
 #endif
 
 
@@ -49,9 +56,10 @@
 
 
 void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-int8_t initCLI(uint8_t *buffer);
 void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
-void   wipeEEPROM();
+#if (CLI)
+int8_t initCLI(uint8_t *buffer);
+#endif
 
 
 #endif

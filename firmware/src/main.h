@@ -1,4 +1,4 @@
-/* firmware.h -*-c-*-
+/* main.h -*-c-*-
  * SNESoIP firmware.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
@@ -6,10 +6,12 @@
  * license.  See the file LICENSE for details. */
 
 
-#ifndef FIRMWARE_h
-#define FIRMWARE_h
+#ifndef MAIN_h
+#define MAIN_h
 
-#define DEBUG_MSG(s) if (debug == 1) PUTS_P(s)
+#ifndef CLI
+#define CLI 0
+#endif
 
 
 #include "cli.h"

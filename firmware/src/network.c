@@ -9,19 +9,15 @@
 #include "network.h"
 
 
-static uint8_t myip[4];
-static uint8_t mymac[6];
-static uint8_t gwip[4];
-static uint8_t gwmac[6];
-static uint8_t serverip[4];
-static uint8_t netmask[4];
+static uint8_t  myip[4];
+static uint8_t  mymac[6];
+static uint8_t  gwip[4];
+static uint8_t  gwmac[6];
+static uint8_t  serverip[4];
+static uint8_t  netmask[4];
 
 
-void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
-	ip = ip;
-	if (refnum == TRANS_NUM_GWMAC)
-		memcpy(gwmac, mac, 6);
-}
+static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host) {
@@ -97,11 +93,8 @@ uint8_t *setIPviaDHCP(uint8_t *buffer) {
 }
 
 
-uint8_t tcpResultCallback(uint8_t fd, uint8_t status, uint16_t pos, uint16_t len) {
-	fd     = fd;
-	status = status;
-	pos    = pos;
-	len    = len;
-
-	return 1;
+static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
+	ip = ip;
+	if (refnum == TRANS_NUM_GWMAC)
+		memcpy(gwmac, mac, 6);
 }

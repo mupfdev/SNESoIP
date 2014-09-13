@@ -27,7 +27,7 @@
 // a server answering to UDP messages
 #undef UDP_server
 // a web server
-#undef WWW_server
+#define WWW_server
 //
 
 // to send out a ping:

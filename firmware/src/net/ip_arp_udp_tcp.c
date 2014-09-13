@@ -33,7 +33,6 @@
 //
 static uint8_t macaddr[6];
 static uint8_t ipaddr[4]={0,0,0,0};
-static uint8_t seqnum=0xa; // my initial tcp sequence number
 static void (*icmp_callback)(uint8_t *ip);
 //
 #if defined (NTP_client) || defined (UDP_client) || defined (TCP_client) || defined (PING_client)
@@ -41,6 +40,7 @@ static void (*icmp_callback)(uint8_t *ip);
 #define ALL_clients 1
 #endif
 #if defined (WWW_client) || defined (TCP_client) 
+static uint8_t seqnum=0xa; // my initial tcp sequence number
 // just lower byte, the upper byte is TCPCLIENT_SRC_PORT_H:
 static uint8_t tcpclient_src_port_l=1; 
 static uint8_t tcp_fd=0; // a file descriptor, will be encoded into the port
@@ -1312,7 +1312,9 @@ uint8_t packetloop_icmp_checkreply(uint8_t *buf,uint8_t *ip_monitoredhost)
 // of the tcp data if there is tcp data part
 uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
 {
+#if defined (WWW_server) || defined (TCP_client)
         uint16_t len;
+#endif
 #if defined (TCP_client)
         uint8_t send_fin=0;
         uint16_t tcpstart;

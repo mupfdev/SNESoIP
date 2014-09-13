@@ -13,7 +13,7 @@ F_CPU   = 16000000UL
 MCU     = atmega168
 OBJ     = src/cli.o \
           src/duoled.o \
-          src/firmware.o \
+          src/main.o \
           src/network.o \
           src/snesio.o \
           src/trivium.o \

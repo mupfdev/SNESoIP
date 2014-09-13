@@ -1,5 +1,5 @@
 /* cli.c -*-c-*-
- * Command-line interface.
+ * Command-line/config interface.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like
@@ -26,6 +26,7 @@ static int8_t   portIsValid(uint8_t *port);
 static void     strToIP(uint8_t *ip, uint8_t *dst);
 static uint32_t strtoint(char* str);
 static uint32_t strntoint(char* str, int n);
+static void     wipeEEPROM();
 
 
 static const char cmd_quit[]         PROGMEM = "quit";
@@ -120,22 +121,11 @@ int8_t initCLI(uint8_t *buffer) {
 
 	}
 }
-#else
-int8_t initCLI(uint8_t *buffer) {
-	buffer[0] = '\0';
-	return 0;
-}
 #endif
 
 
 void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 	eeprom_update_block(param, offset, length);
-}
-
-
-void wipeEEPROM() {
-	for (uint16_t i = 0; i < 1024; i++)
-		eeprom_update_byte(i, 0);
 }
 
 
@@ -249,8 +239,8 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 			return INVALID_PARAM;
 
 		port = strtoint((char *)param);
-		buffer[0] = (port >> 8);
-		buffer[1] =  port & 0xff;
+		buffer[0] =  port & 0xff;
+		buffer[1] = (port >> 8);
 		setConfigParam(buffer, UDP_PORT_MIN, UDP_PORT_MIN_LEN);
 		return 0;
 	}
@@ -261,8 +251,8 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 			return INVALID_PARAM;
 
 		port = strtoint((char *)param);
-		buffer[0] = (port >> 8);
-		buffer[1] =  port & 0xff;
+		buffer[0] =  port & 0xff;
+		buffer[1] = (port >> 8);
 		setConfigParam(buffer, UDP_PORT_MAX, UDP_PORT_MAX_LEN);
 		return 0;
 	}
@@ -273,8 +263,8 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 			return INVALID_PARAM;
 
 		port = strtoint((char *)param);
-		buffer[0] = (port >> 8);
-		buffer[1] =  port & 0xff;
+		buffer[0] =  port & 0xff;
+		buffer[1] = (port >> 8);
 		setConfigParam(buffer, SERVER_PORT, SERVER_PORT_LEN);
 		return 0;
 	}
@@ -421,5 +411,11 @@ static uint32_t strntoint(char* str, int n) {
 	}
 
 	return sign * ret;
+}
+
+
+static void wipeEEPROM() {
+	for (uint16_t i = 0; i < 1024; i++)
+		eeprom_update_byte(i, 0);
 }
 #endif
