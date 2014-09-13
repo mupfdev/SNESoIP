@@ -9,8 +9,14 @@
 #ifndef MAIN_h
 #define MAIN_h
 
-#ifndef CLI
-#define CLI 0
+#if (DEBUG)
+  #define DEBUG_ONLY(x...) x
+  #define BEGIN_DEBUG_ONLY if (1) {
+  #define END_DEBUG_ONLY }
+#else
+#define DEBUG_ONLY(x) {}
+  #define BEGIN_DEBUG_ONLY if (0) {
+  #define END_DEBUG_ONLY }
 #endif
 
 

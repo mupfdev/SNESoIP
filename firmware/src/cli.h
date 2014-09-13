@@ -44,8 +44,10 @@
 #define SERVER_PORT_LEN  0x02
 #define SERVER_HOST_LEN  0x40
 
-#ifndef CLI
-#define CLI 0
+#if (CLI)
+  #define CLI_ONLY(x...) x
+#else
+#define CLI_ONLY(x) {}
 #endif
 
 

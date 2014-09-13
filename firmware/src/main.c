@@ -11,10 +11,11 @@
 
 int main(void) {
 	INIT_BUFFER;
-	snesIO  port0 = 0xffff;
+	snesIO  port0       = 0xffff;
 	uint8_t tcpPortLow  = 0;
 	uint8_t tcpPortHigh = 0;
 	uint8_t tmp[64];
+	uint8_t *p          = 0;
 
 	getConfigParam(&tcpPortLow,  SERVER_PORT_L, 1);
 	getConfigParam(&tcpPortHigh, SERVER_PORT_H, 1);
@@ -32,57 +33,56 @@ int main(void) {
 	// Command-line interface: B + Y at boot time.
 	port0 = recvInput();
 	if (port0 == 0xfffc)
-#if (CLI)
-		initCLI(buffer);
-#endif
+		CLI_ONLY(initCLI(buffer););
 
 
 	// Initialise network interface.
 	getConfigParam(buffer, MYMAC, MYMAC_LEN);
 	initNetwork(buffer);
-#if (DEBUG)
+
+	BEGIN_DEBUG_ONLY;
 	PUTS_P("\r\nMAC: ");
 	uartPrintArray((unsigned char *)buffer, 6, 16, ':');
 	PUTS_P("\r\n");
-#endif
+	END_DEBUG_ONLY;
 
 
 	// Get the initial IP via DHCP and configure network.
-#if (DEBUG)
-	PUTS_P("IP: ");
-	uartPrintArray((unsigned char *)setIPviaDHCP(buffer), 4, 10, '.');
+	DEBUG_ONLY(PUTS_P("IP: "););
+
+	p = setIPviaDHCP(buffer);
+
+	BEGIN_DEBUG_ONLY;
+	uartPrintArray((unsigned char *)p, 4, 10, '.');
 	PUTS_P("\r\n");
-#else
-	setIPviaDHCP(buffer);
-#endif
+	END_DEBUG_ONLY;
 
 
 	// Resolve MAC address from server or gateway.
-#if (DEBUG)
-	PUTS_P("Gateway MAC: ");
-	uartPrintArray((unsigned char *)resolveMAC(buffer), 6, 16, ':');
+	DEBUG_ONLY(PUTS_P("Gateway MAC: "););
+
+	p = resolveMAC(buffer);
+
+	BEGIN_DEBUG_ONLY;
+	uartPrintArray((unsigned char *)p, 6, 16, ':');
 	PUTS_P("\r\n");
-#else
-	resolveMAC(buffer);
-#endif
+	END_DEBUG_ONLY;
 
 
 	// Perform DNS lookup of server hostname.
 	getConfigParam(tmp, SERVER_HOST, SERVER_HOST_LEN);
-	if (tmp[0] != '\0') {
-#if (DEBUG)
-		PUTS_P("Server: ");
-		uartPrintArray((unsigned char *)dnsLookup(buffer, (char *)tmp), 4, 10, '.');
-		PUTS_P("\r\n");
-#else
-		dnsLookup(buffer, (char *)tmp);
-#endif
-	} else {
-#if (DEBUG)
-		PUTS_P("Error: server host not set.\r\n");
+	if (tmp[0] == '\0') {
+		DEBUG_ONLY(PUTS_P("Error: server host not set.\r\n"));
 		return -1;
-#endif
 	}
+	DEBUG_ONLY(PUTS_P("Server: "));;
+
+	p = dnsLookup(buffer, (char *)tmp);
+
+	BEGIN_DEBUG_ONLY;
+	uartPrintArray((unsigned char *)p, 4, 10, '.');
+	PUTS_P("\r\n");
+	END_DEBUG_ONLY;
 
 
 	// Say a friendly HELO and initiate server login.
@@ -120,9 +120,7 @@ int main(void) {
 
 		// Answer ping with pong.
 		IF_PING() {
-#if (DEBUG)
-			PUTS_P("Pong\r\n");
-#endif
+			DEBUG_ONLY(PUTS_P("Pong\r\n"););
 
 			make_echo_reply_from_request(buffer, received);
 			continue;
@@ -146,7 +144,7 @@ int main(void) {
 				}
 
 				if (strncmp("HELO ", (char *)&(buffer[datp]), 5) != 0) {
-					PUTS_P("HELO received.\r\n");
+					DEBUG_ONLY(PUTS_P("HELO\r\n"););
 					make_tcp_ack_from_any(buffer, 0, 0);
 					make_tcp_ack_with_data_noflags(buffer, received);
 					continue;
