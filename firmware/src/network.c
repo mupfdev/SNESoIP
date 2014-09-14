@@ -16,13 +16,14 @@ static uint8_t  gwmac[6];
 static uint8_t  serverip[4];
 static uint8_t  netmask[4];
 
-static uint8_t *bufptr;
-static uint16_t plen;
+static uint8_t *bufp;
+static char     tcpBuffer[TCP_BUFFER_SIZE];
+static uint8_t  tcpFD = 0;
 
 
 static void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
 static uint16_t tcpDatafillCallback(uint8_t fd);
-static uint8_t  tcpResultCallback(uint8_t fd, uint8_t status, uint16_t startPosOfData, uint16_t lenOfData);
+static uint8_t  tcpResultCallback(uint8_t fd, uint8_t statuscode, uint16_t datapos, uint16_t datalen);
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host) {
@@ -49,13 +50,6 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 }
 
 
-void fillTCPdata_P(uint8_t *buffer, const char *s) {
-	bufptr = buffer;
-
-	plen = fill_tcp_data_p(bufptr, 0, s);
-}
-
-
 void initNetwork(uint8_t *mac) {
 	memcpy(mymac, mac, 6);
 
@@ -68,6 +62,12 @@ void initNetwork(uint8_t *mac) {
 	enc28j60PhyWrite(PHLCON, 0x476);
 	_delay_ms(100);
 	init_mac(mymac);
+}
+
+
+void initTCPclient(uint8_t *buffer) {
+	bufp = buffer;
+	memset(tcpBuffer, 0, TCP_BUFFER_SIZE);
 }
 
 
@@ -89,8 +89,9 @@ uint8_t *resolveMAC(uint8_t *buffer) {
 }
 
 
-uint8_t sendTCPrequest(uint16_t port) {
-	return client_tcp_req(&tcpResultCallback, &tcpDatafillCallback, port, serverip, gwmac);
+void sendTCPrequest(char *data, uint16_t port) {
+	memcpy(tcpBuffer, data, TCP_BUFFER_SIZE);
+	tcpFD = client_tcp_req(&tcpResultCallback,&tcpDatafillCallback, port, serverip, gwmac);
 }
 
 
@@ -118,18 +119,22 @@ static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac)
 
 
 static uint16_t tcpDatafillCallback(uint8_t fd) {
-	if (fd == 0)
-		return plen;
+	uint16_t len = 0;;
+
+	if (fd == tcpFD) {
+		len = fill_tcp_data(bufp, 0, tcpBuffer);
+		return len;
+	}
 
 	return 0;
 }
 
 
-static uint8_t tcpResultCallback(uint8_t fd, uint8_t status, uint16_t startPosOfData, uint16_t lenOfData){
-	fd             = fd;
-	status         = status;
-	startPosOfData = startPosOfData;
-	lenOfData      = lenOfData;
+static uint8_t tcpResultCallback(uint8_t fd, uint8_t statuscode, uint16_t datapos, uint16_t datalen) {
+	fd         = fd;
+	statuscode = statuscode;
+	datapos    = datapos;
+	datalen    = datalen;
 
 	return 0;
 }

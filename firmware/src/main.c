@@ -32,7 +32,7 @@ int main(void) {
 	port0 = recvInput();
 	if (port0 == 0xfffc)
 		CLI_ONLY(initCLI(buffer););
-	getConfigParam((uint8_t *)&serverPort,  SERVER_PORT, SERVER_PORT_LEN);
+	getConfigParam((uint8_t *)&serverPort, SERVER_PORT, SERVER_PORT_LEN);
 
 
 	// Initialise network interface.
@@ -85,11 +85,8 @@ int main(void) {
 
 
 	ledOnGreen();
-	www_server_port(serverPort);
 	register_ping_rec_callback(&pingCallback);
-
-
-	loginState = 1; // Test.
+	initTCPclient(buffer);
 
 
 	while (1) {
@@ -99,45 +96,25 @@ int main(void) {
 		plen = enc28j60PacketReceive(BUFFER_SIZE, buffer);
 		datp = packetloop_arp_icmp_tcp(buffer, plen);
 
+
 		// Do something while no packet in queue.
 		if (datp == 0) {
 			port0 = recvInput();
 
+			if (loginState == 0) { // Initiate server login.
+				sendTCPrequest("HELO", serverPort);
+				loginState = 1;
+			}
+
 			sendOutput(port0, port0);
 			continue;
 		}
-
-
-		if (loginState == 1)
-			if (strncmp("HELO client:", (char *)&(buffer[datp]), 12) == 0) {
-				loginState = 2;
-
-				getConfigParam(tmp, USERNAME, USERNAME_LEN);
-				plen = 0;
-				plen = fill_tcp_data_p(buffer, plen, PSTR("USER "));
-				plen = fill_tcp_data(buffer, plen, (const char *)tmp);
-
-				www_server_reply(buffer, plen);
-				continue;
-			}
-
-
-		if (loginState == 2) {
-			DEBUG_ONLY(PUTS_P("Logged in.\r\n"););
-		}
-
-
-		// Check if IP packets (ICMP or UDP) are for us.
-		if (eth_type_is_ip_and_my_ip(buffer, plen) == 0)
-			continue;
-
-
-		// UDP placeholder.
 	}
 
 
 	return (0);
 }
+
 
 
 void pingCallback(uint8_t *ip) {
