@@ -12,7 +12,7 @@
 #define INIT_BUFFER uint8_t buffer[BUFFER_SIZE + 1]; memset(buffer, 0, BUFFER_SIZE)
 
 #define BUFFER_SIZE     500 // Do NOT change this value.
-#define TCP_DATA_SIZE    32
+#define TCP_BUFFER_SIZE  64
 #define TRANS_NUM_GWMAC   1
 
 
@@ -27,11 +27,14 @@
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host);
+int8_t  getTCPresult(uint8_t *buffer);
 void     initNetwork(uint8_t *mac);
 void     initTCPclient(uint8_t *buffer);
 uint8_t *resolveMAC(uint8_t *buffer);
 void     sendTCPrequest(char *data, uint16_t port);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
+
+void tcp_client_syn(uint8_t *buf, uint8_t srcport, uint16_t dstport);
 
 
 #endif

@@ -48,6 +48,7 @@ static uint8_t tcp_otherside_ip[4];
 static uint8_t tcp_dst_mac[6]; // normally the gateway via which we want to send
 static uint8_t tcp_client_state=0;
 static uint16_t tcp_client_port=0;
+static uint8_t syn_has_already_been_sent=0;
 // This function will be called if we ever get a result back from the
 // TCP connection to the sever:
 // close_connection= your_client_tcp_result_callback(uint8_t fd, uint8_t statuscode,uint16_t data_start_pos_in_buf, uint16_t len_of_data){...your code}
@@ -1163,6 +1164,24 @@ uint8_t client_tcp_req(uint8_t (*result_callback)(uint8_t fd,uint8_t statuscode,
         }
         return(tcp_fd);
 }
+// same as above but it sends the SYN packet only once.
+uint8_t client_tcp_req_single_syn(uint8_t (*result_callback)(uint8_t fd,uint8_t statuscode,uint16_t data_start_pos_in_buf, uint16_t len_of_data),uint16_t (*datafill_callback)(uint8_t fd),uint16_t port,uint8_t *dstip,uint8_t *dstmac)
+{
+        uint8_t i=0;
+        client_tcp_result_callback=result_callback;
+        client_tcp_datafill_callback=datafill_callback;
+        while(i<4){tcp_otherside_ip[i]=dstip[i];i++;}
+        i=0;
+        while(i<6){tcp_dst_mac[i]=dstmac[i];i++;}
+        tcp_client_port=port;
+        if (syn_has_already_been_sent==0)tcp_client_state=1; // send a syn
+				else tcp_client_state=3;
+        tcp_fd++;
+        if (tcp_fd>7){
+                tcp_fd=0;
+        }
+        return(tcp_fd);
+}
 #endif //  TCP_client
 
 #if defined (WWW_client) 
@@ -1340,6 +1359,7 @@ uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
                         // way we get it back in every message that comes
                         // from the server:
                         tcp_client_syn(buf,((tcp_fd<<5) | (0x1f & tcpclient_src_port_l)),tcp_client_port);
+                        syn_has_already_been_sent = 1;
                 }
 #endif
                 return(0);

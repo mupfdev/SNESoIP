@@ -16,9 +16,10 @@ static uint8_t  gwmac[6];
 static uint8_t  serverip[4];
 static uint8_t  netmask[4];
 
-static uint8_t *bufp;
-static char     tcpBuffer[TCP_BUFFER_SIZE];
-static uint8_t  tcpFD = 0;
+static uint8_t *bufp      = 0;
+static char     tcpRecvBuffer[TCP_BUFFER_SIZE];
+static char     tcpSendBuffer[TCP_BUFFER_SIZE];
+static uint8_t  tcpFD     = 0;
 
 
 static void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
@@ -50,6 +51,15 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 }
 
 
+int8_t getTCPresult(uint8_t *buffer) {
+	if (tcpRecvBuffer[0] == 0) return -1;
+
+	memcpy(buffer, tcpRecvBuffer, TCP_BUFFER_SIZE);
+	memset(tcpRecvBuffer, 0, TCP_BUFFER_SIZE);
+	return 0;
+}
+
+
 void initNetwork(uint8_t *mac) {
 	memcpy(mymac, mac, 6);
 
@@ -67,7 +77,8 @@ void initNetwork(uint8_t *mac) {
 
 void initTCPclient(uint8_t *buffer) {
 	bufp = buffer;
-	memset(tcpBuffer, 0, TCP_BUFFER_SIZE);
+	memset(tcpRecvBuffer, 0, TCP_BUFFER_SIZE);
+	memset(tcpSendBuffer, 0, TCP_BUFFER_SIZE);
 }
 
 
@@ -90,8 +101,8 @@ uint8_t *resolveMAC(uint8_t *buffer) {
 
 
 void sendTCPrequest(char *data, uint16_t port) {
-	memcpy(tcpBuffer, data, TCP_BUFFER_SIZE);
-	tcpFD = client_tcp_req(&tcpResultCallback,&tcpDatafillCallback, port, serverip, gwmac);
+	memcpy(tcpSendBuffer, data, TCP_BUFFER_SIZE);
+	tcpFD = client_tcp_req_single_syn(&tcpResultCallback, &tcpDatafillCallback, port, serverip, gwmac);
 }
 
 
@@ -122,7 +133,7 @@ static uint16_t tcpDatafillCallback(uint8_t fd) {
 	uint16_t len = 0;;
 
 	if (fd == tcpFD) {
-		len = fill_tcp_data(bufp, 0, tcpBuffer);
+		len = fill_tcp_data(bufp, 0, tcpSendBuffer);
 		return len;
 	}
 
@@ -135,6 +146,15 @@ static uint8_t tcpResultCallback(uint8_t fd, uint8_t statuscode, uint16_t datapo
 	statuscode = statuscode;
 	datapos    = datapos;
 	datalen    = datalen;
+
+	memset(tcpRecvBuffer, 0, TCP_BUFFER_SIZE);
+
+	if (datalen != 0) {
+		if (datalen > TCP_BUFFER_SIZE) datalen = TCP_BUFFER_SIZE;
+		memcpy(tcpRecvBuffer, bufp + datapos, datalen);
+		tcpRecvBuffer[datalen] = '\0';
+		return 0;
+	}
 
 	return 0;
 }

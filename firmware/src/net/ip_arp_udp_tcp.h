@@ -129,6 +129,7 @@ uint8_t get_mac_with_arp_wait(void); // checks current ongoing transaction, retu
 // given the fact that we have very little RAM memory.
 //
 extern uint8_t client_tcp_req(uint8_t (*result_callback)(uint8_t fd,uint8_t statuscode,uint16_t data_start_pos_in_buf, uint16_t len_of_data),uint16_t (*datafill_callback)(uint8_t fd),uint16_t port,uint8_t *dstip,uint8_t *dstmac);
+extern uint8_t client_tcp_req_single_syn(uint8_t (*result_callback)(uint8_t fd,uint8_t statuscode,uint16_t data_start_pos_in_buf, uint16_t len_of_data),uint16_t (*datafill_callback)(uint8_t fd),uint16_t port,uint8_t *dstip,uint8_t *dstmac);
 #endif
 
 #ifdef WWW_client
