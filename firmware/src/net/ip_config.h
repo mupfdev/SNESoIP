@@ -19,13 +19,15 @@
 #undef NTP_client
 // a spontanious sending UDP client (needed as well for DNS and DHCP)
 #define UDP_client
-// a server answering to UDP messages
-#undef UDP_server
+//
+#define TCP_client
 
 // define this if you want to use enc28j60EnableBroadcast/enc28j60DisableBroadcast
 // the dhcp_client.c needs this.
 #define ENC28J60_BROADCAST
 
+// a server answering to UDP messages
+#undef UDP_server
 // a web server
 #undef WWW_server
 
@@ -39,10 +41,8 @@
 // function to send a gratuitous arp
 #undef GRATARP
 
-//
-#define TCP_client
 // a "web browser". This can be use to upload data
-// to a web server on the internet by encoding the data
+// to a web server on the internet by encoding the data 
 // into the url (like a Form action of type GET):
 #undef WWW_client
 // if you do not need a browser and just a server:

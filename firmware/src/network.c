@@ -102,7 +102,7 @@ uint8_t *resolveMAC(uint8_t *buffer) {
 
 void sendTCPrequest(char *data, uint16_t port) {
 	memcpy(tcpSendBuffer, data, TCP_BUFFER_SIZE);
-	tcpFD = client_tcp_req_single_syn(&tcpResultCallback, &tcpDatafillCallback, port, serverip, gwmac);
+	tcpFD = client_tcp_req(&tcpResultCallback, &tcpDatafillCallback, port, serverip, gwmac);
 }
 
 

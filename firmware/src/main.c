@@ -84,7 +84,6 @@ int main(void) {
 	END_DEBUG_ONLY;
 
 
-	ledOnGreen();
 	register_ping_rec_callback(&pingCallback);
 	initTCPclient(buffer);
 
@@ -101,45 +100,32 @@ int main(void) {
 		if (datp == 0) {
 			port0 = recvInput();
 
-
 			if (loginState == 0) {
-				uartPuts("loginState == 0\r\n");
+				DEBUG_ONLY(PUTS_P("-> HELO\r\n"););
 				sendTCPrequest("HELO", serverPort);
 				loginState = 1;
 			}
 
 			if (loginState == 1) {
-				uartPuts("loginState == 1\r\n");
 				if (getTCPresult(tmp) == 0)
-					if (strncmp((char *)tmp, "HELO client:", 12) == 0)
+					if (strncmp("HELO client:", (char *)tmp, 12) == 0) {
+						BEGIN_DEBUG_ONLY;
+						PUTS_P("<- ");
+						uartPuts((char *)tmp);
+						PUTS_P("\r");
+						END_DEBUG_ONLY;
+						ledOnGreen();
 						loginState = 2;
+					}
 			}
 
-			if (loginState == 2) {
-				uartPuts("loginState == 2\r\n");
-				sendTCPrequest("USER client0", serverPort);
+			if (loginState == 2)
 				loginState = 3;
-			}
-
-			if (loginState == 3) {
-				uartPuts("loginState == 3\r\n");
-
-				// DOES NOT WORK. DEBUG ME.
-				sendTCPrequest("USER client0", serverPort);
-				loginState = 4;
-			}
-
-			if (loginState == 4) {
-				uartPuts("loginState == 4\r\n");
-				loginState = 5;
-			}
-
 
 			sendOutput(port0, port0);
 			continue;
 		}
 	}
-
 
 	return (0);
 }
