@@ -34,7 +34,5 @@ uint8_t *resolveMAC(uint8_t *buffer);
 void     sendTCPrequest(char *data, uint16_t port);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
 
-void tcp_client_syn(uint8_t *buf, uint8_t srcport, uint16_t dstport);
-
 
 #endif
