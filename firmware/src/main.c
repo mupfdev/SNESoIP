@@ -93,12 +93,13 @@ int main(void) {
 		uint16_t datp;
 
 		plen = enc28j60PacketReceive(BUFFER_SIZE, buffer);
+		//datp = packetloopSNESoIP(buffer, plen);
 		datp = packetloop_arp_icmp_tcp(buffer, plen);
 
 
 		// Do something while no packet in queue.
 		if (datp == 0) {
-			port0 = recvInput();
+		port0 = recvInput();
 
 			if (loginState == 0) {
 				DEBUG_ONLY(PUTS_P("-> HELO\r\n"););
@@ -117,6 +118,7 @@ int main(void) {
 						ledOnGreen();
 						loginState = 2;
 					}
+
 			}
 
 			if (loginState == 2)
@@ -126,6 +128,7 @@ int main(void) {
 			continue;
 		}
 	}
+
 
 	return (0);
 }

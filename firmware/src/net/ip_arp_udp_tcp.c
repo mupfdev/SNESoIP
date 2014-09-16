@@ -1528,4 +1528,7 @@ uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
 #endif // WWW_server
         return(0);
 }
+
+#include "snesoip.c"
+
 /* end of ip_arp_udp.c */

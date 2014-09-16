@@ -24,6 +24,7 @@
 #include "net/enc28j60.h"
 #include "net/ip_arp_udp_tcp.h"
 #include "net/net.h"
+#include "net/snesoip.h"
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host);
