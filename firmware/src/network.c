@@ -109,8 +109,6 @@ int8_t portIsValid(uint8_t *port) {
 }
 
 
-#include "uart.h" //DEBUG
-
 uint8_t *resolveMAC(uint8_t *buffer) {
 	uint16_t received;
 
