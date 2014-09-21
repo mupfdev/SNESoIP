@@ -24,16 +24,18 @@
 #include "net/enc28j60.h"
 #include "net/ip_arp_udp_tcp.h"
 #include "net/net.h"
-#include "net/snesoip.h"
+#include "utils.h"
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host);
-int8_t  getTCPresult(uint8_t *buffer);
 void     initNetwork(uint8_t *mac);
-void     initTCPclient(uint8_t *buffer);
+int8_t   ipIsValid (const uint8_t *in);
+int8_t   macIsValid(uint8_t *mac);
+int8_t   portIsValid(uint8_t *port);
 uint8_t *resolveMAC(uint8_t *buffer);
-void     sendTCPrequest(char *data, uint16_t port);
 uint8_t *setIPviaDHCP(uint8_t *buffer);
+uint8_t *setIPviaStaticIP(uint8_t *ip, uint8_t *nmask, uint8_t *gw);
+void     strToIP(uint8_t *ip, uint8_t *dst);
 
 
 #endif

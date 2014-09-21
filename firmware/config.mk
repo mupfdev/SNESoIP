@@ -18,6 +18,7 @@ OBJ     = src/cli.o \
           src/snesio.o \
           src/trivium.o \
           src/uart.o \
+          src/utils.o \
           src/net/dhcp_client.o \
           src/net/dnslkup.o \
           src/net/enc28j60.o \

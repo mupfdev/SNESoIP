@@ -9,33 +9,29 @@
 #ifndef CLI_h
 #define CLI_h
 
-#define FLAGS            0x00
-#define MYMAC            0x02
-#define MYIP             0x08
-#define GWIP             0x0C
-#define NETMASK          0x10
-#define DNS              0x14
-#define USERNAME         0x18
-#define PASSWORD         0x38
-#define KEY              0x58
-#define UDP_PORT_MIN     0x62
-#define UDP_PORT_MAX     0x64
-#define SERVER_PORT      0x66
-#define SERVER_HOST      0x68
+#define EEPROM_FLAGS           0x00
+#define EEPROM_MYMAC           0x01
+#define EEPROM_MYIP            0x07
+#define EEPROM_GWIP            0x0b
+#define EEPROM_NETMASK         0x0f
+#define EEPROM_USERNAME        0x13
+#define EEPROM_PASSWORD        0x33
+#define EEPROM_KEY             0x53
+#define EEPROM_SOURCE_PORT     0x5d
+#define EEPROM_SERVER_PORT     0x5f
+#define EEPROM_SERVER_HOST     0x61
 
-#define FLAGS_LEN        0x04
-#define MYMAC_LEN        0x06
-#define MYIP_LEN         0x04
-#define GWIP_LEN         0x04
-#define NETMASK_LEN      0x04
-#define DNS_LEN          0x04
-#define USERNAME_LEN     0x20
-#define PASSWORD_LEN     0x20
-#define KEY_LEN          0x0A
-#define UDP_PORT_MIN_LEN 0x02
-#define UDP_PORT_MAX_LEN 0x02
-#define SERVER_PORT_LEN  0x02
-#define SERVER_HOST_LEN  0x40
+#define EEPROM_FLAGS_LEN       0x01
+#define EEPROM_MYMAC_LEN       0x06
+#define EEPROM_MYIP_LEN        0x04
+#define EEPROM_GWIP_LEN        0x04
+#define EEPROM_NETMASK_LEN     0x04
+#define EEPROM_USERNAME_LEN    0x20
+#define EEPROM_PASSWORD_LEN    0x20
+#define EEPROM_KEY_LEN         0x0a
+#define EEPROM_SOURCE_PORT_LEN 0x02
+#define EEPROM_SERVER_PORT_LEN 0x02
+#define EEPROM_SERVER_HOST_LEN 0x40
 
 #if (CLI)
   #define CLI_ONLY(x...) x
@@ -45,9 +41,9 @@
 
 
 #include <avr/eeprom.h>
-#include <ctype.h>
-#include <string.h>
+#include "network.h"
 #include "uart.h"
+#include "utils.h"
 
 
 void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);

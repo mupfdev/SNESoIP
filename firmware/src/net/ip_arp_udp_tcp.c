@@ -33,7 +33,9 @@
 //
 static uint8_t macaddr[6];
 static uint8_t ipaddr[4]={0,0,0,0};
+#if defined (TCP_client) || defined (WWW_server)
 static uint8_t seqnum=0xa; // my initial tcp sequence number
+#endif
 static void (*icmp_callback)(uint8_t *ip);
 //
 #if defined (NTP_client) || defined (UDP_client) || defined (TCP_client) || defined (PING_client)
@@ -1312,7 +1314,9 @@ uint8_t packetloop_icmp_checkreply(uint8_t *buf,uint8_t *ip_monitoredhost)
 // of the tcp data if there is tcp data part
 uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
 {
+#if defined (TCP_client) || defined (WWW_server)
         uint16_t len;
+#endif
 #if defined (TCP_client)
         uint8_t send_fin=0;
         uint16_t tcpstart;
@@ -1528,7 +1532,4 @@ uint16_t packetloop_arp_icmp_tcp(uint8_t *buf,uint16_t plen)
 #endif // WWW_server
         return(0);
 }
-
-#include "snesoip.c"
-
 /* end of ip_arp_udp.c */
