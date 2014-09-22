@@ -10,15 +10,12 @@
 
 
 int main(void) {
-	INIT_BUFFER;
-	snesIO   port0    = 0xffff;
-	uint8_t  cnt1     = 0;
-	uint8_t  cnt2     = 0;
-	uint8_t *myip     = 0;
-	uint8_t *gwmac    = 0;
-	uint8_t *serverip = 0;
-	uint8_t  tmp1[64];
-	uint8_t  tmp2[4];
+	uint8_t buffer[BUFFER_SIZE + 1];
+	snesIO  port0 = 0xffff;
+	uint8_t tmp1[64];
+	uint8_t tmp2[4];
+
+	memset(buffer, 0, BUFFER_SIZE);
 	memset(tmp1, 0, 64);
 	memset(tmp2, 0, 4);
 
@@ -26,7 +23,6 @@ int main(void) {
 	// Initialise basic I/O.
 	initLed();
 	ledOnRed();
-
 	initUART();
  	INIT_IO();
 
@@ -49,7 +45,14 @@ int main(void) {
 
 
 	// Check if a static IP is set (IP is not 0.0.0.0 nor 255.255.255.255).
+	// Explanation:
+	// 0.0.0.0         : state after 'wipe' command was used.
+	// 255.255.255.255 : default ex-factory.
 	getConfigParam(tmp1, EEPROM_MYIP, EEPROM_MYIP_LEN);
+
+	uint8_t  cnt1 = 0;
+	uint8_t  cnt2 = 0;
+
 	for (uint8_t i = 0; i < 3; i++) {
 		if (tmp1[i] == 0x00) cnt1++;
 		if (tmp1[i] == 0xff) cnt2++;
@@ -57,6 +60,8 @@ int main(void) {
 
 
 	// Set IP (DHCP or static) and confiugure network.
+	uint8_t *myip = 0;
+
 	DEBUG_ONLY(PUTS_P("IP: "););
 	if ((cnt1 == 3) || (cnt2 == 3))
 		myip = setIPviaDHCP(buffer);
@@ -70,10 +75,13 @@ int main(void) {
 	PUTS_P("\r\n");
 	END_DEBUG_ONLY;
 
+	ledOnGreen();
+
 
 	// Resolve MAC address from server or gateway.
 	DEBUG_ONLY(PUTS_P("Gateway MAC: "););
 
+	uint8_t *gwmac = 0;
 	gwmac = resolveMAC(buffer);
 
 	BEGIN_DEBUG_ONLY;
@@ -91,6 +99,7 @@ int main(void) {
 	}
 	DEBUG_ONLY(PUTS_P("Server: "));;
 
+	uint8_t *serverip = 0;
 	serverip = dnsLookup(buffer, (char *)tmp1);
 
 	BEGIN_DEBUG_ONLY;
@@ -99,8 +108,22 @@ int main(void) {
 	END_DEBUG_ONLY;
 
 
+	// Asign source and server port.
+	uint16_t serverPort;
+	uint16_t sourcePort;
+
+	getConfigParam(buffer, EEPROM_SOURCE_PORT, EEPROM_SOURCE_PORT_LEN);
+	sourcePort = ((uint16_t)buffer[1] << 8) | buffer[0];
+	getConfigParam(buffer, EEPROM_SERVER_PORT, EEPROM_SERVER_PORT_LEN);
+	serverPort = ((uint16_t)buffer[1] << 8) | buffer[0];
+
+	if (serverPort == 0) serverPort = 51234;
+	if (sourcePort == 0) sourcePort = 51233;
+
+
+	// -- //
 	register_ping_rec_callback(&pingCallback);
-	ledOnGreen();
+	uint8_t loginState = 0;
 
 
 	while (1) {
@@ -114,12 +137,16 @@ int main(void) {
 		if (datp == 0) {
 			port0 = recvInput();
 
+			if (loginState == 0) {
+				DEBUG_ONLY(PUTS_P("-> HELO\r\n"););
+				send_udp(buffer, "HELO", 4, sourcePort, serverip, serverPort, gwmac);
+				loginState = 1;
+			}
 
 			sendOutput(port0, port0);
 			continue;
 		}
 	}
-
 
 	return (0);
 }

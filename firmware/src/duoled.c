@@ -1,5 +1,5 @@
 /* duoled.c -*-c-*-
- * 
+ * DuoLED control functions.
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
  * This program has has been released under the terms of a BSD-like

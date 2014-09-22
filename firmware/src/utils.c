@@ -9,7 +9,7 @@
 #include "utils.h"
 
 
-// Attention: no string validation!
+// No string validation!
 uint8_t hextoi(uint8_t *s) {
 	uint8_t val;
 
@@ -57,4 +57,3 @@ uint32_t strntoint(char* str, int n) {
 
 	return sign * ret;
 }
-

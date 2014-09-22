@@ -119,8 +119,6 @@ void setConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 }
 
 
-
-
 #if (CLI)
 static void clearLine() {
 	uartPutc('\r');

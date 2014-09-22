@@ -16,6 +16,7 @@
 #include <string.h>
 
 
+// hextoi(): no string validation!
 uint8_t  hextoi(uint8_t *s);
 uint32_t strtoint(char* str);
 uint32_t strntoint(char* str, int n);

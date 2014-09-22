@@ -151,8 +151,7 @@ uint8_t *setIPviaStaticIP(uint8_t *ip, uint8_t *nmask, uint8_t *gw) {
 }
 
 
-// Attention: no string validation!
-// For pre-validation use ipIsValid().
+// No string validation!
 void strToIP(uint8_t *ip, uint8_t *dst) {
 	uint8_t i = 0;
 	char   *tmp;
