@@ -32,7 +32,7 @@ if (expr) { \
 
 
 // Auth server port.
-#define PORT 51234
+//#define PORT 51234
 
 
 // Buffer maxlength.
