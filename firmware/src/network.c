@@ -166,6 +166,19 @@ void strToIP(uint8_t *ip, uint8_t *dst) {
 }
 
 
+uint8_t udpDataReceived(uint8_t *buffer, uint16_t plen, uint16_t port) {
+	if(eth_type_is_ip_and_my_ip(buffer, plen) == 0)
+		return 0;
+
+	if (buffer[IP_PROTO_P]     == IP_PROTO_UDP_V &&
+		buffer[UDP_DST_PORT_H_P] == (port >> 8) &&
+		buffer[UDP_DST_PORT_L_P] == (port & 0xff)
+	) return 1;
+
+	return 0;
+}
+
+
 static void arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac) {
 	ip = ip;
 	if (refnum == TRANS_NUM_GWMAC)

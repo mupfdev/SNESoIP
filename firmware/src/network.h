@@ -34,6 +34,7 @@ uint8_t *setIPviaDHCP(uint8_t *buffer);
 uint8_t *setIPviaStaticIP(uint8_t *ip, uint8_t *nmask, uint8_t *gw);
 // strToIP(): No string validation!
 void     strToIP(uint8_t *ip, uint8_t *dst);
+uint8_t  udpDataReceived(uint8_t *buffer, uint16_t plen, uint16_t port);
 
 
 #endif

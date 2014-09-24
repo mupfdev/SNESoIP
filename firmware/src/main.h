@@ -20,6 +20,7 @@
 #endif
 
 
+#include <avr/interrupt.h>
 #include "cli.h"
 #include "duoled.h"
 #include "network.h"

@@ -11,6 +11,7 @@
 
 int main(void) {
 	uint8_t buffer[BUFFER_SIZE + 1];
+	uint8_t loginState = 0;
 	snesIO  port0 = 0xffff;
 	uint8_t tmp1[64];
 	uint8_t tmp2[4];
@@ -117,25 +118,37 @@ int main(void) {
 	getConfigParam(buffer, EEPROM_SERVER_PORT, EEPROM_SERVER_PORT_LEN);
 	serverPort = ((uint16_t)buffer[1] << 8) | buffer[0];
 
-	if (serverPort == 0) serverPort = 51234;
-	if (sourcePort == 0) sourcePort = 51233;
-
 
 	// -- //
 	register_ping_rec_callback(&pingCallback);
-	uint8_t loginState = 0;
-
 
 	while (1) {
 		uint16_t plen;
 		uint16_t datp;
+		uint8_t  udpPayloadLen;
+		uint8_t  udpPayloadBuffer[128];
 
 		plen = enc28j60PacketReceive(BUFFER_SIZE, buffer);
 		datp = packetloop_arp_icmp_tcp(buffer, plen);
 
-		// Do something while no packet in queue.
+		// Do something while no TCP packet in queue.
+		// (That's the way the TCP/IP stack was designed, even if TCP isn't
+		// used here)
 		if (datp == 0) {
 			port0 = recvInput();
+
+			// Store payload if UDP data is available.
+			if (udpDataReceived(buffer, plen, sourcePort)) {
+
+				udpPayloadLen = buffer[UDP_LEN_L_P] - UDP_HEADER_LEN;
+				if (udpPayloadLen > 128) udpPayloadLen = 128;
+				memcpy(udpPayloadBuffer, buffer + UDP_DATA_P, udpPayloadLen);
+				udpPayloadBuffer[udpPayloadLen] = '\0';
+
+				DEBUG_ONLY(PUTS_P("<- "););
+				DEBUG_ONLY(uartPuts((char *)udpPayloadBuffer););
+				DEBUG_ONLY(PUTS_P("\r"););
+			}
 
 			if (loginState == 0) {
 				DEBUG_ONLY(PUTS_P("-> HELO\r\n"););
