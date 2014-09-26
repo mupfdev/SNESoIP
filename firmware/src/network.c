@@ -25,7 +25,7 @@ uint8_t *dnsLookup(uint8_t *buffer, char *host) {
 	uint16_t received;
 
 	// Check if the host is already a valid IP address.
-	if (ipIsValid((uint8_t *)host) == 0) {
+	if (ipIsValid((uint8_t *)host)) {
 		strToIP((uint8_t *)host, serverip);
 		return serverip;
 	}
@@ -66,7 +66,7 @@ void initNetwork(uint8_t *mac) {
 }
 
 
-int8_t ipIsValid (const uint8_t *in)  {
+uint8_t ipIsValid (const uint8_t *in)  {
 	uint8_t  c  = 0;
 	unsigned ip = 0;
 
@@ -78,34 +78,34 @@ int8_t ipIsValid (const uint8_t *in)  {
 		}
 
 	if (!parseIP (in, &ip))
-		return 0;
+		return 1;
 	else
-		return -1;
+		return 0;
 }
 
 
-int8_t macIsValid(uint8_t *mac) {
-	if (strlen((char *)mac) != 17) return -1;
+uint8_t macIsValid(uint8_t *mac) {
+	if (strlen((char *)mac) != 17) return 0;
 
 	for (uint8_t i = 2; i < 14; i = i + 3)
 		if (mac[i] != ':') return -1;
 
 	for (uint8_t i = 0; i < 17; i++) {
 		if (mac[i] == ':') i++;
-		if (isxdigit(mac[i]) == 0) return -1;
+		if (isxdigit(mac[i]) == 0) return 0;
 	}
 
-	return 0;
+	return 1;
 }
 
 
-int8_t portIsValid(uint8_t *port) {
-	if (port[0] == '\0') return -1;
+uint8_t portIsValid(uint8_t *port) {
+	if (port[0] == '\0') return 0;
 
 	if (strtoint((char *)port) > 65535)
-		return -1;
+		return 0;
 
-	return 0;
+	return 1;
 }
 
 

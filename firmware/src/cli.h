@@ -49,7 +49,7 @@
 void   getConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 void   setConfigParam(uint8_t *param, uint8_t offset, uint8_t length);
 #if (CLI)
-  int8_t initCLI(uint8_t *buffer);
+  uint8_t initCLI(uint8_t *buffer);
 #endif
 
 

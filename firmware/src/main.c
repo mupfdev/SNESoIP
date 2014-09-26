@@ -9,9 +9,11 @@
 #include "main.h"
 
 
+static uint8_t loginState = STATE_SEND_HELO;
+
+
 int main(void) {
 	uint8_t buffer[BUFFER_SIZE + 1];
-	uint8_t loginState = 0;
 	snesIO  port0 = 0xffff;
 	uint8_t tmp1[64];
 	uint8_t tmp2[4];
@@ -22,6 +24,7 @@ int main(void) {
 
 
 	// Initialise basic I/O.
+	initTimer(TIMER_16MHZ_3_SECONDS);
 	initLed();
 	ledOnRed();
 	initUART();
@@ -51,8 +54,8 @@ int main(void) {
 	// 255.255.255.255 : default ex-factory.
 	getConfigParam(tmp1, EEPROM_MYIP, EEPROM_MYIP_LEN);
 
-	uint8_t  cnt1 = 0;
-	uint8_t  cnt2 = 0;
+	uint8_t cnt1 = 0;
+	uint8_t cnt2 = 0;
 
 	for (uint8_t i = 0; i < 3; i++) {
 		if (tmp1[i] == 0x00) cnt1++;
@@ -122,6 +125,7 @@ int main(void) {
 	// -- //
 	register_ping_rec_callback(&pingCallback);
 
+
 	while (1) {
 		uint16_t plen;
 		uint16_t datp;
@@ -150,10 +154,10 @@ int main(void) {
 				DEBUG_ONLY(PUTS_P("\r"););
 			}
 
-			if (loginState == 0) {
+			if (loginState == STATE_SEND_HELO) {
 				DEBUG_ONLY(PUTS_P("-> HELO\r\n"););
 				send_udp(buffer, "HELO", 4, sourcePort, serverip, serverPort, gwmac);
-				loginState = 1;
+				loginState = STATE_WAIT_FOR_HELO;
 			}
 
 			sendOutput(port0, port0);
@@ -162,6 +166,11 @@ int main(void) {
 	}
 
 	return (0);
+}
+
+
+ISR (TIMER1_COMPA_vect) {
+	PUTS_P("I'm the timer!\r\n");
 }
 
 

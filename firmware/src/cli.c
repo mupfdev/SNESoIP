@@ -42,7 +42,7 @@ void getConfigParam(uint8_t *param, uint8_t offset, uint8_t length) {
 
 
 #if (CLI)
-int8_t initCLI(uint8_t *buffer) {
+uint8_t initCLI(uint8_t *buffer) {
 	int8_t i = 0;
 
 	PUTS_P("\r\nCommand-line interface.");
@@ -92,7 +92,7 @@ int8_t initCLI(uint8_t *buffer) {
 					PUTS_P(": invalid parameter.");
 				}
 
-				if (i == 1) return 0; // Quit.
+				if (i == 1) return 1; // Quit.
 
 				memset(buffer, 0, INPUT_MAX_LENGTH);
 			}
@@ -143,7 +143,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// mymac:
 	if (COMMAND(cmd_mymac)) {
-		if (macIsValid(param) == -1)
+		if (! macIsValid(param))
 			return INVALID_PARAM;
 
 		buffer[0] = hextoi(param);
@@ -158,7 +158,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// myip:
 	if (COMMAND(cmd_myip)) {
-		if (ipIsValid(param) == -1)
+		if (! ipIsValid(param))
 			return INVALID_PARAM;
 
 		strToIP(param, buffer);
@@ -168,7 +168,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// gwip:
 	if (COMMAND(cmd_gwip)) {
-		if (ipIsValid(param) == -1)
+		if (! ipIsValid(param))
 			return INVALID_PARAM;
 
 		strToIP(param, buffer);
@@ -178,7 +178,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// netmask:
 	if (COMMAND(cmd_netmask)) {
-		if (ipIsValid(param) == -1)
+		if (! ipIsValid(param))
 			return INVALID_PARAM;
 
 		strToIP(param, buffer);
@@ -215,7 +215,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// sourceport:
 	if (COMMAND(cmd_sourceport)) {
-		if (portIsValid(param) == -1)
+		if (! portIsValid(param))
 			return INVALID_PARAM;
 
 		port = strtoint((char *)param);
@@ -227,7 +227,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 
 	// serverport:
 	if (COMMAND(cmd_serverport)) {
-		if (portIsValid(param) == -1)
+		if (! portIsValid(param))
 			return INVALID_PARAM;
 
 		port = strtoint((char *)param);
@@ -247,7 +247,7 @@ static int8_t execCommand(uint8_t *command, uint8_t *param) {
 	}
 
 
-	return -1;
+	return INVALID_COMMAND;
 }
 
 

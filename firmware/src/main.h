@@ -19,12 +19,15 @@
   #define END_DEBUG_ONLY }
 #endif
 
+#define STATE_SEND_HELO     0x00
+#define STATE_WAIT_FOR_HELO 0x01
 
-#include <avr/interrupt.h>
+
 #include "cli.h"
 #include "duoled.h"
 #include "network.h"
 #include "snesio.h"
+#include "timer.h"
 #include "trivium.h"
 #include "uart.h"
 
