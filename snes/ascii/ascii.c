@@ -38,7 +38,6 @@ int main(void) {
 		scanPads();
 		data = padsCurrent(1);
 
-
 		charIndex = 0;
 		if (data & BIT(15)) charIndex = charIndex + 1;
 		if (data & BIT(14)) charIndex = charIndex + 2;

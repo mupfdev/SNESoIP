@@ -1,7 +1,9 @@
 # ASCII text reader #
 
 This ROM interprets the input of the second controller port as ASCII
-characters and prints them out on the screen.
+characters and prints them out on the screen:
+
+![Screenshot](screenshot.png?raw=true)
 
 It can be compiled using the
 [pvsneslib](https://code.google.com/p/pvsneslib/) development kit.
