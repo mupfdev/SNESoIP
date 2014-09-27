@@ -35,13 +35,13 @@ void ledOnRed() {
 
 void ledToggleGreen() {
 	LEDredPORT   &= ~(1 << LEDred);
-	LEDgreenPORT ^= (1 << LEDgreen);
+	LEDgreenPORT ^=  (1 << LEDgreen);
 }
 
 
 void ledToggleRed() {
-	LEDgreenPORT   &= ~(1 << LEDgreen);
-	LEDredPORT   ^= (1 << LEDred);
+	LEDgreenPORT &= ~(1 << LEDgreen);
+	LEDredPORT   ^=  (1 << LEDred);
 }
 
 

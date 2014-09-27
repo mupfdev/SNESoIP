@@ -16,6 +16,7 @@ OBJ     = src/cli.o \
           src/main.o \
           src/network.o \
           src/snesio.o \
+          src/timer.o \
           src/trivium.o \
           src/uart.o \
           src/utils.o \

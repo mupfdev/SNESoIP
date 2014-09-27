@@ -17,8 +17,8 @@ static uint8_t serverip[4];
 static uint8_t netmask[4];
 
 
-static void     arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
-static int8_t   parseIP(const uint8_t *in, unsigned *out);
+static void   arpresolverResultCallback(uint8_t *ip, uint8_t refnum, uint8_t *mac);
+static int8_t parseIP(const uint8_t *in, unsigned *out);
 
 
 uint8_t *dnsLookup(uint8_t *buffer, char *host) {

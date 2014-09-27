@@ -152,6 +152,10 @@ int main(void) {
 				DEBUG_ONLY(PUTS_P("<- "););
 				DEBUG_ONLY(uartPuts((char *)udpPayloadBuffer););
 				DEBUG_ONLY(PUTS_P("\r"););
+
+				// Test.
+				for (uint8_t i = 0; i <= udpPayloadLen; i++)
+					sendOutput(port0, 0xffff - udpPayloadBuffer[i]);
 			}
 
 			if (loginState == STATE_SEND_HELO) {
