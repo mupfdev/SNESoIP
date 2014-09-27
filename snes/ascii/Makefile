@@ -1,4 +1,8 @@
-include config.mk
+# path to snesdev root directory (for emulators, devkitsnes, libsnes)
+#export DEVKITSNES := /d/snesdev/
+
+# path to devkitsnes root directory for compiler
+#export DEVKIT65XX := /d/snesdev/devkitsnes
 
 #---------------------------------------------------------------------------------
 .SUFFIXES:
@@ -29,8 +33,8 @@ CFLAGS	+=	$(INCLUDE)
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(PVSNESLIB)
-#LIBOBJS +:=
-
+#LIBOBJS +:=	
+ 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
  
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
