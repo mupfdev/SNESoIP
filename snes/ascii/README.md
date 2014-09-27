@@ -3,6 +3,9 @@
 This ROM interprets the input of the second controller port as ASCII
 characters and prints them out on the screen.
 
+It can be compiled using the
+[pvsneslib](https://code.google.com/p/pvsneslib/) development kit.
+
 
 # Additional credits #
 
