@@ -13,4 +13,4 @@ SOURCES    := . src/
 # A list of directories containing resources (*.bmp, *.it, ...):
 RESOURCES  := res/
 #
-FONTFILE   := res/font/font.bmp
+FONTFILE   := font.bmp

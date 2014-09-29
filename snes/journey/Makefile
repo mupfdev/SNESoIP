@@ -1,5 +1,5 @@
 # -*-makefile-*-
-.PHONY: all audiofiles clean res run sprites
+.PHONY: all audiofiles clean font res run sprites
 
 
 ifeq ($(strip $(DEVKIT65XX)),)
@@ -26,9 +26,9 @@ AUDIOFILES := $(foreach dir, $(RESOURCES), $(wildcard $(dir)*.it))
 BMPFILES   := $(foreach dir, $(RESOURCES), $(wildcard $(dir)*.bmp))
 
 ifneq ($(AUDIOFILES),)
-ifeq ($(wildcard soundbank.asm),)
-  SFILES := soundbank.asm $(SFILES)
-endif
+  ifeq ($(wildcard soundbank.asm),)
+    SFILES := soundbank.asm $(SFILES)
+  endif
 endif
 
 
@@ -48,7 +48,7 @@ all: res $(OUTPUT).sfc
 
 
 clean:
-	rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym $(BMPFILES:.bmp=.pic) soundbank.*
+	rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym $(BMPFILES:.bmp=.pal) $(BMPFILES:.bmp=.pic) $(FONTFILE:.bmp=.pic) soundbank.*
 
 
 run:
@@ -57,17 +57,21 @@ run:
 
 # -- #
 soundbank.asm: $(AUDIOFILES)
-	$(SMCONV) $(SMCONVFLAGS) $^
+	@$(foreach file, $(AUDIOFILES), $(SMCONV) $(SMCONVFLAGS) $(file);)
 
 
 audiofiles: soundbank.asm
 
 
-sprites: $(BMPFILES)
+font: $(FONTFILE)
 	$(GFXCONV) -n -gs8 -po2 -pc16 -pe1 -mR! -m! -p! $<
 
 
-res: audiofiles sprites
+sprites: $(BMPFILES)
+	@$(foreach file, $(BMPFILES), $(GFXCONV) -gs16 -pc16 -po16 -n $(file);)
+
+
+res: audiofiles font sprites
 
 
 $(OUTPUT).sfc: $(OFILES)

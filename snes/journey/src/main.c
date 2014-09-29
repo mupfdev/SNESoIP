@@ -11,6 +11,7 @@
 #include "soundbank.h"
 
 
+extern char finn;
 extern char snesfont;
 extern char __SOUNDBANK__;
 

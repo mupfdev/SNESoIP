@@ -1,70 +1,77 @@
-# path to snesdev root directory (for emulators, devkitsnes, libsnes)
-#export DEVKITSNES := /d/snesdev/
+# -*-makefile-*-
+.PHONY: all audiofiles clean font res run sprites
 
-# path to devkitsnes root directory for compiler
-#export DEVKIT65XX := /d/snesdev/devkitsnes
-
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
 
 ifeq ($(strip $(DEVKIT65XX)),)
-$(error "Please set DEVKIT65XX in your environment. export DEVKIT65XX=<path to>devkit65XX")
+  $(error "Please set DEVKIT65XX in your environment. export DEVKIT65XX=<path to>devkit65XX")
 endif
 
 include $(DEVKIT65XX)/snes_rules
+include config.mk
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-#---------------------------------------------------------------------------------
-TARGET		:=	$(shell basename $(CURDIR))
-SOURCES		:=	.
 
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-CFLAGS	+=	$(INCLUDE) 
+# Options for code generation:
+CFLAGS += $(INCLUDE)
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=	$(PVSNESLIB)
-#LIBOBJS +:=	
- 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
- 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.asm)))
- 
-#---------------------------------------------------------------------------------
-export OFILES	:=	$(BINFILES:.bin=.obj) $(CFILES:.c=.obj) $(SFILES:.asm=.obj)
- 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
 
-GTITLE 		:= -ht"$(TARGET)"
- 
-.PHONY: bitmaps all
+# A list of directories containing libraries, this must be the top level
+# containing include and lib:
+LIBDIRS    := $(PVSNESLIB)
+#LIBOBJS   +:=
 
-#---------------------------------------------------------------------------------
-all	:	bitmaps $(OUTPUT).sfc
+OUTPUT     := $(CURDIR)/$(TARGET)
+CFILES     := $(foreach dir,$(SOURCES),$(wildcard $(dir)*.c))
+SFILES     := $(foreach dir,$(SOURCES),$(wildcard $(dir)*.asm))
+#AUDIOFILES := $(foreach dir, $(RESOURCES), $(wildcard $(dir)*.it))
+BMPFILES   := $(foreach dir, $(RESOURCES), $(wildcard $(dir)*.bmp))
+
+ifneq ($(AUDIOFILES),)
+  ifeq ($(wildcard soundbank.asm),)
+    SFILES := soundbank.asm $(SFILES)
+  endif
+endif
+
+
+# -- #
+OFILES       := $(BINFILES:.bin=.obj) $(CFILES:.c=.obj) $(SFILES:.asm=.obj)
+INCLUDE      := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+                $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+                -I$(CURDIR)/$(BUILD)
+
+SMCONVFLAGS  := -l -s -o soundbank -v -b 5
+GTITLE       := -ht"$(TARGET)"
+
+
+# -- #
+all: res $(OUTPUT).sfc
 	$(SNTOOLS) -hi! $(GTITLE) $(TARGET).sfc
 
-clean:
-	@echo clean ...
-	@rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym *.pic *.map *.pal
 
-#---------------------------------------------------------------------------------
-font.pic: font.bmp
-	@echo convert font with no tile reduction ... $(notdir $@)
+clean:
+	rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym $(BMPFILES:.bmp=.pic) $(FONTFILE:.bmp=.pic) soundbank.*
+
+
+run:
+	$(EMULATOR) $(OUTPUT).sfc
+
+
+# -- #
+soundbank.asm: $(AUDIOFILES)
+	$(SMCONV) $(SMCONVFLAGS) $^
+
+
+audiofiles: soundbank.asm
+
+
+font: $(FONTFILE)
 	$(GFXCONV) -n -gs8 -po2 -pc16 -pe1 -mR! -m! -p! $<
 
-bitmaps : font.pic
 
-#---------------------------------------------------------------------------------
-$(OUTPUT).sfc	: $(OFILES)
+sprites: $(BMPFILES)
+	@$(foreach file, $(BMPFILES), $(GFXCONV) -gs16 -pc16 -po16 -n $(file);)
+
+
+res: font
+
+
+$(OUTPUT).sfc: $(OFILES)

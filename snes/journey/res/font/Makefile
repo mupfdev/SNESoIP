@@ -3,12 +3,12 @@
 
 
 all:
-	make -C ../
+	make -C ../../
 
 
 clean:
-	make -C ../ clean
+	make -C ../../ clean
 
 
 run:
-	make -C ../ run
+	make -C ../../ run
