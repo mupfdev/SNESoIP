@@ -7,8 +7,7 @@
  * details. */
 
 
-#include <snes.h>
-#include "soundbank.h"
+#include "main.h"
 
 
 extern char finn;

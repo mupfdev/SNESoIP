@@ -7,20 +7,14 @@
  * details. */
 
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_h
+#define UTILS_h
 
 
-#include <ctype.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <snes.h>
 
 
-// hextoi(): no string validation!
-uint8_t  hextoi(uint8_t *s);
-uint32_t strtoint(char* str);
-uint32_t strntoint(char* str, int n);
+void delay(int delay);
 
 
 #endif

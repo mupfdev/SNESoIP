@@ -9,8 +9,9 @@
  *
  * Copyright (c) 2014 Michael Fitzmayer.  All rights reserved.
  *
- * This program has has been released under the terms of a BSD-like
- * license.  See the file LICENSE for details. */
+ * This program is part of the SNESoIP project and has has been released
+ * under the terms of a BSD-like license.  See the file LICENSE for
+ * details. */
 
 
 #ifndef TIMER_h

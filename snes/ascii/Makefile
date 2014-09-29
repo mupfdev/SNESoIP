@@ -48,7 +48,7 @@ all: res $(OUTPUT).sfc
 
 
 clean:
-	rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym $(BMPFILES:.bmp=.pic) $(FONTFILE:.bmp=.pic) soundbank.*
+	rm -f $(OFILES) $(TARGET).sfc $(TARGET).sym $(BMPFILES:.bmp=.pal) $(BMPFILES:.bmp=.pic) $(FONTFILE:.bmp=.pic) soundbank.*
 
 
 run:
