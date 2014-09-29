@@ -67,8 +67,8 @@ font: $(FONTFILE)
 	$(GFXCONV) -n -gs8 -po2 -pc16 -pe1 -mR! -m! -p! $<
 
 
-sprites: $(BMPFILES)
-	@$(foreach file, $(BMPFILES), $(GFXCONV) -gs16 -pc16 -po16 -n $(file);)
+sprites32x32: $(BMPFILES)
+	@$(foreach file, $(BMPFILES), $(GFXCONV) -gs32 -pc16 -po16 -n $(file);)
 
 
 res: font

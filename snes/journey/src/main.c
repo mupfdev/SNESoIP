@@ -28,8 +28,10 @@ int main(void) {
 	bgSetDisable(1);
 	bgSetDisable(2);
 
-	consoleDrawText(10, 10, "The journey");
-	setBrightness(0xF);
+
+ 	textFader(500, 10, 10, "mupf presents");
+	textFader(500, 12, 10, "a journey");
+
 
 	while(1) {
 		spcProcess();

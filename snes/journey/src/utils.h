@@ -12,9 +12,11 @@
 
 
 #include <snes.h>
+#include <stdint.h>
 
 
-void delay(int delay);
+void delay(u16 vblanks);
+void textFader(uint16_t vblanks, uint16_t x, uint16_t y, char *string);
 
 
 #endif

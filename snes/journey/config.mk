@@ -1,7 +1,7 @@
 # -*-makefile-*-
 
 
-EMULATOR    = /usr/bin/snes9x
+EMULATOR    = /usr/bin/snes9x-gtk
 # The name of the output:
 TARGET     := $(shell basename $(CURDIR))
 # The directory where object files & intermediate files will be placed:
