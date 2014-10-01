@@ -23,6 +23,12 @@ void initInput() {
 }
 
 
+void initIO() {
+	Port0WRIO_DDR &= (1 << Port0WRIO);
+	Port1WRIO_DDR &= (1 << Port1WRIO);
+}
+
+
 void initOutput() {
 	Port0ClockDDR  &= ~(1 << Port0Clock);
 	Port0LatchDDR  |=  (1 << Port0Latch);
@@ -68,6 +74,14 @@ snesIO recvInput() {
 	}
 
 	return input;
+}
+
+
+uint8_t recvIO(uint8_t port) {
+	if (port)
+		return (Port1WRIO_PIN & (1 << Port1WRIO));
+
+	return (Port0WRIO_PIN & (1 << Port0WRIO));
 }
 
 

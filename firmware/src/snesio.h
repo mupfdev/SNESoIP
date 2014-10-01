@@ -10,7 +10,7 @@
 #ifndef IO_h
 #define IO_h
 
-#define INIT_IO() initInput(); initOutput()
+#define INIT_IO() initInput(); initIO(); initOutput()
 
 #define InputClockDDR  DDRD
 #define InputClockPORT PORTD
@@ -39,6 +39,11 @@
 #define Port0DataPORT  PORTC
 #define Port0Data      PC4
 
+#define Port0WRIO_DDR  DDRB
+#define Port0WRIO_PORT PORTB
+#define Port0WRIO_PIN  PINB
+#define Port0WRIO      PB1
+
 
 #define Port1ClockDDR  DDRD
 #define Port1ClockPORT PORTD
@@ -53,6 +58,11 @@
 #define Port1DataPORT  PORTD
 #define Port1Data      PD2
 
+#define Port1WRIO_DDR  DDRB
+#define Port1WRIO_PORT PORTB
+#define Port1WRIO_PIN  PINB
+#define Port1WRIO      PB0
+
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -61,11 +71,13 @@
 typedef uint16_t snesIO;
 
 
-void     initInput(void);
-void     initOutput(void);
+void    initInput(void);
+void    initIO();
+void    initOutput(void);
 
-snesIO   recvInput(void);
-void     sendOutput(snesIO port0, snesIO port1);
+snesIO  recvInput(void);
+uint8_t recvIO(uint8_t port);
+void    sendOutput(snesIO port0, snesIO port1);
 
 
 #endif

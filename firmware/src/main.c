@@ -25,7 +25,7 @@ int main(void) {
 
 
 	// Initialise basic I/O.
-	initTimer(TIMER_16MHZ_3_SECONDS);
+	//initTimer(TIMER_16MHZ_3_SECONDS);
 	initLed();
 	ledOnRed();
 	initUART();
@@ -141,6 +141,9 @@ int main(void) {
 		// used here)
 		if (datp == 0) {
 			port0 = recvInput();
+
+			if (! recvIO(0))
+				PUTS_P("0\n");
 
 			// Store payload if UDP data is available.
 			if (udpDataReceived(buffer, plen, sourcePort)) {
