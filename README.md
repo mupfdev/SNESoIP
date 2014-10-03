@@ -93,14 +93,19 @@ requirements:
 
 #### Connector modification instructions ####
 
-Make sure that you're cutting the detends on the right side of the
-connectors:
+Make sure that you're cutting the retention hooks on the right side of
+the connectors:
 
 ![Connector modification 1](hardware/images/instructions/connector-modification-01-small.jpg?raw=true)
 
 ![Connector modification 2](hardware/images/instructions/connector-modification-02-small.jpg?raw=true)
 
+Now use a pair of pliers to push in the retention hooks on the opposite
+side of the plug:
+
 ![Connector modification 3](hardware/images/instructions/connector-modification-03-small.jpg?raw=true)
+
+Then push the plug out of its shell:
 
 ![Connector modification 4](hardware/images/instructions/connector-modification-04-small.jpg?raw=true)
 
@@ -108,13 +113,17 @@ connectors:
 
 ![Connector modification 6](hardware/images/instructions/connector-modification-06-small.jpg?raw=true)
 
-Modified cable for port1:
+Original pin assignment:
 
 ![Connector modification 7](hardware/images/instructions/connector-modification-07-small.jpg?raw=true)
 
-Modified cable for port0:
+Modified cable for port1:
 
 ![Connector modification 8](hardware/images/instructions/connector-modification-08-small.jpg?raw=true)
+
+Modified cable for port0:
+
+![Connector modification 9](hardware/images/instructions/connector-modification-09-small.jpg?raw=true)
 
 For images in higher resolution click [here](hardware/images/instructions/).
 
