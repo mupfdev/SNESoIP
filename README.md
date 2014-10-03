@@ -91,7 +91,34 @@ Because these connectors aren't designed to be reopened again, I made
 some simple instructions how they can be modified to fit the
 requirements:
 
-![Todo](todo.png?raw=true)
+#### Connector modification instructions ####
+
+Attention: make sure that you're cutting the detends on the right side
+of the connectors.
+
+![Connector modification 1](hardware/images/instructions/connector-modification-01-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-01.jpg)
+
+![Connector modification 2](hardware/images/instructions/connector-modification-02-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-02.jpg)
+
+![Connector modification 3](hardware/images/instructions/connector-modification-03-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-03.jpg)
+
+![Connector modification 4](hardware/images/instructions/connector-modification-04-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-04.jpg)
+
+![Connector modification 5](hardware/images/instructions/connector-modification-05-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-05.jpg)
+
+![Connector modification 6](hardware/images/instructions/connector-modification-06-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-06.jpg)
+
+![Connector modification 7](hardware/images/instructions/connector-modification-07-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-07.jpg)
+
+![Connector modification 8](hardware/images/instructions/connector-modification-08-small.jpg?raw=true)
+[Full size](hardware/images/instructions/connector-modification-08.jpg)
 
 
 ## How it works ##
@@ -121,10 +148,11 @@ firmware stuff, project founder.
 ### Additional credits ###
 
 [Daniel Otte](mailto:/daniel.otte@rub.de): The author of the
-AVR-Crypto-Lib.
+[AVR-Crypto-Lib](https://www.das-labor.org/wiki/AVR-Crypto-Lib/en).
 
 [Guido Socher](mailto:/guidosocher@fastmail.fm): The author of the
-tuxgraphics TCP/IP stack used in the firmware.
+[tuxgraphic TCP/IP stack](http://tuxgraphics.org/common/src2/article09051/
+"The tuxgraphics TCP/IP stack") used in the firmware.
 
 [Jan Schmitz](mailto:/pw_returner@web.de): Early code review and
 improvements.
