@@ -22,7 +22,7 @@ you definitely came to the right place.
 
 But be aware that the project is still in an early testing/development
 stage and I'm currently not planning to build and/or sell these devices
-in a larger quantity - mostly due to the legal situation in Germany. So,
+in a larger quantity – mostly due to the legal situation in Germany. So,
 if you want one, you have to build one by yourself or at least wait
 until someone decides to produce and sell them professionally.
 
@@ -96,12 +96,56 @@ requirements:
 
 ## How it works ##
 
-This is magic. Don't even try to understand it, unless your name is
-Dumbledore.
+This is magic.
+Don't even try to understand it, unless your last name is Dumbledore.
 
+
+## Authors of the SNESoIP project ##
+
+The following contributions warranted legal paper exchanges with Michael
+Fitzmayer:
+
+### Core developers ###
+
+[Daniel Baumann](mailto:/sciurus@blastprocessing.de)
+The author of the web interface and the java adaption of the login server.
+
+[saturnu](http://jensma.de/rehkopf/gallery-images/saturnu.gif), the fabulous:
+<pre>
+He's most likely the only person who understands the project as a
+whole.
+He also develops homebrew software, wrote a login server and a
+virtual userspace device, etc.
+</pre>
+
+[Michael Fitzmayer](mailto:/mail@michael-fitzmayer.de)
+<pre>
+Hard- and firmware stuff, project founder.
+</pre>
+
+### Additional credits ###
+
+[Daniel Otte](mailto:/daniel.otte@rub.de)
+<pre>
+The author of the AVR-Crypto-Lib.
+</pre>
+
+[Guido Socher](mailto:/guidosocher@fastmail.fm)
+<pre>
+The author of the tuxgraphics TCP/IP stack used in the firmware.
+</pre>
+
+[Jan Schmitz](mailto:/pw_returner@web.de)
+<pre>
+Early code review and improvements.
+</pre>
 
 ## Special thanks goes to ##
 
+- The guys from
+  [#retrotardation](http://de.irc2go.com/webchat/?net=euIRC&room=retrotardation)
+  on [euIRC](http://www.euirc.net/en/) for all the support and
+  amusement,
 - [lytron](http://pantalytron.com) for testing the initial prototype,
 - Farbauti for his code improvements,
 - the [snesfreaks.com](http://snesfreaks.com) community for all the
@@ -110,12 +154,18 @@ Dumbledore.
   [shackspace](http://shackspace.de).  You guys rock!
 
 
-## License ##
+## Licenses ##
 
-The whole project (except the
-[IP stack](http://tuxgraphics.org/common/src2/article09051/ "The
-tuxgraphics TCP/IP stack") by tuxgraphics.org) has has been released
-under the terms of a BSD-like license.  See the file [LICENSE](LICENSE)
-for details.
+The project has been released under the terms of a BSD-like license.
+See the file [LICENSE](LICENSE) for details.
+
+The
+[tuxgraphic TCP/IP stack](http://tuxgraphics.org/common/src2/article09051/
+"The tuxgraphics TCP/IP stack") is under the terms of
+[The MIT License (MIT)](http://www.opensource.org/licenses/mit-license.html).
+
+For license information of the
+[AVR-Crypto-Lib](https://www.das-labor.org/wiki/AVR-Crypto-Lib/en) see
+the [GNU General Public License](http://www.gnu.org/licenses/).
 
 "Nintendo" is a registered trademark of Nintendo of America Inc.
