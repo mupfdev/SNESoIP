@@ -93,8 +93,8 @@ requirements:
 
 #### Connector modification instructions ####
 
-Attention: make sure that you're cutting the detends on the right side
-of the connectors.
+Make sure that you're cutting the detends on the right side of the
+connectors:
 
 ![Connector modification 1](hardware/images/instructions/connector-modification-01-small.jpg?raw=true)
 
@@ -108,7 +108,11 @@ of the connectors.
 
 ![Connector modification 6](hardware/images/instructions/connector-modification-06-small.jpg?raw=true)
 
+Modified cable for port1:
+
 ![Connector modification 7](hardware/images/instructions/connector-modification-07-small.jpg?raw=true)
+
+Modified cable for port0:
 
 ![Connector modification 8](hardware/images/instructions/connector-modification-08-small.jpg?raw=true)
 
