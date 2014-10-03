@@ -108,31 +108,35 @@ Fitzmayer:
 ### Core developers ###
 
 [Daniel Baumann](mailto:/sciurus@blastprocessing.de)
+
 <pre>The author of the web interface and the java adaption of the login
 server.</pre>
 
 [saturnu](http://jensma.de/rehkopf/gallery-images/saturnu.gif), the fabulous:
+
 <pre>He's most likely the only person who understands the project as a
 whole.
 He also develops homebrew software, wrote a login server and a virtual
 userspace device, etc.</pre>
 
 [Michael Fitzmayer](mailto:/mail@michael-fitzmayer.de)
+
 <pre>Hard- and firmware stuff, project founder.</pre>
 
 ### Additional credits ###
 
 [Daniel Otte](mailto:/daniel.otte@rub.de)
+
 <pre>The author of the AVR-Crypto-Lib.</pre>
 
 [Guido Socher](mailto:/guidosocher@fastmail.fm)
+
 <pre>The author of the tuxgraphics TCP/IP stack used in the
 firmware.</pre>
 
 [Jan Schmitz](mailto:/pw_returner@web.de)
-<pre>
-Early code review and improvements.
-</pre>
+
+<pre>Early code review and improvements.</pre>
 
 ## Special thanks goes to ##
 
