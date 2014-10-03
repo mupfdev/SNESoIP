@@ -97,28 +97,22 @@ Attention: make sure that you're cutting the detends on the right side
 of the connectors.
 
 ![Connector modification 1](hardware/images/instructions/connector-modification-01-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-01.jpg)
 
 ![Connector modification 2](hardware/images/instructions/connector-modification-02-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-02.jpg)
 
 ![Connector modification 3](hardware/images/instructions/connector-modification-03-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-03.jpg)
 
 ![Connector modification 4](hardware/images/instructions/connector-modification-04-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-04.jpg)
 
 ![Connector modification 5](hardware/images/instructions/connector-modification-05-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-05.jpg)
 
 ![Connector modification 6](hardware/images/instructions/connector-modification-06-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-06.jpg)
 
 ![Connector modification 7](hardware/images/instructions/connector-modification-07-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-07.jpg)
 
 ![Connector modification 8](hardware/images/instructions/connector-modification-08-small.jpg?raw=true)
-[Full size](hardware/images/instructions/connector-modification-08.jpg)
+
+For images in higher resolution click [here](hardware/images/instructions/).
 
 
 ## How it works ##
