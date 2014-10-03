@@ -107,28 +107,27 @@ Fitzmayer:
 
 ### Core developers ###
 
-[Daniel Baumann](mailto:/sciurus@blastprocessing.de)
-The author of the web interface and the java adaption of the login
-server.
+[Daniel Baumann](mailto:/sciurus@blastprocessing.de): The author of the
+web interface and the java adaption of the login server.
 
-[saturnu](http://jensma.de/rehkopf/gallery-images/saturnu.gif), the fabulous:
-He's most likely the only person who understands the project as a whole.
-He also develops homebrew software, wrote a login server and a virtual
-userspace device, etc.
+[saturnu](http://jensma.de/rehkopf/gallery-images/saturnu.gif), the
+fabulous: He's most likely the only person who understands the project
+as a whole. He also develops homebrew software, wrote a login server and
+a virtual userspace device, etc.
 
-[Michael Fitzmayer](mailto:/mail@michael-fitzmayer.de)
-Hard- and firmware stuff, project founder.
+[Michael Fitzmayer](mailto:/mail@michael-fitzmayer.de): Hard- and
+firmware stuff, project founder.
 
 ### Additional credits ###
 
-[Daniel Otte](mailto:/daniel.otte@rub.de)
-The author of the AVR-Crypto-Lib.
+[Daniel Otte](mailto:/daniel.otte@rub.de): The author of the
+AVR-Crypto-Lib.
 
-[Guido Socher](mailto:/guidosocher@fastmail.fm)
-The author of the tuxgraphics TCP/IP stack used in the firmware.
+[Guido Socher](mailto:/guidosocher@fastmail.fm): The author of the
+tuxgraphics TCP/IP stack used in the firmware.
 
-[Jan Schmitz](mailto:/pw_returner@web.de)
-Early code review and improvements.
+[Jan Schmitz](mailto:/pw_returner@web.de): Early code review and
+improvements.
 
 ## Special thanks goes to ##
 
