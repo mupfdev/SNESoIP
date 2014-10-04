@@ -54,7 +54,13 @@ help is appreciated!
 
 Here are some instructions on how to setup the rev. 02 hardware:
 
-![Todo](todo.png?raw=true)
+![Assembly 1](hardware/images/instructions/assembly-rev02-01-small.jpg?raw=true)
+
+![Assembly 2](hardware/images/instructions/assembly-rev02-02-small.jpg?raw=true)
+
+![Assembly 3](hardware/images/instructions/assembly-rev02-03-small.jpg?raw=true)
+
+For images in higher resolution click [here](hardware/images/instructions/).
 
 ### The last-minute modification ###
 
