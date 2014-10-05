@@ -52,12 +52,26 @@ help is appreciated!
 
 ### Assembly ###
 
-Here are some instructions on how to assemble the external components
-of the rev. 02 hardware:
+Here are some instructions on how to assemble the current rev. 02 hardware:
+
+#### External components ####
+
+The orientation of the [ENC28J60 module](hardware/rev02/docs/enc28j60-module.jpg):
 
 ![Assembly 1](hardware/images/instructions/assembly-rev02-01-small.jpg?raw=true)
 
+The pins for input, port0, port1 are in the same order (ascending):
+
+VCC, GND, Clock, Latch, Data
+
+Pin 1 is marked with a tiny 1 on the silk-layer.
+The controller pinout is as follows:
+
+![SNES controller pinout](hardware/images/instructions/snes-controller-pinout.png?raw=true)
+
 ![Assembly 2](hardware/images/instructions/assembly-rev02-02-small.jpg?raw=true)
+
+The [last-minute modification](#the-last-minute-modification):
 
 ![Assembly 3](hardware/images/instructions/assembly-rev02-03-small.jpg?raw=true)
 
@@ -104,7 +118,7 @@ requirements:
 
 #### Connector modification instructions ####
 
-Make sure that you're cutting the retention hooks on the right side of
+Make sure that you're cutting the retention hooks on the correct side of
 the connectors:
 
 ![Connector modification 1](hardware/images/instructions/connector-modification-01-small.jpg?raw=true)
