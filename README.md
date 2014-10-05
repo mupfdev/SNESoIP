@@ -52,7 +52,8 @@ help is appreciated!
 
 ### Assembly ###
 
-Here are some instructions on how to setup the rev. 02 hardware:
+Here are some instructions on how to assemble the external components
+of the rev. 02 hardware:
 
 ![Assembly 1](hardware/images/instructions/assembly-rev02-01-small.jpg?raw=true)
 
@@ -60,7 +61,11 @@ Here are some instructions on how to setup the rev. 02 hardware:
 
 ![Assembly 3](hardware/images/instructions/assembly-rev02-03-small.jpg?raw=true)
 
-For images in higher resolution click [here](hardware/images/instructions/).
+For images in higher resolution click
+[here](hardware/images/instructions/).
+
+The assembly of the self-explanatory, bipolar components is not
+illustrated.
 
 ### The last-minute modification ###
 
