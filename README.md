@@ -123,11 +123,11 @@ Original pin assignment:
 
 ![Connector modification 7](hardware/images/instructions/connector-modification-07-small.jpg?raw=true)
 
-Modified cable for port1:
+Modified cable for port0:
 
 ![Connector modification 8](hardware/images/instructions/connector-modification-08-small.jpg?raw=true)
 
-Modified cable for port0:
+Modified cable for port1:
 
 ![Connector modification 9](hardware/images/instructions/connector-modification-09-small.jpg?raw=true)
 
