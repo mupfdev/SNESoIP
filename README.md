@@ -60,12 +60,11 @@ The orientation of the [ENC28J60 module](hardware/rev02/docs/enc28j60-module.jpg
 
 ![Assembly 1](hardware/images/instructions/assembly-rev02-01-small.jpg?raw=true)
 
-The pins for input, port0, port1 are in the same order (ascending):
-
-VCC, GND, Clock, Latch, Data
+The pinout on the PCB for input, port0, port1 is in the same order
+(ascending): VCC, GND, Clock, Latch, Data
 
 Pin 1 is marked with a tiny 1 on the silk-layer.
-The controller pinout is as follows:
+The actual pinout for the controller plug is as follows:
 
 ![SNES controller pinout](hardware/images/instructions/snes-controller-pinout.png?raw=true)
 
