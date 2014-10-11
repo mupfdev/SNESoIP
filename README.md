@@ -162,9 +162,6 @@ Don't even try to understand it, unless your last name is Dumbledore.
 
 ## Authors of the SNESoIP project ##
 
-The following contributions warranted legal paper exchanges with Michael
-Fitzmayer:
-
 ### Core developers ###
 
 [Daniel Baumann](mailto:/sciurus@blastprocessing.de): The author of the
