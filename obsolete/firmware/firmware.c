@@ -17,9 +17,9 @@ int main(void) {
 	snesIO   port0 = 0xffff, port1 = 0xffff;
 
 
-  // Initialise UART.
-  uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
-  sei();
+	// Initialise UART.
+	uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
+	sei();
 	uart_puts("\r\nWelcome to the SNESoIP debugging interface.\r\n\n");
 
 

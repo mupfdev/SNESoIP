@@ -2,20 +2,7 @@
 .PHONY: all clean flash
 
 
-# Basic configuration.
-CID     = 0x00
-P2CID   = 0x00
-SERVER  = snesoip.de
-
-PORT    = /dev/ttyUSB0
-
-# Nothing below this line need to be changed.
-F_CPU   = 16000000UL
-MCU     = atmega168
-OBJ     = firmware.o io.o \
-	net/dhcp_client.o net/dnslkup.o net/enc28j60.o net/ip_arp_udp_tcp.o \
-	uart/uart.o
-PRG     = firmware
+include config.mk
 
 
 all: $(PRG).hex
@@ -30,13 +17,24 @@ $(PRG).elf: $(OBJ)
 	avr-size -A $(PRG).elf
 
 %.o: %.c
-	avr-gcc $< -Os -DF_CPU=$(F_CPU) \
-	-DCID=$(CID) -DP2CID=$(P2CID) -DServerVHost=\"$(SERVER)\" \
+	avr-gcc $< \
+	-Os \
+	-fno-tree-scev-cprop \
+	-std=c99 \
+	-mcall-prologues \
+	-Wall \
+	-Werror \
+	-Wextra \
+	-DCLI=$(CLI) \
+	-DBAUD=$(BAUD) \
+	-DDEBUG=$(DEBUG) \
+	-DF_CPU=$(F_CPU) \
 	-g -mmcu=$(MCU) -c -o $@
 
 
 clean:
-	rm *.o net/*.o uart/*.o *.elf *.hex
+	rm src/*.o src/net/*.o *.elf *.hex
+
 
 flash: $(PRG).hex
-	fboot -d $(PORT) -b 115200 -v -p $(PRG).hex
+	fboot -d $(PORT) -b $(BAUD) -H -v -p $(PRG).hex

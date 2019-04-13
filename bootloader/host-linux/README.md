@@ -52,6 +52,7 @@ bootloader [-d /dev/ttyS0] [-b 9600] -[v|p] file.hex
 -p                  Program flash
 -e                  Erase, use together with -p to erase controller,
                     with -v to check if it is erased
+-H                  Hide progress bar. Useful to use within Emacs.
 -P pwd              Password that is set in the AVR. Since the bootloader prepends 0x0d to
                     the password for autobaud, it is not necessary for the password to contain
                     an autobaud character like 'a'. So there might be used arbitrary characters
