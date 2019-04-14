@@ -52,7 +52,7 @@ And feel free to contribute to our
 
 ### Communication ###
 
-The SNESoIP ethernet adapter is continously sending 4-byte data packets
+The SNESoIP ethernet adapter is continuously sending 4-byte data packets
 via UDP to a (remote) server and receive 2-byte answer packets from the
 (remote) server.
 
@@ -79,7 +79,7 @@ the server and used to store its state on the server.
 answer your packet with the controller data of the controller identified
 by `P2CID`.
 
-Update packets are being sent to the server continously even if the
+Update packets are being sent to the server continuously even if the
 local controller state does not change state.
 
 ### Switch Mode ###
