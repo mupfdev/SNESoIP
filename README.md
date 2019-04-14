@@ -28,11 +28,28 @@ systems, etc.
 
 ## Project History
 
-2013 - 2019. Todo.
+The SNESoIP is, so to speak, my never-ending long-term project, which I
+started on 29 July 2013 and have taken up again and again since then.
+
+The last time I put the project down was shortly before the birth of my
+son.  The following years were strenuous; the new role as family father,
+the death of my best friend [Ertugrul
+Söylemez](https://github.com/esoeylemez), and frankly, I never intended
+to resume the project at all.  Nevertheless, the project had a big
+impact on my life and was, in a manner of speaking, the foundation for
+my career as a software developer for embedded systems.
+
+As you can imagine, this project is personal. And I always had the urge
+to bring it to finish what I started almost six years ago.
+
+We'll see where 2019 is going.
 
 ## Hardware
 
-Todo.
+The new hardware design will most-likely be based on a STM32F103C8
+microcontroller board (also known as the Blue Pill) running FreeRTOS.
+
+For connectivity I intend to use the WIZnet W5100 ethernet controller.
 
 ## Licence and Credits
 

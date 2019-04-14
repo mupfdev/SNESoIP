@@ -11,6 +11,9 @@
 #include <stm32f10x_gpio.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <socket.h>
+#include <dhcp.h>
+#include <dns.h>
 
 static void _GPIO_Init(void);
 static void _vTaskMain(void* pArg);
