@@ -40,7 +40,7 @@ impact on my life and was, in a manner of speaking, the foundation for
 my career as a software developer for embedded systems.
 
 As you can imagine, this project is personal. And I always had the urge
-to bring it to finish what I started almost six years ago.
+to finish what I started almost six years ago.
 
 We'll see where 2019 is going.
 
