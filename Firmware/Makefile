@@ -1,10 +1,10 @@
 .PHONY: all clean upload
 
 all:
-	pio run
+	pio run --disable-auto-clean
 
 clean:
 	pio run --target clean
 
 upload:
-	pio run --target upload
+	pio run --disable-auto-clean --target upload

@@ -46,10 +46,8 @@ We'll see where 2019 is going.
 
 ## Hardware
 
-The new hardware design will most-likely be based on a STM32F103C8
-microcontroller board (also known as the Blue Pill) running FreeRTOS.
-
-For connectivity I intend to use the WIZnet W5100 ethernet controller.
+The new hardware design will most-likely be based on a ESP32 or ESP8266
+microcontroller by Espressif Systems and will therefore use Wi-Fi.
 
 ## Licence and Credits
 
