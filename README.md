@@ -19,6 +19,9 @@ I also highly recommend to use this project only in combination with a
 flash cartridge like the [sd2snes](http://sd2snes.de/blog/) or the Super
 Everdrive.
 
+If you want to help with the further development of this project, join
+us on our [Discord server](https://discord.gg/araBwyp).
+
 ## Annotation
 
 It's not the project's main goal to support existing SNES games.  It
