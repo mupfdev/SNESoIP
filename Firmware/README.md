@@ -2,8 +2,7 @@
 
 ## Installation
 
-1. `Install PlatformIO Core
-   <http://docs.platformio.org/page/core.html>`_
+1. Install [PlatformIO Core](http://docs.platformio.org/page/core.html)
 2. Run these commands:
 
 ```bash
