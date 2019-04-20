@@ -6,7 +6,7 @@
  * @details
  * @code{.unparsed}
  *
- * Wiring diagram:
+ * Wiring diagram (default configuration):
  *   +-------------------+--------------+,
  *   |                   |                \
  *   | [VCC] [2] [3] [4] | [NC] [6] [GND] |
@@ -47,7 +47,7 @@
  * one pin on each cable.  These pins can be used to gain access to the
  * usually unconnected pin 6 used by the IOPort.
  *
- * The SNESoIP used the IOPort to establish bidirectional
+ * The SNESoIP uses the IOPort to establish bidirectional
  * communication.
  *
  * But because SNES controller connectors aren't designed to be reopened
