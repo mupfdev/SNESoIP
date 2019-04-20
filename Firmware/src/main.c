@@ -1,8 +1,8 @@
 /**
  * @file       main.c
  * @brief      SNESoIP main program
- * @ingroup    SNESoIP
- * @defgroup   SNESoIP
+ * @ingroup    SNESoIP SNESoIP main
+ * @defgroup   SNESoIP SNESoIP main
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */
@@ -12,6 +12,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "Config.h"
 #include "SNES.h"
 #include "WiFi.h"
 

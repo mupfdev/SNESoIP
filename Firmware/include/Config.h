@@ -1,15 +1,15 @@
 /**
- * @file       SNES.h
- * @brief      SNES I/O driver
- * @ingroup    SNESIO SNES I/O driver
- * @defgroup   SNESIO SNES I/O driver
+ * @file       Config.h
+ * @brief      Configuration
+ * @ingroup    Config Configuration
+ * @defgroup   Config Configutation
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
- * @todo       Adjust default pin configuration
+ * @todo       Adjust configuration to match the actual setup
  */
 #pragma once
 
-#ifdef USE_SNES_DEFAULT_CONFIG
+#ifndef USE_SNES_DEFAULT_CONFIG
 #define SNES_PORT1_CLOCK  0
 #define SNES_PORT1_LATCH  1
 #define SNES_PORT1_DATA   2
@@ -22,6 +22,3 @@
 #define SNES_IOPORT_BIT6  9
 #define SNES_IOPORT_BIT7  10
 #endif
-
-int InitSNES(void);
-int StartSNES(void);

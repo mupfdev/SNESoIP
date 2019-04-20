@@ -2,8 +2,6 @@
 
 ![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
 
-For images in higher resolution click [here](Archive/Rev2/hardware/images/).
-
 ## Introduction
 
 The SNESoIP (SNES over IP) is an ethernet adapter for the Super Nintendo
@@ -74,6 +72,6 @@ microcontroller by Espressif Systems and will therefore use Wi-Fi.
 ## Licence and Credits
 
 This project is licenced under the "THE BEER-WARE LICENCE".  See the
-file [LICENCE.md](LICENCE.md) for details.
+file LICENCE.md for details.
 
 "Nintendo" is a registered trademark of Nintendo of America Inc.

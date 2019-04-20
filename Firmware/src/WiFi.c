@@ -1,8 +1,8 @@
 /**
  * @file       WiFi.c
  * @brief      WiFi driver
- * @ingroup    WiFi
- * @defgroup   Wifi
+ * @ingroup    WiFi WiFi driver
+ * @defgroup   Wifi WiFi driver
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */
@@ -47,7 +47,7 @@ static void      _SmartConfigThread(void* pArg);
 static void      _SCCallback(smartconfig_status_t stStatus, void* pdata);
 
 /**
- * @enum     eBits
+ * @enum     eBits_t
  * @brief    
  * @details  The event group allows multiple bits for each event, but we
  *           only care about one event - are we connected to the AP with
@@ -105,6 +105,8 @@ static esp_err_t _EventHandler(void* pctx, system_event_t* stEvent)
 static void _SmartConfigThread(void* pArg)
 {
     EventBits_t uxBits;
+    (void)pArg;
+
     ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
     ESP_ERROR_CHECK(esp_smartconfig_start(_SCCallback));
 
@@ -119,7 +121,7 @@ static void _SmartConfigThread(void* pArg)
         }
         if (uxBits & eESPTOUCH_DONE_BIT)
         {
-            ESP_LOGI(_stDriver.acTag, "smartconfig over");
+            ESP_LOGI(_stDriver.acTag, "SmartConfig over");
             esp_smartconfig_stop();
             vTaskDelete(NULL);
         }
