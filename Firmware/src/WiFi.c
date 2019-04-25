@@ -8,6 +8,7 @@
  */
 
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "freertos/FreeRTOS.h"
@@ -17,10 +18,11 @@
 #include "esp_wpa2.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
+#include "esp_smartconfig.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
+#include "rom/ets_sys.h"
 #include "tcpip_adapter.h"
-#include "esp_smartconfig.h"
 #include "WiFi.h"
 
 /**
@@ -29,10 +31,10 @@
  */
 typedef struct WiFiDriver_t
 {
+    bool bHasIP;
     /* FreeRTOS event group to signal when we are connected & ready
        to make a request */
     EventGroupHandle_t hEventGroup;
-    char               acTag[3];
 
 } WiFiDriver;
 
@@ -70,7 +72,6 @@ void InitWiFi(void)
 
     ESP_ERROR_CHECK(nvs_flash_init());
     memset(&_stDriver, 0, sizeof(struct WiFiDriver_t));
-    strncpy(_stDriver.acTag, "sc", 2);
 
     tcpip_adapter_init();
     _stDriver.hEventGroup = xEventGroupCreate();
@@ -80,6 +81,18 @@ void InitWiFi(void)
     ESP_ERROR_CHECK(esp_wifi_init(&stConfig));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
+}
+
+/**
+ * @fn     void WaitForIP(void)
+ * @brief  Wait for IP (blocking)
+ */
+void WaitForIP(void)
+{
+    while (! _stDriver.bHasIP)
+    {
+        ets_delay_us(1000000);
+    }
 }
 
 static esp_err_t _EventHandler(void* pctx, system_event_t* stEvent)
@@ -117,11 +130,12 @@ static void _SmartConfigThread(void* pArg)
 
         if (uxBits & eCONNECTED_BIT)
         {
-            ESP_LOGI(_stDriver.acTag, "WiFi Connected to ap");
+            ESP_LOGI("sc", "WiFi Connected to ap");
         }
         if (uxBits & eESPTOUCH_DONE_BIT)
         {
-            ESP_LOGI(_stDriver.acTag, "SmartConfig over");
+            _stDriver.bHasIP = true;
+            ESP_LOGI("sc", "SmartConfig over");
             esp_smartconfig_stop();
             vTaskDelete(NULL);
         }
@@ -135,30 +149,30 @@ static void _SCCallback(smartconfig_status_t stStatus, void* pdata)
     switch (stStatus)
     {
         case SC_STATUS_WAIT:
-            ESP_LOGI(_stDriver.acTag, "SC_STATUS_WAIT");
+            ESP_LOGI("sc", "SC_STATUS_WAIT");
             break;
         case SC_STATUS_FIND_CHANNEL:
-            ESP_LOGI(_stDriver.acTag, "SC_STATUS_FINDING_CHANNEL");
+            ESP_LOGI("sc", "SC_STATUS_FINDING_CHANNEL");
             break;
         case SC_STATUS_GETTING_SSID_PSWD:
-            ESP_LOGI(_stDriver.acTag, "SC_STATUS_GETTING_SSID_PSWD");
+            ESP_LOGI("sc", "SC_STATUS_GETTING_SSID_PSWD");
             break;
         case SC_STATUS_LINK:
-            ESP_LOGI(_stDriver.acTag, "SC_STATUS_LINK");
-            ESP_LOGI(_stDriver.acTag, "SSID:%s", stConfig->sta.ssid);
-            ESP_LOGI(_stDriver.acTag, "PASSWORD:%s", stConfig->sta.password);
+            ESP_LOGI("sc", "SC_STATUS_LINK");
+            ESP_LOGI("sc", "SSID:%s", stConfig->sta.ssid);
+            ESP_LOGI("sc", "PASSWORD:%s", stConfig->sta.password);
             ESP_ERROR_CHECK(esp_wifi_disconnect());
             ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, stConfig));
             ESP_ERROR_CHECK(esp_wifi_connect());
             break;
         case SC_STATUS_LINK_OVER:
-            ESP_LOGI(_stDriver.acTag, "SC_STATUS_LINK_OVER");
+            ESP_LOGI("sc", "SC_STATUS_LINK_OVER");
             if (pdata != NULL)
             {
                 uint8_t au8PhoneIP[4] = { 0 };
                 memcpy(au8PhoneIP, (uint8_t*)pdata, 4);
                 ESP_LOGI(
-                    _stDriver.acTag,
+                    "sc",
                     "Phone IP: %d.%d.%d.%d\n",
                     au8PhoneIP[0],
                     au8PhoneIP[1],

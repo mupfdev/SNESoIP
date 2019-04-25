@@ -21,21 +21,21 @@
  *   | Location    | Pin | Desc.     | Conn. | ESP32 |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Port1  |  1  | +5V       |  +5V  |       |
- *   | SNES Port1  |  2  | Clock     | LShft |       |
- *   | SNES Port1  |  3  | Latch     | LShft |       |
- *   | SNES Port1  |  4  | Data      | LShft |       |
- *   | SNES Port1  |  6  | IOPort 6  | LShft |       |
+ *   | SNES Port1  |  2  | Clock     | LShft | IO 27 |
+ *   | SNES Port1  |  3  | Latch     | LShft | IO 25 |
+ *   | SNES Port1  |  4  | Data      | LShft | IO 32 |
+ *   | SNES Port1  |  6  | IOPort 6  | LShft | IO 23 |
  *   +-------------+-----+-----------+-------+-------+
- *   | SNES Port2  |  2  | Clock     | LShft |       |
- *   | SNES Port2  |  3  | Latch     | LShft |       |
- *   | SNES Port2  |  4  | Data      | LShft |       |
- *   | SNES Port2  |  6  | IOPort 7  | LShft |       |
+ *   | SNES Port2  |  2  | Clock     | LShft | IO 22 |
+ *   | SNES Port2  |  3  | Latch     | LShft | IO 21 |
+ *   | SNES Port2  |  4  | Data      | LShft | IO 17 |
+ *   | SNES Port2  |  6  | IOPort 7  | LShft | IO 05 |
  *   | SNES Port2  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Input  |  1  | +5V       |  +5V  |       |
- *   | SNES Input  |  2  | Clock     | LShft |       |
- *   | SNES Input  |  3  | Latch     | LShft |       |
- *   | SNES Input  |  4  | Data      | LShft |       |
+ *   | SNES Input  |  2  | Clock     | LShft | IO26  |
+ *   | SNES Input  |  3  | Latch     | LShft | IO18  |
+ *   | SNES Input  |  4  | Data      | LShft | IO19  |
  *   | SNES Input  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
  *
@@ -76,12 +76,14 @@
  *             logic level shifter due it's weak high-level.
  */
 
-#include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "driver/gpio.h"
+#include "rom/ets_sys.h"
 #include "SNES.h"
 
 /**
@@ -90,8 +92,8 @@
  */
 typedef struct SNESDriver_t
 {
-    uint16_t u16Port1;
-    uint16_t u16Port2;
+    bool     bIsRunning;
+    uint16_t u16InputData;
     bool     bIOPortBit6;
     bool     bIOPortBit7;
 
@@ -103,27 +105,137 @@ typedef struct SNESDriver_t
  */
 static SNESDriver _stDriver;
 
-static void _SNESThread(void* pArg);
+static void _SNESReadInputThread(void* pArg);
 
-int InitSNES(void)
+/**
+ * @fn     void InitSNES(void)
+ * @brief  Initialise SNES I/O driver
+ */
+void InitSNES(void)
 {
+    gpio_config_t stGPIOConf;
+
     memset(&_stDriver, 0, sizeof(struct SNESDriver_t));
+    _stDriver.u16InputData = 0xffff;
 
-    uint16_t u16Port1 = 0xffff;
-    uint16_t u16Port2 = 0xffff;
+    // Initialise GPIO pins.
+    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
+    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
+    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_CLOCK;
+    stGPIOConf.pull_up_en   = 1;
+    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
-    xTaskCreate(_SNESThread, "SNESThread", 4096, NULL, 2 | portPRIVILEGE_BIT, NULL);
+    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
+    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
+    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_LATCH;
+    stGPIOConf.pull_down_en = 1;
+    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
-    return 0;
+    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
+    stGPIOConf.mode         = GPIO_MODE_INPUT;
+    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA;
+    stGPIOConf.pull_up_en   = 1;
+    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
+
+    xTaskCreate(_SNESReadInputThread, "SNESReadInputThread", 4096, NULL, 3, NULL);
 }
 
-int StartSNES(void)
+/**
+ * @fn     void DeInitSNES(void)
+ * @brief  De-initialise/stop SNES I/O driver
+ */
+void DeInitSNES(void)
 {
-    return 0;
+    _stDriver.bIsRunning = false;
 }
 
-static void _SNESThread(void* pArg)
+/**
+ * @fn     uint16_t GetSNESInputData(void)
+ * @brief  Get current SNES controller input data
+ */
+uint16_t GetSNESInputData(void)
 {
-    (void)pArg;
+    return _stDriver.u16InputData;
+}
+
+/**
+ * @fn       void _SNESReadInputThread(void* pArg)
+ * @brief    Read SNES controller input
+ * @param    pArg
+ *           Unused
+ * @details
+ * @code{.unparsed}
+ *
+ * Every 16.67ms (60Hz), the SNES CPU sends out a 12µs wide, positive
+ * going data latch pulse on pin 3.  This instructs the parallel-in
+ * serial-out shift register in the controller to latch the state of all
+ * buttons internally.
+ *
+ * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
+ * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
+ * cycle.  The controllers serially shift the latched button states out
+ * of pin 4 on very rising edge of the clock, and the CPU samples the
+ * data on every falling edge.
+ *
+ * At the end of the 16 cycle sequence, the serial data line is driven
+ * low until the next data latch pulse.  Only 4 of the 16 clock cycles
+ * are shown for brevity:
+ *
+ *                    |<------------16.67ms------------>|
+ *
+ *                    12µs
+ *                 -->|   |<--
+ *
+ *                     ---                               ---
+ *                    |   |                             |   |
+ * Data Latch      ---     -----------------/ /----------    --------...
+ *
+ * Data clock      ----------   -   -   -  -/ /----------------   -  ...
+ *                           | | | | | | | |                   | | | |
+ *                            -   -   -   -                     -   -
+ *                            1   2   3   4                     1   2
+ *
+ * Serial Data         ----     ---     ----/ /           ---
+ *                    |    |   |   |   |                 |
+ * (Buttons B      ---      ---     ---        ----------
+ *  & Select       norm      B      SEL           norm
+ *  pressed).      low                            low
+ *                         12µs
+ *                      -->|   |<--
+ *
+ * Source: repairfaq.org
+ *
+ * @endcode
+ */
+static void _SNESReadInputThread(void* pArg)
+{
+    _stDriver.bIsRunning = true;
+
+    while (_stDriver.bIsRunning)
+    {
+        gpio_set_level(GPIO_SNES_INPUT_LATCH, 1);
+        ets_delay_us(12);
+        gpio_set_level(GPIO_SNES_INPUT_LATCH, 1);
+        ets_delay_us(6);
+
+        for (uint8_t u8Bit = 0; u8Bit < 16; u8Bit++)
+        {
+            gpio_set_level(GPIO_SNES_INPUT_CLOCK, 0);
+            ets_delay_us(6);
+
+            if (gpio_get_level(GPIO_SNES_INPUT_DATA))
+            {
+                _stDriver.u16InputData |= 1 << u8Bit;
+            }
+            else
+            {
+                _stDriver.u16InputData &= ~(1 << u8Bit);
+            }
+
+            gpio_set_level(GPIO_SNES_INPUT_CLOCK, 1);
+            ets_delay_us(6);
+        }
+    }
+
     vTaskDelete(NULL);
 }

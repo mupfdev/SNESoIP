@@ -9,3 +9,4 @@
 #pragma once
 
 void InitWiFi(void);
+void WaitForIP(void);
