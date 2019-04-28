@@ -48,7 +48,7 @@ org $809751
 ; Start with 7 lives cheat
 
 org $808880
-    DB $06
+    db $06
 
 ; Make sure that both players have selected a character
 

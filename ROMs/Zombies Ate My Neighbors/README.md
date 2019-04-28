@@ -14,7 +14,7 @@ MD5: 23c2af7897d9384c4791189b68c142eb
 2. Apply patch using [asar](https://github.com/RPGHacker/asar):
 
 ```
-asar "Zombies Ate My Neighbors (U) [!].asar" "Zombies Ate My Neighbors (U) [!].sfc"
+asar "Zombies Ate My Neighbors (U) [!].asm" "Zombies Ate My Neighbors (U) [!].sfc"
 ```
 
 If asar has problems patching the file, make sure the filename extension
