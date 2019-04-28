@@ -21,21 +21,21 @@
  *   | Location    | Pin | Desc.     | Conn. | ESP32 |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Port1  |  1  | +5V       |  +5V  |       |
- *   | SNES Port1  |  2  | Clock     | LShft | IO 27 |
- *   | SNES Port1  |  3  | Latch     | LShft | IO 25 |
- *   | SNES Port1  |  4  | Data      | LShft | IO 32 |
- *   | SNES Port1  |  6  | IOPort 6  | LShft | IO 23 |
+ *   | SNES Port1  |  2  | Clock     | LShft |       |
+ *   | SNES Port1  |  3  | Latch     | LShft |       |
+ *   | SNES Port1  |  4  | Data      | LShft |       |
+ *   | SNES Port1  |  6  | IOPort 6  | LShft |       |
  *   +-------------+-----+-----------+-------+-------+
- *   | SNES Port2  |  2  | Clock     | LShft | IO 22 |
- *   | SNES Port2  |  3  | Latch     | LShft | IO 21 |
- *   | SNES Port2  |  4  | Data      | LShft | IO 17 |
- *   | SNES Port2  |  6  | IOPort 7  | LShft | IO 05 |
+ *   | SNES Port2  |  2  | Clock     | LShft |       |
+ *   | SNES Port2  |  3  | Latch     | LShft |       |
+ *   | SNES Port2  |  4  | Data      | LShft |       |
+ *   | SNES Port2  |  6  | IOPort 7  | LShft |       |
  *   | SNES Port2  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Input  |  1  | +5V       |  +5V  |       |
- *   | SNES Input  |  2  | Clock     | LShft | IO26  |
- *   | SNES Input  |  3  | Latch     | LShft | IO18  |
- *   | SNES Input  |  4  | Data      | LShft | IO19  |
+ *   | SNES Input  |  2  | Clock     | LShft | IO 25 |
+ *   | SNES Input  |  3  | Latch     | LShft | IO 26 |
+ *   | SNES Input  |  4  | Data      | LShft | IO 27 |
  *   | SNES Input  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
  *
@@ -82,6 +82,8 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_err.h"
+#include "driver/rmt.h"
 #include "driver/gpio.h"
 #include "rom/ets_sys.h"
 #include "SNES.h"
@@ -97,6 +99,12 @@ typedef struct SNESDriver_t
     bool     bIOPortBit6;
     bool     bIOPortBit7;
 
+    rmt_config_t stLatch;
+    rmt_item32_t stLatchItem[1];
+
+    rmt_config_t stClock;
+    rmt_item32_t stClockItem[17];
+
 } SNESDriver;
 
 /**
@@ -106,6 +114,8 @@ typedef struct SNESDriver_t
 static SNESDriver _stDriver;
 
 static void _SNESReadInputThread(void* pArg);
+static void _SendClock(void);
+static void _SendLatch(void);
 
 /**
  * @fn     void InitSNES(void)
@@ -118,26 +128,62 @@ void InitSNES(void)
     memset(&_stDriver, 0, sizeof(struct SNESDriver_t));
     _stDriver.u16InputData = 0xffff;
 
-    // Initialise GPIO pins.
-    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
-    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
-    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_CLOCK;
-    stGPIOConf.pull_up_en   = 1;
-    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
-
-    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
-    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
-    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_LATCH;
-    stGPIOConf.pull_down_en = 1;
-    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
-
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
     stGPIOConf.mode         = GPIO_MODE_INPUT;
-    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA;
+    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA_BIT;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
-    xTaskCreate(_SNESReadInputThread, "SNESReadInputThread", 4096, NULL, 3, NULL);
+    // Initialise latch signal.
+    _stDriver.stLatch.rmt_mode      = RMT_MODE_TX;
+    _stDriver.stLatch.channel       = RMT_CHANNEL_0;
+    _stDriver.stLatch.clk_div       = 80;
+    _stDriver.stLatch.gpio_num      = GPIO_SNES_INPUT_LATCH_PIN;
+    _stDriver.stLatch.mem_block_num = 1;
+
+    _stDriver.stLatch.tx_config.loop_en        = 0;
+    _stDriver.stLatch.tx_config.idle_level     = RMT_IDLE_LEVEL_LOW;
+    _stDriver.stLatch.tx_config.idle_output_en = 1;
+
+    rmt_config(&_stDriver.stLatch);
+    rmt_driver_install(_stDriver.stLatch.channel, 0, 0);
+
+    _stDriver.stLatchItem[0].duration0 = 12;
+    _stDriver.stLatchItem[0].level0    = 1;
+    _stDriver.stLatchItem[0].duration1 = 0;
+    _stDriver.stLatchItem[0].level1    = 0;
+
+    // Initialise clock signal.
+    _stDriver.stClock.rmt_mode      = RMT_MODE_TX;
+    _stDriver.stClock.channel       = RMT_CHANNEL_1;
+    _stDriver.stClock.clk_div       = 80;
+    _stDriver.stClock.gpio_num      = GPIO_SNES_INPUT_CLOCK_PIN;
+    _stDriver.stClock.mem_block_num = 1;
+
+    _stDriver.stClock.tx_config.loop_en        = 0;
+    _stDriver.stClock.tx_config.idle_level     = RMT_IDLE_LEVEL_HIGH;
+    _stDriver.stClock.tx_config.idle_output_en = 1;
+
+    rmt_config(&_stDriver.stClock);
+    rmt_driver_install(_stDriver.stClock.channel, 0, 0);
+
+    _stDriver.stClockItem[0].duration0 = 6;
+    _stDriver.stClockItem[0].level0    = 1;
+    _stDriver.stClockItem[0].duration1 = 5;
+    _stDriver.stClockItem[0].level1    = 1;
+
+    for (uint8_t u8Index = 1; u8Index < 17; u8Index++)
+    {
+        _stDriver.stClockItem[u8Index].duration0 = 6;
+        _stDriver.stClockItem[u8Index].level0    = 0;
+        _stDriver.stClockItem[u8Index].duration1 = 6;
+        _stDriver.stClockItem[u8Index].level1    = 1;
+    }
+
+    xTaskCreate(
+        _SNESReadInputThread,
+        "SNESReadInputThread",
+        4096, NULL, 3, NULL);
 }
 
 /**
@@ -166,7 +212,7 @@ uint16_t GetSNESInputData(void)
  * @details
  * @code{.unparsed}
  *
- * Every 16.67ms (60Hz), the SNES CPU sends out a 12µs wide, positive
+ * Every 16.67ms / (60Hz), the SNES CPU sends out a 12µs wide, positive
  * going data latch pulse on pin 3.  This instructs the parallel-in
  * serial-out shift register in the controller to latch the state of all
  * buttons internally.
@@ -213,29 +259,20 @@ static void _SNESReadInputThread(void* pArg)
 
     while (_stDriver.bIsRunning)
     {
-        gpio_set_level(GPIO_SNES_INPUT_LATCH, 1);
-        ets_delay_us(12);
-        gpio_set_level(GPIO_SNES_INPUT_LATCH, 1);
-        ets_delay_us(6);
-
-        for (uint8_t u8Bit = 0; u8Bit < 16; u8Bit++)
-        {
-            gpio_set_level(GPIO_SNES_INPUT_CLOCK, 0);
-            ets_delay_us(6);
-
-            if (gpio_get_level(GPIO_SNES_INPUT_DATA))
-            {
-                _stDriver.u16InputData |= 1 << u8Bit;
-            }
-            else
-            {
-                _stDriver.u16InputData &= ~(1 << u8Bit);
-            }
-
-            gpio_set_level(GPIO_SNES_INPUT_CLOCK, 1);
-            ets_delay_us(6);
-        }
+        _SendLatch();
+        _SendClock();
+        vTaskDelay(16 / portTICK_PERIOD_MS);
     }
 
     vTaskDelete(NULL);
+}
+
+static void _SendClock(void)
+{
+    rmt_write_items(_stDriver.stClock.channel, _stDriver.stClockItem, 16, 1);
+}
+
+static void _SendLatch(void)
+{
+    rmt_write_items(_stDriver.stLatch.channel, _stDriver.stLatchItem, 1, 0);
 }

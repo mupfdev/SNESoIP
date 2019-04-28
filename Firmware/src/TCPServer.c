@@ -19,7 +19,7 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include "lwip/netdb.h"
-
+#include "SNES.h"
 #include "TCPServer.h"
 
 /**
@@ -63,12 +63,28 @@ void DeInitTCPServer(void)
 }
 
 /**
+ * @fn     bool IsHostConnected(void)
+ * @brief  Check if the server has accepted a connection
+ */
+bool IsHostConnected(void)
+{
+    if (_stServer.bHostConnected)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/**
  * @fn     void _TCPServerThread(void* pArg)
  * @brief  TCP server
  * @param  pArg
  *         Unused
  */
-void _TCPServerThread(void* pArg)
+static void _TCPServerThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
@@ -180,6 +196,28 @@ void _TCPServerThread(void* pArg)
                     char* pacVersion = VERSION;
                     send(nSock, pacVersion, strlen(pacVersion), 0);
                 }
+                else if (_CheckCommand(acRXBuffer, "input"))
+                {
+                    uint16_t u16InputData    = GetSNESInputData();
+                    uint8_t  u8Index         = 15;
+                    char     acInputData[18] = { 0 };
+                    for (uint8_t u8Bit = 0; u8Bit < 16; u8Bit++)
+                    {
+                        if ((u16InputData >> u8Bit) & 1)
+                        {
+                            acInputData[u8Index] = '1';
+                        }
+                        else
+                        {
+                            acInputData[u8Index] = '0';
+                        }
+                        u8Index--;
+                    }
+
+                    acInputData[16] = '\r';
+                    acInputData[17] = '\n';
+                    send(nSock, acInputData, strlen(acInputData), 0);
+                }
             }
         }
 
@@ -197,18 +235,6 @@ void _TCPServerThread(void* pArg)
 static bool _CheckCommand(char* pacRXBuffer, char* pacCommand)
 {
     if (0 == strncmp(pacRXBuffer, pacCommand, strlen(pacCommand)))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool IsHostConnected(void)
-{
-    if (_stServer.bHostConnected)
     {
         return true;
     }

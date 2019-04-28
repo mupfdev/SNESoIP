@@ -14,12 +14,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#include "esp_wifi.h"
-#include "esp_wpa2.h"
+#include "esp_err.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
 #include "esp_smartconfig.h"
 #include "esp_system.h"
+#include "esp_wifi.h"
+#include "esp_wpa2.h"
 #include "nvs_flash.h"
 #include "rom/ets_sys.h"
 #include "tcpip_adapter.h"
@@ -91,7 +92,7 @@ void WaitForIP(void)
 {
     while (! _stDriver.bHasIP)
     {
-        ets_delay_us(1000000);
+        ets_delay_us(100000);
     }
 }
 
