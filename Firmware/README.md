@@ -1,5 +1,9 @@
 # SNESoIP Firmware
 
+SNESoIP firmware.
+
+[![Build status](https://travis-ci.org/mupfelofen-de/SNESoIP.svg?branch=master)](https://travis-ci.org/mupfelofen-de/SNESoIP)
+
 ## Installation
 
 1. Install [PlatformIO Core](http://docs.platformio.org/page/core.html)
