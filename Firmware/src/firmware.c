@@ -1,8 +1,8 @@
 /**
- * @file       main.c
- * @brief      SNESoIP main program
- * @ingroup    SNESoIP SNESoIP main
- * @defgroup   SNESoIP SNESoIP main
+ * @file       firmware.c
+ * @brief      SNESoIP firmware
+ * @defgroup   Firmware SNESoIP firmware
+ * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */

@@ -1,8 +1,7 @@
 /**
  * @file       WiFi.c
  * @brief      WiFi driver
- * @ingroup    WiFi WiFi driver
- * @defgroup   Wifi WiFi driver
+ * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */

@@ -1,8 +1,8 @@
 /**
- * @file       main.c
- * @brief      SNESoIP server
- * @ingroup    SNESSrv SNESoIP server
- * @defgroup   SNESSrv SNESoIP server
+ * @file      server.c
+ * @brief     SNESoIP server
+ * @defgroup  Server SNESoIP server
+ * @ingroup   Server
  */
 
 #include <arpa/inet.h>
@@ -18,6 +18,10 @@
 #include <unistd.h>
 #include "inih/ini.h"
 
+/**
+ * @struct  Server
+ * @brief   Server data
+ */
 typedef struct Server_t
 {
     struct sockaddr_storage stClientAddr;
@@ -27,6 +31,10 @@ typedef struct Server_t
 
 } Server;
 
+/**
+ * @struct  Config
+ * @brief   Server configuration
+ */
 typedef struct Config_t
 {
     uint16_t u16Port;
@@ -159,6 +167,30 @@ quit:
     return nRet;
 }
 
+/**
+ * @fn     void _ConnHandler(int nSock)
+ * @brief  Connection handler.
+ */
+static void _ConnHandler(int nSock)
+{
+    int  u8ClientID = _stServer.u8NumClients;
+    char acIpAddr[15];
+    (void)nSock;
+    inet_ntop(
+        _stServer.stClientAddr.ss_family,
+        _GetInAddr((struct sockaddr*)&_stServer.stClientAddr),
+        acIpAddr,
+        sizeof(acIpAddr));
+
+    printf(" (%u) %s connected\n", u8ClientID, acIpAddr);
+    _stServer.u8NumClients += 1;
+
+    // Do magic.
+
+    printf(" (%u) %s disconnected\n", u8ClientID, acIpAddr);
+    _stServer.u8NumClients -= 1;
+}
+
 static int _ConfigHandler(
     void*       pUser,
     const char* pacSection,
@@ -187,30 +219,6 @@ static int _ConfigHandler(
     }
 
     return 1;
-}
-
-/**
- * @fn     void _ConnHandler(int nSock)
- * @brief  Connection handler.
- */
-static void _ConnHandler(int nSock)
-{
-    int  u8ClientID = _stServer.u8NumClients;
-    char acIpAddr[15];
-    (void)nSock;
-    inet_ntop(
-        _stServer.stClientAddr.ss_family,
-        _GetInAddr((struct sockaddr*)&_stServer.stClientAddr),
-        acIpAddr,
-        sizeof(acIpAddr));
-
-    printf(" (%u) %s connected\n", u8ClientID, acIpAddr);
-    _stServer.u8NumClients += 1;
-
-    // Do magic.
-
-    printf(" (%u) %s disconnected\n", u8ClientID, acIpAddr);
-    _stServer.u8NumClients -= 1;
 }
 
 /**

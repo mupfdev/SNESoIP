@@ -1,6 +1,6 @@
 # SNESoIP server
 
-SNESoIP main server application.
+SNESoIP main server.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/rdablcrv5xikp55r?svg=true)](https://ci.appveyor.com/project/mupfelofen-de/snesoip)
 

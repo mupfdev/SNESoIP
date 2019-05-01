@@ -1,8 +1,7 @@
 /**
- * @file       SNES.c
- * @brief      SNES I/O driver
- * @ingroup    SNESIO SNES I/O driver
- * @defgroup   SNESIO SNES I/O driver
+ * @file     SNES.c
+ * @brief    SNES I/O driver
+ * @ingroup  Firmware
  * @details
  * @code{.unparsed}
  *
@@ -120,6 +119,49 @@ static void _SendLatch(void);
 /**
  * @fn     void InitSNES(void)
  * @brief  Initialise SNES I/O driver
+ * @details
+ * @code{.unparsed}
+ *
+ * Every 16.67ms / (60Hz), the SNES CPU sends out a 12µs wide, positive
+ * going data latch pulse on pin 3.  This instructs the parallel-in
+ * serial-out shift register in the controller to latch the state of all
+ * buttons internally.
+ *
+ * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
+ * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
+ * cycle.  The controllers serially shift the latched button states out
+ * of pin 4 on very rising edge of the clock, and the CPU samples the
+ * data on every falling edge.
+ *
+ * At the end of the 16 cycle sequence, the serial data line is driven
+ * low until the next data latch pulse.  Only 4 of the 16 clock cycles
+ * are shown for brevity:
+ *
+ *                    |<------------16.67ms------------>|
+ *
+ *                    12µs
+ *                 -->|   |<--
+ *
+ *                     ---                               ---
+ *                    |   |                             |   |
+ * Data Latch      ---     -----------------/ /----------    --------...
+ *
+ * Data clock      ----------   -   -   -  -/ /----------------   -  ...
+ *                           | | | | | | | |                   | | | |
+ *                            -   -   -   -                     -   -
+ *                            1   2   3   4                     1   2
+ *
+ * Serial Data         ----     ---     ----/ /           ---
+ *                    |    |   |   |   |                 |
+ * (Buttons B      ---      ---     ---        ----------
+ *  & Select       norm      B      SEL           norm
+ *  pressed).      low                            low
+ *                         12µs
+ *                      -->|   |<--
+ *
+ * Source: repairfaq.org
+ *
+ * @endcode
  */
 void InitSNES(void)
 {
@@ -209,49 +251,8 @@ uint16_t GetSNESInputData(void)
  * @brief    Read SNES controller input
  * @param    pArg
  *           Unused
- * @details
- * @code{.unparsed}
- *
- * Every 16.67ms / (60Hz), the SNES CPU sends out a 12µs wide, positive
- * going data latch pulse on pin 3.  This instructs the parallel-in
- * serial-out shift register in the controller to latch the state of all
- * buttons internally.
- *
- * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
- * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
- * cycle.  The controllers serially shift the latched button states out
- * of pin 4 on very rising edge of the clock, and the CPU samples the
- * data on every falling edge.
- *
- * At the end of the 16 cycle sequence, the serial data line is driven
- * low until the next data latch pulse.  Only 4 of the 16 clock cycles
- * are shown for brevity:
- *
- *                    |<------------16.67ms------------>|
- *
- *                    12µs
- *                 -->|   |<--
- *
- *                     ---                               ---
- *                    |   |                             |   |
- * Data Latch      ---     -----------------/ /----------    --------...
- *
- * Data clock      ----------   -   -   -  -/ /----------------   -  ...
- *                           | | | | | | | |                   | | | |
- *                            -   -   -   -                     -   -
- *                            1   2   3   4                     1   2
- *
- * Serial Data         ----     ---     ----/ /           ---
- *                    |    |   |   |   |                 |
- * (Buttons B      ---      ---     ---        ----------
- *  & Select       norm      B      SEL           norm
- *  pressed).      low                            low
- *                         12µs
- *                      -->|   |<--
- *
- * Source: repairfaq.org
- *
- * @endcode
+ * @todo     Apparently the signal is generated every 10µs.  This isn't
+ *           a problem, I just dont understand why.
  */
 static void _SNESReadInputThread(void* pArg)
 {
@@ -267,11 +268,19 @@ static void _SNESReadInputThread(void* pArg)
     vTaskDelete(NULL);
 }
 
+/**
+ * @fn     void _SendClock(void)
+ * @brief  Send clock signal.
+ */
 static void _SendClock(void)
 {
-    rmt_write_items(_stDriver.stClock.channel, _stDriver.stClockItem, 16, 1);
+    rmt_write_items(_stDriver.stClock.channel, _stDriver.stClockItem, 17, 1);
 }
 
+/**
+ * @fn     _SendLatch(void)
+ * @brief  Send latch pulse.
+ */
 static void _SendLatch(void)
 {
     rmt_write_items(_stDriver.stLatch.channel, _stDriver.stLatchItem, 1, 0);

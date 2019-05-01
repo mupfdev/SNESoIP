@@ -2,8 +2,7 @@
  * @file       TCPServer.c
  * @brief      TCP server
  * @details    A TCP server to use as a terminal interface
- * @ingroup    TCPServer TCP server
- * @defgroup   TCPServer TCP server
+ * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */

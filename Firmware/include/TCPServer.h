@@ -1,8 +1,7 @@
 /**
  * @file       TCPServer.h
  * @brief      TCP server
- * @ingroup    TCPServer TCP server
- * @defgroup   TCPServer TCP server
+ * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
  */
