@@ -1,0 +1,3 @@
+[submodule "Server/src/inih"]
+	path = Server/src/inih
+	url = https://github.com/benhoyt/inih.git

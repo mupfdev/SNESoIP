@@ -1,0 +1,10 @@
+image: ubuntu
+
+before_build:
+- git submodule update --init --recursive
+
+build_script:
+- mkdir -p Server/build
+- cd Server/build
+- cmake ..
+- make
