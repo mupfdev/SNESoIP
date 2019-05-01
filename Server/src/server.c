@@ -32,6 +32,16 @@ typedef struct Server_t
 } Server;
 
 /**
+ * @struct  Client
+ * @brief   Client data
+ */
+typedef struct Client_t
+{
+    uint8_t u8ClientID;
+
+} Client;
+
+/**
  * @struct  Config
  * @brief   Server configuration
  */
@@ -51,6 +61,7 @@ static Server _stServer = { 0 };
 
 static void* _GetInAddr(struct sockaddr *stAddr);
 static void  _ConnHandler(int nSock);
+static void  _IntHandler(int nSig);
 static int   _ConfigHandler(
     void*       pUser,
     const char* pacSection,
@@ -59,7 +70,7 @@ static int   _ConfigHandler(
 
 int main(int argc, char* argv[])
 {
-    struct sockaddr_in      stServerAddr;
+    struct sockaddr_in stServerAddr;
 
     int       nRet = EXIT_SUCCESS;
     Config    stConfig;
@@ -69,6 +80,8 @@ int main(int argc, char* argv[])
     int       nNewSock;
     int       nSockOpt= 1;
     socklen_t nAddrSize;
+
+    signal(SIGINT, _IntHandler);
 
     if (argc > 1)
     {
@@ -81,7 +94,19 @@ int main(int argc, char* argv[])
 
     if (0 > ini_parse(pacIniFile, _ConfigHandler, &stConfig))
     {
-        fprintf(stderr, "Unable to load %s\n", pacIniFile);
+        fprintf(stderr, "Unable to load %s.\n", pacIniFile);
+        return EXIT_FAILURE;
+    }
+
+    if (0 == stConfig.u8MaxClients)
+    {
+        fprintf(stderr, "Error: max_clients can't be set to zero.\n");
+        return EXIT_FAILURE;
+    }
+
+    if (0 != (stConfig.u8MaxClients % 2))
+    {
+        fprintf(stderr, "Error: max_clients must be set to an even number.\n");
         return EXIT_FAILURE;
     }
 
@@ -124,7 +149,8 @@ int main(int argc, char* argv[])
     puts(" ╚════██║██║╚██╗██║██╔══╝  ╚════██║██║   ██║██║██╔═══╝");
     puts(" ███████║██║ ╚████║███████╗███████║╚██████╔╝██║██║");
     puts(" ╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝ ╚═════╝ ╚═╝╚═╝");
-    printf(" IP: %s  Port: %u\n", stConfig.acAddr, stConfig.u16Port);
+    printf(" IP: \x1b[33m%s  \x1b[0mPort: \x1b[33m%u  \x1b[0mQuit: CTRL+c\n",
+           stConfig.acAddr, stConfig.u16Port);
     puts(" Listening.\n");
 
     _stServer.bIsRunning = true;
@@ -170,12 +196,45 @@ quit:
 /**
  * @fn     void _ConnHandler(int nSock)
  * @brief  Connection handler.
+ * @todo   Add WRIO/RDIO to protocol specification.
+ * @details
+ * @code{.unparsed}
+ *
+ * Present protocol description
+ *
+ * Stage 1:
+ *
+ * The client connects to the server and the server assigns a
+ * consecutive ID to the client.  This ID correlates to the counter of
+ * the currently connected clients.
+ *
+ * The server sends a 6-byte message where the last byte is the asigned
+ * client ID:
+ *
+ * +---+---+---+---+---+---+
+ * | H | e | l | l | o | 0 |
+ * +---+---+---+---+---+---+
+ *
+ * Stage 2:
+ *
+ * If the client ID is an even number, the client assigns itself to the
+ * console's first controller port.  And the server links the client to
+ * the client with the next higher odd ID number.  This client
+ * automatically assigns itself to the second controller port.  The
+ * maximum number of clients can only be set to an even number.
+ *
+ * Stage 3:
+ *
+ *   
+ *
+ * @endcode
  */
 static void _ConnHandler(int nSock)
 {
     int  u8ClientID = _stServer.u8NumClients;
     char acIpAddr[15];
-    (void)nSock;
+    char acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
+
     inet_ntop(
         _stServer.stClientAddr.ss_family,
         _GetInAddr((struct sockaddr*)&_stServer.stClientAddr),
@@ -185,10 +244,36 @@ static void _ConnHandler(int nSock)
     printf(" (%u) %s connected\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients += 1;
 
-    // Do magic.
+    // Stage 1.
+    if (-1 == send(nSock, acTxBuffer, 6, 0))
+    {
+        perror(strerror(errno));
+    }
 
     printf(" (%u) %s disconnected\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients -= 1;
+}
+
+/**
+ * @fn     void _IntHandler(int nSig)
+ * @brief  Interrupt handler.
+ */
+static void _IntHandler(int nSig)
+{
+    char c;
+
+    signal(nSig, SIG_IGN);
+    printf("\nDo you really wanna quit? [y/n] ");
+    c = getchar();
+    if ('y' == c || 'Y' == c)
+    {
+        exit(0);
+    }
+    else
+    {
+        signal(SIGINT, _IntHandler);
+    }
+    getchar();
 }
 
 static int _ConfigHandler(
