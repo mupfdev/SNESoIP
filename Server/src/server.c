@@ -19,6 +19,17 @@
 #include "inih/ini.h"
 
 /**
+ * @struct  Client
+ * @brief   Client data
+ */
+typedef struct Client_t
+{
+    uint8_t  u8OpponentID;
+    uint16_t u16Data;
+
+} Client;
+
+/**
  * @struct  Server
  * @brief   Server data
  */
@@ -28,18 +39,9 @@ typedef struct Server_t
 
     bool    bIsRunning;
     uint8_t u8NumClients;
+    Client  astClient[];
 
 } Server;
-
-/**
- * @struct  Client
- * @brief   Client data
- */
-typedef struct Client_t
-{
-    uint8_t u8ClientID;
-
-} Client;
 
 /**
  * @struct  Config
@@ -196,7 +198,7 @@ quit:
 /**
  * @fn     void _ConnHandler(int nSock)
  * @brief  Connection handler.
- * @todo   Add WRIO/RDIO to protocol specification.
+ * @todo   Add WRIO/RDIO to protocol description.
  * @details
  * @code{.unparsed}
  *
@@ -211,11 +213,11 @@ quit:
  * The server sends a 6-byte message where the last byte is the asigned
  * client ID:
  *
- * +---+---+---+---+---+---+
- * | H | e | l | l | o | 0 |
- * +---+---+---+---+---+---+
+ *   +---+---+---+---+---+---+
+ *   | H | e | l | l | o | 0 |
+ *   +---+---+---+---+---+---+
  *
- * Stage 2:
+ * Stage 2 - First contact:
  *
  * If the client ID is an even number, the client assigns itself to the
  * console's first controller port.  And the server links the client to
@@ -223,17 +225,37 @@ quit:
  * automatically assigns itself to the second controller port.  The
  * maximum number of clients can only be set to an even number.
  *
- * Stage 3:
+ * Stage 3 - Communication:
  *
- *   
+ *   Abbreviation legend
+ *
+ *   ID0: own client ID
+ *   ID1: client ID of opponent
+ *   DLB: controller data, low byte
+ *   DHB: controller data, high byte
+ *
+ * From this point on, the server accepts the following commands:
+ *
+ * +-------------------+-------------------+---------------+
+ * | Command           | Response          | Description   |
+ * +-------------------+-------------------+---------------+
+ * | +---+---+---+     | +---+---+---+     | Data exchange |
+ * | |ID0|DLB|DLH|     | |ID1|DLB|DLH|     |               |
+ * | +---+---+---+     | +---+---+---+     |               |
+ * +-------------------+-------------------+---------------+
+ * | +---+---+---+---+ | +---+---+---+---+ |      End      |
+ * | |ID0| B | y | e | | | C | y | a |ID0| |  conversation |
+ * | +---+---+---+---+ | +---+---+---+---+ |               |
+ * +-------------------+-------------------+---------------+
  *
  * @endcode
  */
 static void _ConnHandler(int nSock)
 {
-    int  u8ClientID = _stServer.u8NumClients;
-    char acIpAddr[15];
+    int  u8ClientID    = _stServer.u8NumClients;
+    bool bIsConnected  = true;
     char acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
+    char acIpAddr[15]  = { 0 };
 
     inet_ntop(
         _stServer.stClientAddr.ss_family,
@@ -241,8 +263,21 @@ static void _ConnHandler(int nSock)
         acIpAddr,
         sizeof(acIpAddr));
 
-    printf(" (%u) %s connected\n", u8ClientID, acIpAddr);
+    printf(" (%u) %s connected.\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients += 1;
+
+    _stServer.astClient[u8ClientID].u16Data = 0xffff;
+    if (0 == (u8ClientID % 2) || 0 == u8ClientID)
+    {
+        _stServer.astClient[u8ClientID].u8OpponentID = u8ClientID + 1;
+    }
+    else
+    {
+        _stServer.astClient[u8ClientID].u8OpponentID = u8ClientID - 1;
+    }
+    printf(" Player %u is now assigned to player %u.\n",
+           u8ClientID,
+           _stServer.astClient[u8ClientID].u8OpponentID);
 
     // Stage 1.
     if (-1 == send(nSock, acTxBuffer, 6, 0))
@@ -250,7 +285,13 @@ static void _ConnHandler(int nSock)
         perror(strerror(errno));
     }
 
-    printf(" (%u) %s disconnected\n", u8ClientID, acIpAddr);
+    // Stage 2.
+    while (bIsConnected)
+    {
+        bIsConnected = false;
+    }
+
+    printf(" (%u) %s disconnected.\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients -= 1;
 }
 
