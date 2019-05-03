@@ -25,7 +25,6 @@
  */
 typedef struct Client_t
 {
-    uint8_t  u8OpponentID;
     uint16_t u16Data;
 
 } Client;
@@ -59,11 +58,7 @@ typedef struct Config_t
 static void* _ConnHandler(void* pSock);
 static void  _IntHandler(int nSig);
 static void* _GetInAddr(struct sockaddr *stAddr);
-static int   _ConfigHandler(
-    void*       pUser,
-    const char* pacSection,
-    const char* pacName,
-    const char* pacValue);
+static int   _ConfigHandler(void* pUser, const char* pacSection, const char* pacName, const char* pacValue);
 
 /**
  * @var    _stServer
@@ -151,13 +146,14 @@ int main(int argc, char* argv[])
     puts(" ╚════██║██║╚██╗██║██╔══╝  ╚════██║██║   ██║██║██╔═══╝");
     puts(" ███████║██║ ╚████║███████╗███████║╚██████╔╝██║██║");
     puts(" ╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝ ╚═════╝ ╚═╝╚═╝");
-    printf(" IP: \x1b[33m%s  \x1b[0mPort: \x1b[33m%u  \x1b[0mQuit: CTRL+c\n",
+    printf(" IP: \x1b[36m%s  \x1b[0mPort: \x1b[36m%u  \x1b[0mQuit: CTRL+c\n",
            stConfig.acAddr, stConfig.u16Port);
     puts(" Listening.\n");
 
     _stServer.bIsRunning = true;
     while (_stServer.bIsRunning)
     {
+        int       nSockOpts = 1;
         pthread_t stThreadID;
         nAddrSize = sizeof(_stServer.stClientAddr);
 
@@ -168,13 +164,19 @@ int main(int argc, char* argv[])
             continue;
         }
 
+        if (setsockopt(nNewSock, SOL_SOCKET, SO_KEEPALIVE, (void *)&nSockOpts, sizeof(nSockOpts)))
+        {
+            perror(strerror(errno));
+            continue;
+        };
+
         if (_stServer.u8NumClients >= stConfig.u8MaxClients)
         {
             puts("No open slots available.");
             continue;
         }
 
-        if (0 > pthread_create(&stThreadID, NULL, _ConnHandler, (void*)&nNewSock))
+        if (0 != pthread_create(&stThreadID, NULL, _ConnHandler, (void*)&nNewSock))
         {
             perror(strerror(errno));
             continue;
@@ -208,7 +210,7 @@ quit:
  *   | H | e | l | l | o | 0 |
  *   +---+---+---+---+---+---+
  *
- * Stage 2 - First contact:
+ * Stage 1 - First contact:
  *
  * If the client ID is an even number, the client assigns itself to the
  * console's first controller port.  And the server links the client to
@@ -216,7 +218,7 @@ quit:
  * automatically assigns itself to the second controller port.  The
  * maximum number of clients can only be set to an even number.
  *
- * Stage 3 - Communication:
+ * Stage 2 - Conversation:
  *
  *   Abbreviation legend
  *
@@ -230,9 +232,9 @@ quit:
  * +-------------------+-------------------+---------------+
  * | Command           | Response          | Description   |
  * +-------------------+-------------------+---------------+
- * | +---+---+---+     | +---+---+---+     | Data exchange |
- * | |ID0|DLB|DLH|     | |ID1|DLB|DLH|     |               |
- * | +---+---+---+     | +---+---+---+     |               |
+ * | +---+---+---+---+ | +---+---+---+---+ |               |
+ * | | D |ID0|DLB|DLH| | | D |ID1|DLB|DLH| | Data exchange |
+ * | +---+---+---+---+ | +---+---+---+---+ |               |
  * +-------------------+-------------------+---------------+
  * | +---+---+---+---+ | +---+---+---+---+ |      End      |
  * | |ID0| B | y | e | | | C | y | a |ID0| |  conversation |
@@ -243,11 +245,14 @@ quit:
  */
 static void* _ConnHandler(void* pSock)
 {
-    int     u8ClientID    = _stServer.u8NumClients;
+    uint8_t u8ClientID    = _stServer.u8NumClients;
+    uint8_t u8OpponentID  = 0;
     bool    bIsConnected  = true;
     char    acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
+    char    acRxBuffer[4] = { 0 };
     char    acIpAddr[15]  = { 0 };
     int     nSock         = *(int*)pSock;
+    int     nReceived     = 0;
 
     inet_ntop(
         _stServer.stClientAddr.ss_family,
@@ -261,27 +266,58 @@ static void* _ConnHandler(void* pSock)
     _stServer.astClient[u8ClientID].u16Data = 0xffff;
     if (0 == (u8ClientID % 2) || 0 == u8ClientID)
     {
-        _stServer.astClient[u8ClientID].u8OpponentID = u8ClientID + 1;
+        u8OpponentID = u8ClientID + 1;
     }
     else
     {
-        _stServer.astClient[u8ClientID].u8OpponentID = u8ClientID - 1;
+        u8OpponentID = u8ClientID - 1;
     }
-    printf(" Player %u is now assigned to player %u.\n",
-           u8ClientID,
-           _stServer.astClient[u8ClientID].u8OpponentID);
+    printf(" Player %u is now assigned to player %u.\n", u8ClientID, u8OpponentID);
 
-    // Stage 1.
+    // Stage 1 - First contact:
     if (-1 == send(nSock, acTxBuffer, 6, 0))
     {
         perror(strerror(errno));
     }
 
-    // Stage 2.
+    // Stage 2 - Conversation:
     while (bIsConnected)
     {
-        sleep(5);
-        bIsConnected = false;
+        int  nSize;
+        char acCommand[2][4] = {
+            { u8ClientID, 'B', 'y', 'e' },
+            { 'D', u8OpponentID, 0, 0 }
+        };
+        char acResponse[2][4] = {
+            { 'C', 'y', 'a', u8ClientID },
+            { 'D', u8OpponentID, 0, 0 }
+        };
+
+        nSize = recv(nSock, acRxBuffer, 4, 0);
+        nReceived += nSize;
+
+        // Command received.
+        if (nReceived >= 4)
+        {
+            // End conversation.
+            if (0 == memcmp(&acCommand[0], &acRxBuffer, 4))
+            {
+                memcpy(acTxBuffer, acResponse[0], 4);
+                if (-1 == send(nSock, acTxBuffer, 4, 0))
+                {
+                    perror(strerror(errno));
+                }
+                bIsConnected = false;
+                continue;
+            }
+            // Data exchange.
+            else if (0 == memcmp(&acCommand[1], &acRxBuffer, 2))
+            {
+                // Todo.
+            }
+            nSize     = 0;
+            nReceived = 0;
+        }
     }
 
     printf(" (%u) %s disconnected.\n", u8ClientID, acIpAddr);
@@ -328,11 +364,10 @@ static void* _GetInAddr(struct sockaddr *stAddr)
     }
 }
 
-static int _ConfigHandler(
-    void*       pUser,
-    const char* pacSection,
-    const char* pacName,
-    const char* pacValue)
+/**
+ * @brief  Configuration handler.
+ */
+static int _ConfigHandler(void* pUser, const char* pacSection, const char* pacName, const char* pacValue)
 {
     Config* pstConfig = (Config*)pUser;
 
