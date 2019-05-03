@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -55,20 +56,20 @@ typedef struct Config_t
 
 } Config;
 
-/**
- * @var    _stServer
- * @brief  Server private data
- */
-static Server _stServer = { 0 };
-
-static void* _GetInAddr(struct sockaddr *stAddr);
-static void  _ConnHandler(int nSock);
+static void* _ConnHandler(void* pSock);
 static void  _IntHandler(int nSig);
+static void* _GetInAddr(struct sockaddr *stAddr);
 static int   _ConfigHandler(
     void*       pUser,
     const char* pacSection,
     const char* pacName,
     const char* pacValue);
+
+/**
+ * @var    _stServer
+ * @brief  Server private data
+ */
+static Server _stServer = { 0 };
 
 int main(int argc, char* argv[])
 {
@@ -77,7 +78,6 @@ int main(int argc, char* argv[])
     int       nRet = EXIT_SUCCESS;
     Config    stConfig;
     char      pacIniFile[20];
-    int       nPid;
     int       nSock;
     int       nNewSock;
     int       nSockOpt= 1;
@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
     _stServer.bIsRunning = true;
     while (_stServer.bIsRunning)
     {
+        pthread_t stThreadID;
         nAddrSize = sizeof(_stServer.stClientAddr);
 
         nNewSock = accept(nSock, (struct sockaddr*)&_stServer.stClientAddr, &nAddrSize);
@@ -173,20 +174,10 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        nPid = fork();
-        if (0 < nPid)
+        if (0 > pthread_create(&stThreadID, NULL, _ConnHandler, (void*)&nNewSock))
         {
-            nRet = EXIT_FAILURE;
             perror(strerror(errno));
             continue;
-        }
-        else if (0 == nPid)
-        {
-            _ConnHandler(nNewSock);
-        }
-        else
-        {
-            close(nNewSock);
         }
     }
 
@@ -196,7 +187,7 @@ quit:
 }
 
 /**
- * @fn     void _ConnHandler(int nSock)
+ * @fn     void* _ConnHandler(void* nSock)
  * @brief  Connection handler.
  * @todo   Add WRIO/RDIO to protocol description.
  * @details
@@ -250,12 +241,13 @@ quit:
  *
  * @endcode
  */
-static void _ConnHandler(int nSock)
+static void* _ConnHandler(void* pSock)
 {
-    int  u8ClientID    = _stServer.u8NumClients;
-    bool bIsConnected  = true;
-    char acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
-    char acIpAddr[15]  = { 0 };
+    int     u8ClientID    = _stServer.u8NumClients;
+    bool    bIsConnected  = true;
+    char    acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
+    char    acIpAddr[15]  = { 0 };
+    int     nSock         = *(int*)pSock;
 
     inet_ntop(
         _stServer.stClientAddr.ss_family,
@@ -288,11 +280,14 @@ static void _ConnHandler(int nSock)
     // Stage 2.
     while (bIsConnected)
     {
+        sleep(5);
         bIsConnected = false;
     }
 
     printf(" (%u) %s disconnected.\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients -= 1;
+
+    return 0;
 }
 
 /**
@@ -315,6 +310,22 @@ static void _IntHandler(int nSig)
         signal(SIGINT, _IntHandler);
     }
     getchar();
+}
+
+/**
+ * @fn     void *_GetInAddr(struct sockaddr *stAddr)
+ * @brief  Get sockaddr, IPv4 or IPv6.
+ */
+static void* _GetInAddr(struct sockaddr *stAddr)
+{
+    if (AF_INET == stAddr->sa_family)
+    {
+        return &(((struct sockaddr_in*)stAddr)->sin_addr);
+    }
+    else
+    {
+	return &(((struct sockaddr_in6*)stAddr)->sin6_addr);
+    }
 }
 
 static int _ConfigHandler(
@@ -345,20 +356,4 @@ static int _ConfigHandler(
     }
 
     return 1;
-}
-
-/**
- * @fn     void *_GetInAddr(struct sockaddr *stAddr)
- * @brief  Get sockaddr, IPv4 or IPv6.
- */
-static void* _GetInAddr(struct sockaddr *stAddr)
-{
-    if (AF_INET == stAddr->sa_family)
-    {
-        return &(((struct sockaddr_in*)stAddr)->sin_addr);
-    }
-    else
-    {
-	return &(((struct sockaddr_in6*)stAddr)->sin6_addr);
-    }
 }
