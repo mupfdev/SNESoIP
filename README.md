@@ -1,13 +1,15 @@
-# SNESoIP: The SNES ethernet adapter #
+# SNESoIP: The SNES Wi-Fi adapter #
 
-![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
+![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
 
 ## Introduction
 
-The SNESoIP (SNES over IP) is an ethernet adapter for the Super Nintendo
+The SNESoIP (SNES over IP) is a Wi-Fi adapter for the Super Nintendo
 Entertainment System which is also known as Super NES, SNES or Super
-Nintendo.  It is basically an open-source, proof-of-concept, network
+Nintendo.  It is basically an open-source, proof-of-concept, Wi-Fi
 adapter to connect the SNES to the internet.
+
+![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
 
 I'm not planning to build and/or sell these devices but the device
 should be fairly easy to recreate.  Especially because I try to use
