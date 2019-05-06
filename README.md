@@ -6,8 +6,12 @@
 
 The SNESoIP (SNES over IP) is a Wi-Fi adapter for the Super Nintendo
 Entertainment System which is also known as Super NES, SNES or Super
-Nintendo.  It is basically an open-source, proof-of-concept, Wi-Fi
-adapter to connect the SNES to the internet.
+Nintendo.  It is basically a fully bi-directional, open-source,
+proof-of-concept, Wi-Fi adapter, designed to connect a SNES to another
+console and/or a special network service.
+
+Possible applications would be bulletin board systems, multi-user
+dungeons, IRC, etc.
 
 ![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
 
@@ -28,6 +32,8 @@ It's not the project's main goal to support existing SNES games.  It
 rather provides the technology that can be used to develop custom
 homebrew applications such as multi-user dungeons, bulletin board
 systems, etc.
+
+However, it is possible.
 
 ## Project History
 
