@@ -1,6 +1,8 @@
 /**
  * @file      server.c
  * @brief     SNESoIP server
+ * @details   Proof-of-concept IP exchange server to use with the
+ *            SNESoIP v3.
  * @defgroup  Server SNESoIP server
  * @ingroup   Server
  */
@@ -17,7 +19,22 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include <CommonInclude.h>
 #include "inih/ini.h"
+
+/**
+ * @enum   eCommand
+ * @brief  Client/Server commands
+ */
+typedef enum eCommand_t
+{
+    C_HELO = 0,
+    C_BYE,
+    C_CYA,
+    C_GETIP,
+    C_NUM
+} eCommand;
 
 /**
  * @struct  Client
@@ -30,6 +47,19 @@ typedef struct Client_t
 } Client;
 
 /**
+ * @struct  Config
+ * @brief   Server configuration
+ */
+typedef struct Config_t
+{
+    uint16_t u16Port;
+    uint8_t  u8MaxClients;
+    uint8_t  u8Verbose;
+    char     acAddr[15];
+
+} Config;
+
+/**
  * @struct  Server
  * @brief   Server data
  */
@@ -39,21 +69,10 @@ typedef struct Server_t
 
     bool    bIsRunning;
     uint8_t u8NumClients;
+    Config  stConfig;
     Client  astClient[];
 
 } Server;
-
-/**
- * @struct  Config
- * @brief   Server configuration
- */
-typedef struct Config_t
-{
-    uint16_t u16Port;
-    uint8_t  u8MaxClients;
-    char     acAddr[15];
-
-} Config;
 
 static void* _ConnHandler(void* pSock);
 static void  _IntHandler(int nSig);
@@ -71,7 +90,6 @@ int main(int argc, char* argv[])
     struct sockaddr_in stServerAddr;
 
     int       nRet = EXIT_SUCCESS;
-    Config    stConfig;
     char      pacIniFile[20];
     int       nSock;
     int       nNewSock;
@@ -89,27 +107,27 @@ int main(int argc, char* argv[])
         strncpy(pacIniFile, "config.ini", 11);
     }
 
-    if (0 > ini_parse(pacIniFile, _ConfigHandler, &stConfig))
+    if (0 > ini_parse(pacIniFile, _ConfigHandler, &_stServer.stConfig))
     {
         fprintf(stderr, "Unable to load %s.\n", pacIniFile);
         return EXIT_FAILURE;
     }
 
-    if (0 == stConfig.u8MaxClients)
+    if (0 == _stServer.stConfig.u8MaxClients)
     {
         fprintf(stderr, "Error: max_clients can't be set to zero.\n");
         return EXIT_FAILURE;
     }
 
-    if (0 != (stConfig.u8MaxClients % 2))
+    if (0 != (_stServer.stConfig.u8MaxClients % 2))
     {
         fprintf(stderr, "Error: max_clients must be set to an even number.\n");
         return EXIT_FAILURE;
     }
 
     stServerAddr.sin_family      = AF_INET;
-    stServerAddr.sin_port        = htons(stConfig.u16Port);
-    stServerAddr.sin_addr.s_addr = inet_addr(stConfig.acAddr);
+    stServerAddr.sin_port        = htons(_stServer.stConfig.u16Port);
+    stServerAddr.sin_addr.s_addr = inet_addr(_stServer.stConfig.acAddr);
 
     nSock = socket(PF_INET, SOCK_STREAM, 0);
     if (-1 == nSock)
@@ -147,7 +165,7 @@ int main(int argc, char* argv[])
     puts(" ███████║██║ ╚████║███████╗███████║╚██████╔╝██║██║");
     puts(" ╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝ ╚═════╝ ╚═╝╚═╝");
     printf(" IP: \x1b[36m%s  \x1b[0mPort: \x1b[36m%u  \x1b[0mQuit: CTRL+c\n",
-           stConfig.acAddr, stConfig.u16Port);
+           _stServer.stConfig.acAddr, _stServer.stConfig.u16Port);
     puts(" Listening.\n");
 
     _stServer.bIsRunning = true;
@@ -170,7 +188,7 @@ int main(int argc, char* argv[])
             continue;
         };
 
-        if (_stServer.u8NumClients >= stConfig.u8MaxClients)
+        if (_stServer.u8NumClients >= _stServer.stConfig.u8MaxClients)
         {
             puts("No open slots available.");
             continue;
@@ -191,11 +209,11 @@ quit:
 /**
  * @fn     void* _ConnHandler(void* nSock)
  * @brief  Connection handler.
- * @todo   Add WRIO/RDIO to protocol description.
+ * @todo   Implement WRIO/RDIO usage.
  * @details
  * @code{.unparsed}
  *
- * Present protocol description
+ * Current protocol description
  *
  * Stage 1:
  *
@@ -206,9 +224,9 @@ quit:
  * The server sends a 6-byte message where the last byte is the asigned
  * client ID:
  *
- *   +---+---+---+---+---+---+
- *   | H | e | l | l | o | 0 |
- *   +---+---+---+---+---+---+
+ *   +---+---+---+---+---+
+ *   | H | e | l | o | 0 |
+ *   +---+---+---+---+---+
  *
  * Stage 1 - First contact:
  *
@@ -218,28 +236,42 @@ quit:
  * automatically assigns itself to the second controller port.  The
  * maximum number of clients can only be set to an even number.
  *
- * Stage 2 - Conversation:
+ * Stage 2 - Exchange:
  *
  *   Abbreviation legend
  *
- *   ID0: own client ID
- *   ID1: client ID of opponent
- *   DLB: controller data, low byte
- *   DHB: controller data, high byte
+ *   ID0:   own client ID
+ *   ID1:   client ID of opponent
+ *   DLB:   controller data, low byte
+ *   DHB:   controller data, high byte
+ *   IHH:
+ *   IHL:   IP address.
+ *   ILH:   e. g. 127.0.0.1 = IHH.IHL.ILH.ILL
+ *   ILL:
+ *   Empty: ignored
  *
- * From this point on, the server accepts the following commands:
+ * From this point on, the server accepts the following commands with a
+ * max. total length of 5 bytes:
  *
- * +-------------------+-------------------+---------------+
- * | Command           | Response          | Description   |
- * +-------------------+-------------------+---------------+
- * | +---+---+---+---+ | +---+---+---+---+ |               |
- * | | D |ID0|DLB|DLH| | | D |ID1|DLB|DLH| | Data exchange |
- * | +---+---+---+---+ | +---+---+---+---+ |               |
- * +-------------------+-------------------+---------------+
- * | +---+---+---+---+ | +---+---+---+---+ |      End      |
- * | |ID0| B | y | e | | | C | y | a |ID0| |  conversation |
- * | +---+---+---+---+ | +---+---+---+---+ |               |
- * +-------------------+-------------------+---------------+
+ * +-----------------------+-----------------------+---------------+
+ * | Command               | Response              |  Description  |
+ * +-----------------------+-----------------------+---------------+
+ * | +---+---+---+---+---+ | +---+---+---+---+---+ |      End      |
+ * | |ID0| B | y | e |   | | | C | y | a |ID0|   | |  conversation |
+ * | +---+---+---+---+---+ | +---+---+---+---+---+ |               |
+ * +-----------------------+-----------------------+---------------+
+ * | +---+---+---+---+---+ | +---+---+---+---+---+ |    Request    |
+ * | | G | e | t | I | P | | |ID1|IHH|IHL|ILH|ILL| | IP address of |
+ * | +---+---+---+---+---+ | +---+---+---+---+---+ |    opponent   |
+ * +-----------------------+ If not available:     |               |
+ * |                       | +---+---+---+---+---+ |               |
+ * |                       | |ID1| N | o | n | e | |               |
+ * |                       | +---+---+---+---+---+ |               |
+ * +-----------------------+-----------------------+---------------+
+ *
+ * Stage 3 - Direct contact
+ *
+ * tbd.
  *
  * @endcode
  */
@@ -248,11 +280,18 @@ static void* _ConnHandler(void* pSock)
     uint8_t u8ClientID    = _stServer.u8NumClients;
     uint8_t u8OpponentID  = 0;
     bool    bIsConnected  = true;
-    char    acTxBuffer[6] = { 'H', 'e', 'l', 'l', 'o', u8ClientID };
-    char    acRxBuffer[4] = { 0 };
+    char    acRxBuffer[5] = { 0 };
+    char    acTxBuffer[5] = { 0 };
     char    acIpAddr[15]  = { 0 };
     int     nSock         = *(int*)pSock;
     int     nReceived     = 0;
+
+    char acCommand[C_NUM][5] = {
+        { 'H', 'e', 'l', 'o', u8ClientID },
+        { u8ClientID, 'B', 'y', 'e', 0 },
+        { 'C', 'y', 'a', u8ClientID, 0 },
+        { 'G', 'e', 't', 'I', 'P' }
+    };
 
     inet_ntop(
         _stServer.stClientAddr.ss_family,
@@ -263,7 +302,6 @@ static void* _ConnHandler(void* pSock)
     printf(" (%u) %s connected.\n", u8ClientID, acIpAddr);
     _stServer.u8NumClients += 1;
 
-    _stServer.astClient[u8ClientID].u16Data = 0xffff;
     if (0 == (u8ClientID % 2) || 0 == u8ClientID)
     {
         u8OpponentID = u8ClientID + 1;
@@ -275,7 +313,8 @@ static void* _ConnHandler(void* pSock)
     printf(" Player %u is now assigned to player %u.\n", u8ClientID, u8OpponentID);
 
     // Stage 1 - First contact:
-    if (-1 == send(nSock, acTxBuffer, 6, 0))
+    memcpy(acTxBuffer, acCommand[C_HELO], 5);
+    if (-1 == send(nSock, acTxBuffer, 5, 0))
     {
         perror(strerror(errno));
     }
@@ -284,37 +323,30 @@ static void* _ConnHandler(void* pSock)
     while (bIsConnected)
     {
         int  nSize;
-        char acCommand[2][4] = {
-            { u8ClientID, 'B', 'y', 'e' },
-            { 'D', u8OpponentID, 0, 0 }
-        };
-        char acResponse[2][4] = {
-            { 'C', 'y', 'a', u8ClientID },
-            { 'D', u8OpponentID, 0, 0 }
-        };
 
         nSize = recv(nSock, acRxBuffer, 4, 0);
         nReceived += nSize;
 
-        // Command received.
-        if (nReceived >= 4)
+        // Full command received.
+        if (nReceived >= 5)
         {
             // End conversation.
-            if (0 == memcmp(&acCommand[0], &acRxBuffer, 4))
+            if (0 == memcmp(&acCommand[C_BYE], &acRxBuffer, 5))
             {
-                memcpy(acTxBuffer, acResponse[0], 4);
-                if (-1 == send(nSock, acTxBuffer, 4, 0))
+                memcpy(acTxBuffer, acCommand[C_CYA], 5);
+                if (-1 == send(nSock, acTxBuffer, 5, 0))
                 {
                     perror(strerror(errno));
                 }
                 bIsConnected = false;
                 continue;
             }
-            // Data exchange.
-            else if (0 == memcmp(&acCommand[1], &acRxBuffer, 2))
+            // IP request.
+            else if(0 == memcmp(&acCommand[C_GETIP], &acRxBuffer, 5))
             {
-                // Todo.
+
             }
+
             nSize     = 0;
             nReceived = 0;
         }
@@ -384,6 +416,10 @@ static int _ConfigHandler(void* pUser, const char* pacSection, const char* pacNa
     else if (MATCH("General", "max_clients"))
     {
         pstConfig->u8MaxClients = atoi(pacValue);
+    }
+    else if (MATCH("General", "verbose"))
+    {
+        pstConfig->u8Verbose = atoi(pacValue);
     }
     else
     {
