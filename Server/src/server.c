@@ -33,6 +33,7 @@ typedef enum eCommand_t
     C_BYE,
     C_CYA,
     C_GETIP,
+    C_NONE,
     C_NUM
 } eCommand;
 
@@ -43,6 +44,7 @@ typedef enum eCommand_t
 typedef struct Client_t
 {
     uint16_t u16Data;
+    uint8_t  au8IP[4];
 
 } Client;
 
@@ -286,20 +288,23 @@ static void* _ConnHandler(void* pSock)
     int     nSock         = *(int*)pSock;
     int     nReceived     = 0;
 
-    char acCommand[C_NUM][5] = {
-        { 'H', 'e', 'l', 'o', u8ClientID },
-        { u8ClientID, 'B', 'y', 'e', 0 },
-        { 'C', 'y', 'a', u8ClientID, 0 },
-        { 'G', 'e', 't', 'I', 'P' }
-    };
-
     inet_ntop(
         _stServer.stClientAddr.ss_family,
         _GetInAddr((struct sockaddr*)&_stServer.stClientAddr),
         acIpAddr,
         sizeof(acIpAddr));
 
-    printf(" (%u) %s connected.\n", u8ClientID, acIpAddr);
+    if (IpIsValid(acIpAddr))
+    {
+        printf(" (%u) %s connected.\n", u8ClientID, acIpAddr);
+        // Todo: store IP to _stServer.astClient[u8ClientID].au8IP
+    }
+    else
+    {
+        perror("Error: Invalid IP address.\n");
+        return 0;
+    }
+
     _stServer.u8NumClients += 1;
 
     if (0 == (u8ClientID % 2) || 0 == u8ClientID)
@@ -311,6 +316,14 @@ static void* _ConnHandler(void* pSock)
         u8OpponentID = u8ClientID - 1;
     }
     printf(" Player %u is now assigned to player %u.\n", u8ClientID, u8OpponentID);
+
+    char acCommand[C_NUM][5] = {
+        { 'H', 'e', 'l', 'o', u8ClientID },
+        { u8ClientID, 'B', 'y', 'e', 0 },
+        { 'C', 'y', 'a', u8ClientID, 0 },
+        { 'G', 'e', 't', 'I', 'P' },
+        { u8OpponentID, 'N', 'o', 'n', 'e' }
+    };
 
     // Stage 1 - First contact:
     memcpy(acTxBuffer, acCommand[C_HELO], 5);
@@ -324,7 +337,7 @@ static void* _ConnHandler(void* pSock)
     {
         int  nSize;
 
-        nSize = recv(nSock, acRxBuffer, 4, 0);
+        nSize = recv(nSock, acRxBuffer, 5, 0);
         nReceived += nSize;
 
         // Full command received.
@@ -344,7 +357,14 @@ static void* _ConnHandler(void* pSock)
             // IP request.
             else if(0 == memcmp(&acCommand[C_GETIP], &acRxBuffer, 5))
             {
-
+                if (0 == _stServer.astClient[u8OpponentID].au8IP[0])
+                {
+                    memcpy(acTxBuffer, acCommand[C_NONE], 5);
+                    if (-1 == send(nSock, acTxBuffer, 5, 0))
+                    {
+                        perror(strerror(errno));
+                    }
+                }
             }
 
             nSize     = 0;

@@ -74,8 +74,8 @@ We'll see where 2019 is going.
 
 ## Hardware
 
-The new hardware design will most-likely be based on a ESP32 or ESP8266
-microcontroller by Espressif Systems and will therefore use Wi-Fi.
+The new hardware design will be based on a ESP32 microcontroller by
+Espressif Systems.
 
 ## Licence and Credits
 

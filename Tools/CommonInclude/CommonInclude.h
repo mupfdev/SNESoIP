@@ -5,4 +5,10 @@
  */
 #pragma once
 
-uint8_t HexToUint8(uint8_t *pu8Hex);
+#include <stdbool.h>
+#include <stdint.h>
+
+uint8_t  HexToUint8(uint8_t *pu8Hex);
+void     StrToIP(char* pacIp, uint8_t* pu8Dest);
+uint32_t StrToUint32(char* pacStr);
+bool     IpIsValid(char* pacIn);

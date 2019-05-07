@@ -117,7 +117,8 @@ WARN_LOGFILE           = Doxygen.warnings
 INPUT                  = ../LICENCE.md \
                          ../README.md \
                          ../Firmware/src \
-                         ../Server/src
+                         ../Server/src \
+                         ../Tools/CommonInclude
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
