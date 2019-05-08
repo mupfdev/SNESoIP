@@ -1,6 +1,6 @@
 # SNESoIP server
 
-SNESoIP server.
+Proof-of-concept IP exchange server to use with the SNESoIP v3.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/rdablcrv5xikp55r?svg=true)](https://ci.appveyor.com/project/mupfelofen-de/snesoip)
 
