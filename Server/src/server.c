@@ -273,7 +273,9 @@ quit:
  *
  * Stage 3 - Direct contact
  *
- * tbd.
+ * As soon as both clients have a valid IP address, they start a direct
+ * data exchange via UDP.  How this has to look like still has to be
+ * specified.
  *
  * @endcode
  */
@@ -297,7 +299,7 @@ static void* _ConnHandler(void* pSock)
     if (IpIsValid(acIpAddr))
     {
         printf(" (%u) %s connected.\n", u8ClientID, acIpAddr);
-        // Todo: store IP to _stServer.astClient[u8ClientID].au8IP
+        StrToIP(acIpAddr, _stServer.astClient[u8ClientID].au8IP);
     }
     else
     {
@@ -343,10 +345,14 @@ static void* _ConnHandler(void* pSock)
         // Full command received.
         if (nReceived >= 5)
         {
+            memset(acTxBuffer, 0, sizeof(acTxBuffer));
+
             // End conversation.
             if (0 == memcmp(&acCommand[C_BYE], &acRxBuffer, 5))
             {
+                printf(" (%u) initiated a disconnect.\n", u8ClientID);
                 memcpy(acTxBuffer, acCommand[C_CYA], 5);
+
                 if (-1 == send(nSock, acTxBuffer, 5, 0))
                 {
                     perror(strerror(errno));
@@ -357,13 +363,36 @@ static void* _ConnHandler(void* pSock)
             // IP request.
             else if(0 == memcmp(&acCommand[C_GETIP], &acRxBuffer, 5))
             {
+                printf(" (%u) requested his opponent's IP address: ", u8ClientID);
                 if (0 == _stServer.astClient[u8OpponentID].au8IP[0])
                 {
+                    puts("IP not available.");
                     memcpy(acTxBuffer, acCommand[C_NONE], 5);
-                    if (-1 == send(nSock, acTxBuffer, 5, 0))
+                }
+                else
+                {
+                    char acGr1[4];
+                    char acGr2[4];
+                    char acGr3[4];
+                    char acGr4[4];
+
+                    sprintf(acGr1, "%u", _stServer.astClient[u8OpponentID].au8IP[0]);
+                    sprintf(acGr2, "%u", _stServer.astClient[u8OpponentID].au8IP[1]);
+                    sprintf(acGr3, "%u", _stServer.astClient[u8OpponentID].au8IP[2]);
+                    sprintf(acGr4, "%u", _stServer.astClient[u8OpponentID].au8IP[3]);
+                    printf("%s.%s.%s.%s sent.\n", acGr1, acGr2, acGr3, acGr4);
+
+                    acTxBuffer[0] = u8OpponentID;
+                    for (uint8_t u8Index = 1; u8Index < 5; u8Index++)
                     {
-                        perror(strerror(errno));
+                        acTxBuffer[u8Index] =
+                            _stServer.astClient[u8OpponentID].au8IP[u8Index - 1];
                     }
+                }
+
+                if (-1 == send(nSock, acTxBuffer, 5, 0))
+                {
+                    perror(strerror(errno));
                 }
             }
 
@@ -372,7 +401,7 @@ static void* _ConnHandler(void* pSock)
         }
     }
 
-    printf(" (%u) %s disconnected.\n", u8ClientID, acIpAddr);
+    printf(" (%u) disconnected.\n", u8ClientID);
     _stServer.u8NumClients -= 1;
 
     return 0;

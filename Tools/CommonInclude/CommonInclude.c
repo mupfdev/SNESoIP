@@ -55,7 +55,7 @@ void StrToIP(char* pacIp, uint8_t* pu8Dest)
 
     pacTemp = strtok((char *)pacIp, ".");
 
-    while (! pacTemp)
+    while (pacTemp)
     {
         pu8Dest[u8Index] = atoi(pacTemp);
         pacTemp          = strtok(NULL, ".");
