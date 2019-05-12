@@ -14,6 +14,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "SNES.h"
+#include "TCPClient.h"
 #include "TCPServer.h"
 #include "WiFi.h"
 
@@ -23,8 +24,9 @@ void app_main()
 {
     InitWiFi();
     WaitForIP();
-    InitTCPServer();
     InitSNES();
+    InitTCPServer();
+    InitTCPClient();
 
     xTaskCreate(_MainThread, "MainThread", 4096, NULL, 5, NULL);
 }

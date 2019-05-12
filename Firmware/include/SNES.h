@@ -22,3 +22,5 @@
 void     InitSNES(void);
 void     DeInitSNES(void);
 uint16_t GetSNESInputData(void);
+void     SendClock(void);
+void     SendLatch(void);

@@ -82,27 +82,29 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_err.h"
+#include "esp_log.h"
 #include "driver/rmt.h"
 #include "driver/gpio.h"
 #include "rom/ets_sys.h"
 #include "SNES.h"
 
 /**
- * @struct  SNESDriver
- * @brief   SNES I/O driver data
+ * @typedef  SNESDriver
+ * @brief    SNES I/O driver data
+ * @struct   SNESDriver_t
+ * @brief    SNES I/O driver data structure
  */
 typedef struct SNESDriver_t
 {
-    bool     bIsRunning;
-    uint16_t u16InputData;
-    bool     bIOPortBit6;
-    bool     bIOPortBit7;
+    bool     bIsRunning;    ///< Run condition
+    uint16_t u16InputData;  ///< Controller input data
+    bool     bIOPortBit6;   ///< Programmable I/O Port bit 6
+    bool     bIOPortBit7;   ///< Programmable I/O Port bit 7
 
-    rmt_config_t stLatch;
-    rmt_item32_t stLatchItem[1];
-
-    rmt_config_t stClock;
-    rmt_item32_t stClockItem[17];
+    rmt_config_t stLatch;          ///< Latch signal configuration
+    rmt_item32_t stLatchItem[1];   ///< Latch signal data
+    rmt_config_t stClock;          ///< Clock signal configuration
+    rmt_item32_t stClockItem[17];  ///< Clock signal data
 
 } SNESDriver;
 
@@ -113,8 +115,10 @@ typedef struct SNESDriver_t
 static SNESDriver _stDriver;
 
 static void _SNESReadInputThread(void* pArg);
-static void _SendClock(void);
-static void _SendLatch(void);
+#ifdef DEBUG
+static void _SNESDebugThread(void* pArg);
+#endif
+static void _InitSNESSigGen(void);
 
 /**
  * @fn     void InitSNES(void)
@@ -168,14 +172,170 @@ void InitSNES(void)
     gpio_config_t stGPIOConf;
 
     memset(&_stDriver, 0, sizeof(struct SNESDriver_t));
-    _stDriver.u16InputData = 0xffff;
+    _stDriver.bIsRunning    = true;
+    _stDriver.u16InputData  = 0xffff;
 
+    // Data.
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
     stGPIOConf.mode         = GPIO_MODE_INPUT;
     stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA_BIT;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
+    _InitSNESSigGen();
+
+    xTaskCreate(
+        _SNESReadInputThread,
+        "SNESReadInputThread",
+        4096, NULL, 3, NULL);
+
+    #ifdef DEBUG
+    xTaskCreate(
+        _SNESDebugThread,
+        "SNESDebugThread",
+        2048, NULL, 3, NULL);
+    #endif
+}
+
+/**
+ * @fn     void DeInitSNES(void)
+ * @brief  De-initialise/stop SNES I/O driver
+ */
+void DeInitSNES(void)
+{
+    _stDriver.bIsRunning = false;
+}
+
+/**
+ * @fn     uint16_t GetSNESInputData(void)
+ * @brief  Get current SNES controller input data
+ */
+uint16_t GetSNESInputData(void)
+{
+    return _stDriver.u16InputData;
+}
+
+/**
+ * @fn      void SendClock(void)
+ * @brief   Send clock signal.
+ */
+void SendClock(void)
+{
+    rmt_write_items(_stDriver.stClock.channel, _stDriver.stClockItem, 17, 0);
+}
+
+/**
+ * @fn     void SendLatch(void)
+ * @brief  Send latch pulse.
+ */
+void SendLatch(void)
+{
+    rmt_write_items(_stDriver.stLatch.channel, _stDriver.stLatchItem, 1, 0);
+}
+
+/**
+ * @fn       void _SNESReadInputThread(void* pArg)
+ * @brief    Read SNES controller input
+ * @details  The data is retrieved three times as often as on a real
+ *           SNES.  Switch bouncing is compensated by comparing the
+ *           results.
+ * @param    pArg
+ *           Unused
+ */
+static void _SNESReadInputThread(void* pArg)
+{
+    uint16_t u16Temp[3] = { 0xffff, 0xffff, 0xffff };
+    uint8_t  u8Attempt = 0;
+
+    while (_stDriver.bIsRunning)
+    {
+        SendLatch();
+        SendClock();
+
+        ets_delay_us(3);
+        for (uint8_t u8Bit = 0; u8Bit < 16; u8Bit++)
+        {
+            ets_delay_us(6);
+            if (u8Bit < 12)
+            {
+                if (gpio_get_level(GPIO_SNES_INPUT_DATA_PIN))
+                {
+                    if (gpio_get_level(GPIO_SNES_INPUT_DATA_PIN))
+                    {
+                        u16Temp[u8Attempt] |= 1 << u8Bit;
+                    }
+                }
+                else
+                {
+                    u16Temp[u8Attempt] &= ~(1 << u8Bit);
+                }
+            }
+            ets_delay_us(6);
+        }
+        u8Attempt++;
+
+        // Compensate switch bouncing.
+        if (u8Attempt > 2)
+        {
+            if (u16Temp[0] == u16Temp[1] && u16Temp[1] == u16Temp[2])
+            {
+                _stDriver.u16InputData = u16Temp[0];
+            }
+            u8Attempt = 0;
+        }
+
+        vTaskDelay(5 / portTICK_PERIOD_MS);
+    }
+
+    vTaskDelete(NULL);
+}
+
+#ifdef DEBUG
+/**
+ * @fn     _SNESDebugThread(void* pArg)
+ * @brief  Debug thread
+ */
+static void _SNESDebugThread(void* pArg)
+{
+    char     acDebug[13] = { 0 };
+    uint16_t u16Prev     = _stDriver.u16InputData;
+
+    while (_stDriver.bIsRunning)
+    {
+        uint16_t u16Temp = _stDriver.u16InputData;
+
+        for (uint8_t u8Index = 0; u8Index < 12; u8Index++)
+        {
+            if ((u16Temp >> u8Index) & 1)
+            {
+                acDebug[u8Index] = '1';
+            }
+            else
+            {
+                acDebug[u8Index] = '0';
+            }
+        }
+        acDebug[12] = '\0';
+        if (u16Temp != u16Prev)
+        {
+            ESP_LOGI("SNES", "%s", acDebug);
+            u16Prev = u16Temp;
+        }
+
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    vTaskDelete(NULL);
+}
+#endif
+
+/**
+ * @fn       void _InitSNESSigGen(void)
+ * @brief    SNES signal generator
+ * @details  This function initialises the latch and clock pins to use
+ *           the RMT (Remote Control) module driver.
+ */
+static void _InitSNESSigGen(void)
+{
     // Initialise latch signal.
     _stDriver.stLatch.rmt_mode      = RMT_MODE_TX;
     _stDriver.stLatch.channel       = RMT_CHANNEL_0;
@@ -221,67 +381,4 @@ void InitSNES(void)
         _stDriver.stClockItem[u8Index].duration1 = 6;
         _stDriver.stClockItem[u8Index].level1    = 1;
     }
-
-    xTaskCreate(
-        _SNESReadInputThread,
-        "SNESReadInputThread",
-        4096, NULL, 3, NULL);
-}
-
-/**
- * @fn     void DeInitSNES(void)
- * @brief  De-initialise/stop SNES I/O driver
- */
-void DeInitSNES(void)
-{
-    _stDriver.bIsRunning = false;
-}
-
-/**
- * @fn     uint16_t GetSNESInputData(void)
- * @brief  Get current SNES controller input data
- */
-uint16_t GetSNESInputData(void)
-{
-    return _stDriver.u16InputData;
-}
-
-/**
- * @fn       void _SNESReadInputThread(void* pArg)
- * @brief    Read SNES controller input
- * @param    pArg
- *           Unused
- * @todo     Apparently the signal is generated every 10µs.  This isn't
- *           a problem, I just dont understand why.
- */
-static void _SNESReadInputThread(void* pArg)
-{
-    _stDriver.bIsRunning = true;
-
-    while (_stDriver.bIsRunning)
-    {
-        _SendLatch();
-        _SendClock();
-        vTaskDelay(16 / portTICK_PERIOD_MS);
-    }
-
-    vTaskDelete(NULL);
-}
-
-/**
- * @fn     void _SendClock(void)
- * @brief  Send clock signal.
- */
-static void _SendClock(void)
-{
-    rmt_write_items(_stDriver.stClock.channel, _stDriver.stClockItem, 17, 1);
-}
-
-/**
- * @fn     _SendLatch(void)
- * @brief  Send latch pulse.
- */
-static void _SendLatch(void)
-{
-    rmt_write_items(_stDriver.stLatch.channel, _stDriver.stLatchItem, 1, 0);
 }

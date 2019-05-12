@@ -1,3 +1,6 @@
 [submodule "Server/src/inih"]
 	path = Server/src/inih
 	url = https://github.com/benhoyt/inih.git
+[submodule "Tools/libSFX"]
+	path = Tools/libSFX
+	url = https://github.com/Optiroc/libSFX.git

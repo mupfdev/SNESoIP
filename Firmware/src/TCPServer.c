@@ -87,7 +87,7 @@ static void _TCPServerThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
-    char acRXBuffer[1024];
+    char acRXBuffer[128];
     char acAddrStr[128];
     int  nAddrFamily;
     int  nIPProtocol;
