@@ -13,8 +13,8 @@
  *   +-------------------+--------------+'
  *
  * Important: The logic levels need to be converted using a
- * bidirectional logic level shifter such as the TXS0108E by Texas
- * Instruments.
+ * bi-directional logic level converter such as the BSS138 by Fairchild
+ * Semiconductor: https://www.sparkfun.com/products/12009
  *
  *   +-------------+-----+--------- -+-------+-------+
  *   | Location    | Pin | Desc.     | Conn. | ESP32 |
