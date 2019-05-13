@@ -324,7 +324,7 @@ static void* _ConnHandler(void* pSock)
         { u8ClientID, 'B', 'y', 'e', 0 },
         { 'C', 'y', 'a', u8ClientID, 0 },
         { 'G', 'e', 't', 'I', 'P' },
-        { u8OpponentID, 'N', 'o', 'n', 'e' }
+        { 'N', 'o', 'n', 'e', 0}
     };
 
     // Stage 1 - First contact:

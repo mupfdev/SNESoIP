@@ -39,7 +39,7 @@ typedef struct TCPServer_t
 static TCPServer _stServer;
 
 static void _TCPServerThread(void* pArg);
-static bool _CheckCommand(char* pacRXBuffer, char* pacCommand);
+static bool _CheckCommand(char* pacRxBuffer, char* pacCommand);
 
 /**
  * @fn     void InitTCPServer(void)
@@ -87,7 +87,7 @@ static void _TCPServerThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
-    char acRXBuffer[128];
+    char acRxBuffer[128];
     char acAddrStr[128];
     int  nAddrFamily;
     int  nIPProtocol;
@@ -161,7 +161,7 @@ static void _TCPServerThread(void* pArg)
 
         while (_stServer.bIsRunning)
         {
-            int nLen = recv(nSock, acRXBuffer, sizeof(acRXBuffer) - 1, 0);
+            int nLen = recv(nSock, acRxBuffer, sizeof(acRxBuffer) - 1, 0);
             // Error occured during receiving.
             if (nLen < 0)
             {
@@ -183,19 +183,19 @@ static void _TCPServerThread(void* pArg)
                     acAddrStr, sizeof(acAddrStr) - 1);
 
                 // Null-terminate whatever we received and treat like a string.
-                acRXBuffer[nLen] = 0;
+                acRxBuffer[nLen] = 0;
                 if (nLen > 2)
                 {
-                    ESP_LOGI("tcpd", "Received %d bytes from %s: %s", nLen, acAddrStr, acRXBuffer);
+                    ESP_LOGI("tcpd", "Received %d bytes from %s: %s", nLen, acAddrStr, acRxBuffer);
                 }
 
                 // Parse commands.
-                if (_CheckCommand(acRXBuffer, "version"))
+                if (_CheckCommand(acRxBuffer, "version"))
                 {
                     char* pacVersion = VERSION;
                     send(nSock, pacVersion, strlen(pacVersion), 0);
                 }
-                else if (_CheckCommand(acRXBuffer, "input"))
+                else if (_CheckCommand(acRxBuffer, "input"))
                 {
                     uint16_t u16InputData    = GetSNESInputData();
                     uint8_t  u8Index         = 15;
@@ -221,7 +221,8 @@ static void _TCPServerThread(void* pArg)
         }
 
         _stServer.bHostConnected = false;
-        if (-1 != nSock) {
+        if (-1 != nSock)
+        {
             ESP_LOGI("tcpd", "Shutting down socket and restarting.");
             shutdown(nSock, 0);
             close(nSock);
@@ -231,9 +232,9 @@ static void _TCPServerThread(void* pArg)
     vTaskDelete(NULL);
 }
 
-static bool _CheckCommand(char* pacRXBuffer, char* pacCommand)
+static bool _CheckCommand(char* pacRxBuffer, char* pacCommand)
 {
-    if (0 == strncmp(pacRXBuffer, pacCommand, strlen(pacCommand)))
+    if (0 == strncmp(pacRxBuffer, pacCommand, strlen(pacCommand)))
     {
         return true;
     }
