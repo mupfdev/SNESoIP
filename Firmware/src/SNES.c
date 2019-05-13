@@ -236,11 +236,11 @@ void SendLatch(void)
 /**
  * @fn       void _SNESReadInputThread(void* pArg)
  * @brief    Read SNES controller input
- * @details  The data is retrieved three times as often as on a real
- *           SNES.  Switch bouncing is compensated by comparing the
- *           results.
- * @param    pArg
- *           Unused
+ * @details  The data is retrieved three times as often as on a SNES.
+ *           Signal fluctuations, probably caused by wrong timing, are
+ *           compensated by comparing the results.  @param pArg Unused
+ * @todo     Use the RMT module driver to read the data in non-blocking
+ *           mode.
  */
 static void _SNESReadInputThread(void* pArg)
 {
@@ -274,7 +274,7 @@ static void _SNESReadInputThread(void* pArg)
         }
         u8Attempt++;
 
-        // Compensate switch bouncing.
+        // Compensate signal fluctuations.
         if (u8Attempt > 2)
         {
             if (u16Temp[0] == u16Temp[1] && u16Temp[1] == u16Temp[2])
