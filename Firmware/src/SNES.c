@@ -298,11 +298,12 @@ static void _SNESReadInputThread(void* pArg)
 static void _SNESDebugThread(void* pArg)
 {
     char     acDebug[13] = { 0 };
-    uint16_t u16Prev     = _stDriver.u16InputData;
+    uint16_t u16Temp     = 0xffff;
+    uint16_t u16Prev     = 0xffff;
 
     while (_stDriver.bIsRunning)
     {
-        uint16_t u16Temp = _stDriver.u16InputData;
+        u16Temp = _stDriver.u16InputData;
 
         for (uint8_t u8Index = 0; u8Index < 12; u8Index++)
         {

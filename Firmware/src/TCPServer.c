@@ -47,7 +47,7 @@ static bool _CheckCommand(char* pacRxBuffer, char* pacCommand);
  */
 void InitTCPServer(void)
 {
-    ESP_LOGI("tcpd", "Initialise TCP server.");
+    ESP_LOGI("Server", "Initialise TCP server.");
     memset(&_stServer, 0, sizeof(struct TCPServer_t));
     xTaskCreate(_TCPServerThread, "TCPServerThread", 4096, NULL, 3, NULL);
 }
@@ -105,26 +105,26 @@ static void _TCPServerThread(void* pArg)
     nListenSock = socket(nAddrFamily, SOCK_STREAM, nIPProtocol);
     if (0 > nListenSock)
     {
-        ESP_LOGE("tcpd", "Unable to create socket: errno %d", errno);
+        ESP_LOGE("Server", "Unable to create socket: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("tcpd", "Socket created successfully.");
+        ESP_LOGI("Server", "Socket created successfully.");
     }
 
     if (0 > setsockopt(nListenSock, SOL_SOCKET, SO_REUSEADDR, &nSockOpt, sizeof(int)))
     {
-        ESP_LOGE("tcpd", "Unable to set socket option: errno %d", errno);
+        ESP_LOGE("Server", "Unable to set socket option: errno %d", errno);
     }
 
     nErr = bind(nListenSock, (struct sockaddr*)&stDestAddr, sizeof(stDestAddr));
     if (0 != nErr)
     {
-        ESP_LOGE("tcpd", "Couldn't bind name to socket: errno %d", errno);
+        ESP_LOGE("Server", "Couldn't bind name to socket: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("tcpd", "Name successfully bound to socket.");
+        ESP_LOGI("Server", "Name successfully bound to socket.");
     }
 
     _stServer.bIsRunning = true;
@@ -137,24 +137,24 @@ static void _TCPServerThread(void* pArg)
         nErr = listen(nListenSock, 1);
         if (0 != nErr)
         {
-            ESP_LOGE("tcpd", "Error occured during listen: errno %d", errno);
+            ESP_LOGE("Server", "Error occured during listen: errno %d", errno);
             break;
         }
         else
         {
-            ESP_LOGI("tcpd", "Listening.");
+            ESP_LOGI("Server", "Listening.");
         }
 
         uAddrLen = sizeof(stSourceAddr);
         nSock    = accept(nListenSock, (struct sockaddr*)&stSourceAddr, &uAddrLen);
         if (0 > nSock)
         {
-            ESP_LOGE("tcpd", "Unable to accept connection: errno %d", errno);
+            ESP_LOGE("Server", "Unable to accept connection: errno %d", errno);
             break;
         }
         else
         {
-            ESP_LOGI("tcpd", "Connection established");
+            ESP_LOGI("Server", "Connection established");
             send(nSock, "Connection established\r\n", 24, 0);
             _stServer.bHostConnected = true;
         }
@@ -165,13 +165,13 @@ static void _TCPServerThread(void* pArg)
             // Error occured during receiving.
             if (nLen < 0)
             {
-                ESP_LOGE("tcpd", "recv failed: errno %d", errno);
+                ESP_LOGE("Server", "recv failed: errno %d", errno);
                 break;
             }
             // Connection closed.
             else if (nLen == 0)
             {
-                ESP_LOGI("tcpd", "Connection closed");
+                ESP_LOGI("Server", "Connection closed");
                 break;
             }
             // Data received.
@@ -186,7 +186,7 @@ static void _TCPServerThread(void* pArg)
                 acRxBuffer[nLen] = 0;
                 if (nLen > 2)
                 {
-                    ESP_LOGI("tcpd", "Received %d bytes from %s: %s", nLen, acAddrStr, acRxBuffer);
+                    ESP_LOGI("Server", "Received %d bytes from %s: %s", nLen, acAddrStr, acRxBuffer);
                 }
 
                 // Parse commands.
@@ -223,7 +223,7 @@ static void _TCPServerThread(void* pArg)
         _stServer.bHostConnected = false;
         if (-1 != nSock)
         {
-            ESP_LOGI("tcpd", "Shutting down socket and restarting.");
+            ESP_LOGI("Server", "Shutting down socket and restarting.");
             shutdown(nSock, 0);
             close(nSock);
         }

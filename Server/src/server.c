@@ -29,11 +29,10 @@
  */
 typedef enum eCommand_t
 {
-    C_HELO = 0,
+    C_HELLO = 0,
     C_BYE,
     C_CYA,
     C_GETIP,
-    C_NONE,
     C_NUM
 } eCommand;
 
@@ -226,9 +225,9 @@ quit:
  * The server sends a 6-byte message where the last byte is the asigned
  * client ID:
  *
- *   +---+---+---+---+---+
- *   | H | e | l | o | 0 |
- *   +---+---+---+---+---+
+ *   +---+---+---+---+---+---+
+ *   | H | e | l | l | o |ID0|
+ *   +---+---+---+---+---+---+
  *
  * Stage 1 - First contact:
  *
@@ -250,26 +249,24 @@ quit:
  *   IHL:   IP address.
  *   ILH:   e. g. 127.0.0.1 = IHH.IHL.ILH.ILL
  *   ILL:
+ *   CRT:   Carriage return
+ *   NWL:   New linex
  *   Empty: ignored
  *
  * From this point on, the server accepts the following commands with a
  * max. total length of 5 bytes:
  *
- * +-----------------------+-----------------------+---------------+
- * | Command               | Response              |  Description  |
- * +-----------------------+-----------------------+---------------+
- * | +---+---+---+---+---+ | +---+---+---+---+---+ |      End      |
- * | |ID0| B | y | e |   | | | C | y | a |ID0|   | |  conversation |
- * | +---+---+---+---+---+ | +---+---+---+---+---+ |               |
- * +-----------------------+-----------------------+---------------+
- * | +---+---+---+---+---+ | +---+---+---+---+---+ |    Request    |
- * | | G | e | t | I | P | | |ID1|IHH|IHL|ILH|ILL| | IP address of |
- * | +---+---+---+---+---+ | +---+---+---+---+---+ |    opponent   |
- * +-----------------------+ If not available:     |               |
- * |                       | +---+---+---+---+---+ |               |
- * |                       | |ID1| N | o | n | e | |               |
- * |                       | +---+---+---+---+---+ |               |
- * +-----------------------+-----------------------+---------------+
+ * +-------------------------------+-----------------------------------------------+---------------+
+ * | Command                       | Response                                      |  Description  |
+ * +-------------------------------+-----------------------------------------------+---------------+
+ * | +---+---+---+---+---+         | +---+---+---+---+---+                         |      End      |
+ * | | B | y | e |CRT|NWL|         | | C | y | a |CRT|NWL|                         |  conversation |
+ * | +---+---+---+---+---+         | +---+---+---+---+---+                         |               |
+ * +-------------------------------+-----------------------------------------------+---------------+
+ * | +---+---+---+---+---+---+---+ | +---+---+---+---+---+---+---+---+---+---+---+ |    Request    |
+ * | | G | e | t | I | P |CRT|NWL| | | I | P | O | K |ID1|IHH|IHL|ILH|ILL|CRT|NWL| | IP address of |
+ * | +---+---+---+---+---+---+---+ | +---+---+---+---+---+---+---+---+---+---+---+ |    opponent   |
+ * +-------------------------------+-----------------------------------------------+---------------+
  *
  * Stage 3 - Direct contact
  *
@@ -281,14 +278,14 @@ quit:
  */
 static void* _ConnHandler(void* pSock)
 {
-    uint8_t u8ClientID    = _stServer.u8NumClients;
-    uint8_t u8OpponentID  = 0;
-    bool    bIsConnected  = true;
-    char    acRxBuffer[5] = { 0 };
-    char    acTxBuffer[5] = { 0 };
-    char    acIpAddr[15]  = { 0 };
-    int     nSock         = *(int*)pSock;
-    int     nReceived     = 0;
+    uint8_t u8ClientID     = _stServer.u8NumClients;
+    uint8_t u8OpponentID   = 0;
+    bool    bIsConnected   = true;
+    char    acRxBuffer[10] = { 0 };
+    char    acTxBuffer[11] = { 0 };
+    char    acIpAddr[15]   = { 0 };
+    int     nSock          = *(int*)pSock;
+    int     nReceived      = 0;
 
     inet_ntop(
         _stServer.stClientAddr.ss_family,
@@ -319,17 +316,16 @@ static void* _ConnHandler(void* pSock)
     }
     printf(" Player %u is now assigned to player %u.\n", u8ClientID, u8OpponentID);
 
-    char acCommand[C_NUM][5] = {
-        { 'H', 'e', 'l', 'o', u8ClientID },
-        { u8ClientID, 'B', 'y', 'e', 0 },
-        { 'C', 'y', 'a', u8ClientID, 0 },
-        { 'G', 'e', 't', 'I', 'P' },
-        { 'N', 'o', 'n', 'e', 0}
+    char acCommand[C_NUM][10] = {
+        { 'H', 'e', 'l', 'l', 'o', u8ClientID, '\r', '\n', 0, 0 },
+        { 'B', 'y', 'e', '\r', '\n', 0, 0, 0, 0, 0 },
+        { 'C', 'y', 'a', '\r', '\n', 0, 0, 0, 0, 0 },
+        { 'G', 'e', 't', 'I', 'P', '\r', '\n', 0, 0, 0 }
     };
 
     // Stage 1 - First contact:
-    memcpy(acTxBuffer, acCommand[C_HELO], 5);
-    if (-1 == send(nSock, acTxBuffer, 5, 0))
+    memcpy(acTxBuffer, acCommand[C_HELLO], 10);
+    if (-1 == send(nSock, acTxBuffer, 10, 0))
     {
         perror(strerror(errno));
     }
@@ -339,42 +335,41 @@ static void* _ConnHandler(void* pSock)
     {
         int  nSize;
 
-        nSize = recv(nSock, acRxBuffer, 5, 0);
+        nSize = recv(nSock, acRxBuffer, 10, 0);
         nReceived += nSize;
 
         // Full command received.
         if (nReceived >= 5)
         {
-            memset(acTxBuffer, 0, sizeof(acTxBuffer));
-
             // End conversation.
-            if (0 == memcmp(&acCommand[C_BYE], &acRxBuffer, 5))
+            if (0 == memcmp(&acCommand[C_BYE], &acRxBuffer, 3))
             {
                 printf(" (%u) initiated a disconnect.\n", u8ClientID);
-                memcpy(acTxBuffer, acCommand[C_CYA], 5);
+                memcpy(acTxBuffer, acCommand[C_CYA], 10);
 
                 if (-1 == send(nSock, acTxBuffer, 5, 0))
                 {
                     perror(strerror(errno));
                 }
+                _stServer.astClient[u8OpponentID].au8IP[0] = 0;
+                _stServer.astClient[u8OpponentID].au8IP[1] = 0;
+                _stServer.astClient[u8OpponentID].au8IP[2] = 0;
+                _stServer.astClient[u8OpponentID].au8IP[3] = 0;
+
                 bIsConnected = false;
                 continue;
             }
             // IP request.
             else if(0 == memcmp(&acCommand[C_GETIP], &acRxBuffer, 5))
             {
-                printf(" (%u) requested his opponent's IP address: ", u8ClientID);
-                if (0 == _stServer.astClient[u8OpponentID].au8IP[0])
+                if (0 != _stServer.astClient[u8OpponentID].au8IP[0])
                 {
-                    puts("IP not available.");
-                    memcpy(acTxBuffer, acCommand[C_NONE], 5);
-                }
-                else
-                {
-                    char acGr1[4];
-                    char acGr2[4];
-                    char acGr3[4];
-                    char acGr4[4];
+                    printf(" (%u) requested his opponent's IP address: ", u8ClientID);
+                    uint8_t u8Gr = 0;
+                    char    acGr1[4];
+                    char    acGr2[4];
+                    char    acGr3[4];
+                    char    acGr4[4];
 
                     sprintf(acGr1, "%u", _stServer.astClient[u8OpponentID].au8IP[0]);
                     sprintf(acGr2, "%u", _stServer.astClient[u8OpponentID].au8IP[1]);
@@ -382,20 +377,44 @@ static void* _ConnHandler(void* pSock)
                     sprintf(acGr4, "%u", _stServer.astClient[u8OpponentID].au8IP[3]);
                     printf("%s.%s.%s.%s sent.\n", acGr1, acGr2, acGr3, acGr4);
 
-                    acTxBuffer[0] = u8OpponentID;
-                    for (uint8_t u8Index = 1; u8Index < 5; u8Index++)
+                    acTxBuffer[0] = 'I';
+                    acTxBuffer[1] = 'P';
+                    acTxBuffer[2] = 'O';
+                    acTxBuffer[3] = 'K';
+                    acTxBuffer[4] = u8OpponentID;
+                    for (uint8_t u8Index = 5; u8Index < 9; u8Index++)
                     {
                         acTxBuffer[u8Index] =
-                            _stServer.astClient[u8OpponentID].au8IP[u8Index - 1];
+                            _stServer.astClient[u8OpponentID].au8IP[u8Gr];
+                        u8Gr++;
+                    }
+                    acTxBuffer[9]  = '\r';
+                    acTxBuffer[10] = '\n';
+
+                    if (-1 == send(nSock, acTxBuffer, 11, 0))
+                    {
+                        perror(strerror(errno));
                     }
                 }
-
-                if (-1 == send(nSock, acTxBuffer, 5, 0))
+                else
                 {
-                    perror(strerror(errno));
+                    if (_stServer.stConfig.u8Verbose)
+                    {
+                        printf(" (%u) requested his opponent's IP address: offline", u8ClientID);
+                    }
+                    acTxBuffer[0] = 'N';
+                    acTxBuffer[1] = 'o';
+                    acTxBuffer[2] = 'n';
+                    acTxBuffer[3] = 'e';
+                    acTxBuffer[4] = '\r';
+                    acTxBuffer[5] = '\n';
+
+                    if (-1 == send(nSock, acTxBuffer, 6, 0))
+                    {
+                        perror(strerror(errno));
+                    }
                 }
             }
-
             nSize     = 0;
             nReceived = 0;
         }

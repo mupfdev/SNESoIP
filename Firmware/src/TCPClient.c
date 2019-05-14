@@ -47,7 +47,7 @@ static void _TCPClientThread(void* pArg);
  */
 void InitTCPClient(void)
 {
-    ESP_LOGI("tcpc", "Initialise TCP client.");
+    ESP_LOGI("Client", "Initialise TCP client.");
     memset(&_stClient, 0, sizeof(struct TCPClient_t));
     xTaskCreate(_TCPClientThread, "TCPClientThread", 4096, NULL, 3, NULL);
 }
@@ -62,7 +62,7 @@ static void _TCPClientThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
-    char acRxBuffer[5];
+    char acRxBuffer[11];
     char acAddrStr[128];
     int  nAddrFamily;
     int  nIPProtocol;
@@ -79,59 +79,96 @@ static void _TCPClientThread(void* pArg)
     nSock = socket(nAddrFamily, SOCK_STREAM, nIPProtocol);
     if (0 > nSock)
     {
-        ESP_LOGE("tcpc", "Unable to create socket: errno %d", errno);
+        ESP_LOGE("Client", "Unable to create socket: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("tcpc", "Socket created successfully.");
+        ESP_LOGI("Client", "Socket created successfully.");
     }
 
     nErr = connect(nSock, (struct sockaddr *)&stDestAddr, sizeof(stDestAddr));
     if (0 != nErr)
     {
-        ESP_LOGE("tcpc", "Unable to connect: errno %d", errno);
+        ESP_LOGE("Client", "Unable to connect: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("tcpc", "Successfully connected");
+        ESP_LOGI("Client", "Successfully connected");
     }
 
     _stClient.bIsRunning = true;
     while (_stClient.bIsRunning)
     {
-        int  nLen         = 0;
-        char acCommand[5] = { 0 };
+        int  nLen;
+        char acCommand[7] = { 0 };
 
         if (1 == _stClient.u8Stage)
         {
-            memcpy(acCommand, "GetIP", 5);
+            ESP_LOGI("Client", "Requesting IP address");
+            memcpy(acCommand, "GetIP\r\n", 7);
+            nErr = send(nSock, acCommand, 7, 0);
+        }
+        if (2 == _stClient.u8Stage)
+        {
+            memcpy(acCommand, "Bye\r\n", 5);
             nErr = send(nSock, acCommand, 5, 0);
-            if (0 > nErr)
-            {
-                ESP_LOGE("tcpc", "Error occured during sending: errno %d", errno);
-                continue;
-            }
-            // DEBUG
-            ESP_LOGI("tcpc", "Disconnecting.");
-            _stClient.bIsRunning = false;
+        }
+        if (0 > nErr)
+        {
+            ESP_LOGE("Client", "Error occured during sending: errno %d", errno);
             continue;
         }
 
-        nLen = recv(nSock, acRxBuffer, sizeof(acRxBuffer) - 1, 0);
+        nLen = recv(nSock, acRxBuffer, sizeof(acRxBuffer) - 1, MSG_DONTWAIT);
         if (0 > nLen)
         {
-            ESP_LOGE("tcpc", "Receive failed: errno %d", errno);
+            if (EAGAIN != errno)
+            {
+                ESP_LOGE("Client", "Receive failed: errno %d", errno);
+            }
         }
         else
         {
             if (0 == _stClient.u8Stage)
             {
-                char acCommand[4] = { 'H', 'e', 'l', 'o' };
+                char acCommand[7] = { 'H', 'e', 'l', 'l', 'o' };
+                if (0 == memcmp(acCommand, &acRxBuffer, 5))
+                {
+                    ESP_LOGI("Client", "Client ID received: %d", acRxBuffer[5]);
+                    _stClient.u8ClientID = acRxBuffer[5];
+                    _stClient.u8Stage    = 1;
+                }
+            }
+            else if (1 == _stClient.u8Stage)
+            {
+                char acCommand[4] = { 'I', 'P', 'O', 'K' };
                 if (0 == memcmp(acCommand, &acRxBuffer, 4))
                 {
-                    ESP_LOGI("tcpc", "Helo received.");
-                    _stClient.u8ClientID = acRxBuffer[4];
-                    _stClient.u8Stage    = 1;
+                    _stClient.u8OpponentID = acRxBuffer[4];
+                    _stClient.u8IpAddr[0]  = acRxBuffer[5];
+                    _stClient.u8IpAddr[1]  = acRxBuffer[6];
+                    _stClient.u8IpAddr[2]  = acRxBuffer[7];
+                    _stClient.u8IpAddr[3]  = acRxBuffer[8];
+
+                    ESP_LOGI("Client", "IP from player %d received: %d.%d.%d.%d",
+                             _stClient.u8OpponentID,
+                             _stClient.u8IpAddr[0],
+                             _stClient.u8IpAddr[1],
+                             _stClient.u8IpAddr[2],
+                             _stClient.u8IpAddr[3]);
+                    _stClient.u8Stage = 2;
+                }
+                else
+                {
+                    ESP_LOGI("Client", "Waiting for opponent");
+                }
+            }
+            else if (2 == _stClient.u8Stage)
+            {
+                char acCommand[5] = { 'C', 'y', 'a', '\r', '\n' };
+                if (0 == memcmp(acCommand, &acRxBuffer, 5))
+                {
+                    _stClient.bIsRunning = false;
                     continue;
                 }
             }
@@ -140,7 +177,7 @@ static void _TCPClientThread(void* pArg)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    ESP_LOGI("tcpc", "Shutting down socket.");
+    ESP_LOGI("Client", "Shutting down socket.");
     shutdown(nSock, 0);
     close(nSock);
 
