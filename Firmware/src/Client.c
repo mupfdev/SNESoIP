@@ -48,7 +48,7 @@ void InitClient(void)
 {
     ESP_LOGI("Client", "Initialise client.");
     memset(&_stClient, 0, sizeof(struct Client_t));
-    xTaskCreate(_ClientThread, "ClientThread", 2048, NULL, 3, NULL);
+    xTaskCreate(_ClientThread, "ClientThread", 4096, NULL, 3, NULL);
 }
 
 /**
