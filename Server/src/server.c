@@ -400,7 +400,7 @@ static void* _ConnHandler(void* pSock)
                 {
                     if (_stServer.stConfig.u8Verbose)
                     {
-                        printf(" (%u) requested his opponent's IP address: offline", u8ClientID);
+                        printf(" (%u) requested his opponent's IP address: offline\n", u8ClientID);
                     }
                     acTxBuffer[0] = 'N';
                     acTxBuffer[1] = 'o';
