@@ -1,7 +1,6 @@
 /**
- * @file       TCPClient.c
- * @brief      TCP client
- * @details    A TCP client to communicate with the main server
+ * @file       Client.c
+ * @brief      Client
  * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
@@ -17,13 +16,13 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-#include "TCPClient.h"
+#include "Client.h"
 
 /**
- * @struct  TCPClient
- * @brief   TCP client data
+ * @struct  Client
+ * @brief   Client data
  */
-typedef struct TCPClient_t
+typedef struct Client_t
 {
     bool    bIsRunning;
     uint8_t u8Stage;
@@ -31,34 +30,34 @@ typedef struct TCPClient_t
     uint8_t u8OpponentID;
     uint8_t u8IpAddr[4];
 
-} TCPClient;
+} Client;
 
 /**
  * @var    _stClient
- * @brief  TCP client private data
+ * @brief  Client private data
  */
-static TCPClient _stClient;
+static Client _stClient;
 
-static void _TCPClientThread(void* pArg);
+static void _ClientThread(void* pArg);
 
 /**
- * @fn     void InitTCPClient(void)
- * @brief  Initialise TCP client
+ * @fn     void InitClient(void)
+ * @brief  Initialise client
  */
-void InitTCPClient(void)
+void InitClient(void)
 {
-    ESP_LOGI("Client", "Initialise TCP client.");
-    memset(&_stClient, 0, sizeof(struct TCPClient_t));
-    xTaskCreate(_TCPClientThread, "TCPClientThread", 4096, NULL, 3, NULL);
+    ESP_LOGI("Client", "Initialise client.");
+    memset(&_stClient, 0, sizeof(struct Client_t));
+    xTaskCreate(_ClientThread, "ClientThread", 2048, NULL, 3, NULL);
 }
 
 /**
- * @fn     void _TCPClientThread(void* pArg)
- * @brief  TCP client
+ * @fn     void _ClientThread(void* pArg)
+ * @brief  Client thread
  * @param  pArg
  *         Unused
  */
-static void _TCPClientThread(void* pArg)
+static void _ClientThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
@@ -69,9 +68,9 @@ static void _TCPClientThread(void* pArg)
     int  nSock;
     int  nErr;
 
-    stDestAddr.sin_addr.s_addr =  inet_addr("10.0.0.3");
+    stDestAddr.sin_addr.s_addr = inet_addr("10.0.0.3");
     stDestAddr.sin_family      = AF_INET;
-    stDestAddr.sin_port        = htons(1995);
+    stDestAddr.sin_port        = htons(54350);
     nAddrFamily                = AF_INET;
     nIPProtocol                = IPPROTO_IP;
     inet_ntoa_r(stDestAddr.sin_addr, acAddrStr, sizeof(acAddrStr) - 1);

@@ -1,6 +1,7 @@
 /**
  * @file       SNES.h
  * @brief      SNES I/O driver
+ * @details    A driver to interact with the console
  * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)

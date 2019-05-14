@@ -187,7 +187,7 @@ void InitSNES(void)
     xTaskCreate(
         _SNESReadInputThread,
         "SNESReadInputThread",
-        4096, NULL, 3, NULL);
+        2048, NULL, 3, NULL);
 
     #ifdef DEBUG
     xTaskCreate(

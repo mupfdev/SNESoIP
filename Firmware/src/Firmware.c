@@ -1,5 +1,5 @@
 /**
- * @file       firmware.c
+ * @file       Firmware.c
  * @brief      SNESoIP firmware
  * @defgroup   Firmware SNESoIP firmware
  * @ingroup    Firmware
@@ -13,9 +13,9 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "Client.h"
 #include "SNES.h"
-#include "TCPClient.h"
-#include "TCPServer.h"
+#include "Terminal.h"
 #include "WiFi.h"
 
 static void _MainThread(void* pArg);
@@ -25,10 +25,10 @@ void app_main()
     InitWiFi();
     WaitForIP();
     InitSNES();
-    InitTCPServer();
-    InitTCPClient();
+    InitTerminal();
+    InitClient();
 
-    xTaskCreate(_MainThread, "MainThread", 4096, NULL, 5, NULL);
+    xTaskCreate(_MainThread, "MainThread", 1024, NULL, 5, NULL);
 }
 
 static void _MainThread(void* pArg)

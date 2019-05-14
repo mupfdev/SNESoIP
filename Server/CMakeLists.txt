@@ -4,7 +4,7 @@ project(server C)
 
 find_package(Threads)
 add_executable(${PROJECT_NAME}
-    src/server.c
+    src/Server.c
     src/inih/ini.c
     )
 

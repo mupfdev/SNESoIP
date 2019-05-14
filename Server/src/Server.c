@@ -1,5 +1,5 @@
 /**
- * @file      server.c
+ * @file      Server.c
  * @brief     SNESoIP server
  * @details   Proof-of-concept IP exchange server to use with the
  *            SNESoIP v3.
