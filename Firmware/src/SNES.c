@@ -19,17 +19,17 @@
  *   +-------------+-----+--------- -+-------+-------+
  *   | Location    | Pin | Desc.     | Conn. | ESP32 |
  *   +-------------+-----+-----------+-------+-------+
- *   | SNES Port1  |  1  | +5V       |  +5V  |       |
+ *   | SNES Port0  |  1  | +5V       |  +5V  |       |
+ *   | SNES Port0  |  2  | Clock     | LShft | IO 18 |
+ *   | SNES Port0  |  3  | Latch     | LShft | IO 19 |
+ *   | SNES Port0  |  4  | Data      | LShft | IO 23 |
+ *   | SNES Port0  |  6  | IOPort 6  | LShft |       |
+ *   +-------------+-----+-----------+-------+-------+
  *   | SNES Port1  |  2  | Clock     | LShft |       |
  *   | SNES Port1  |  3  | Latch     | LShft |       |
  *   | SNES Port1  |  4  | Data      | LShft |       |
- *   | SNES Port1  |  6  | IOPort 6  | LShft |       |
- *   +-------------+-----+-----------+-------+-------+
- *   | SNES Port2  |  2  | Clock     | LShft |       |
- *   | SNES Port2  |  3  | Latch     | LShft |       |
- *   | SNES Port2  |  4  | Data      | LShft |       |
- *   | SNES Port2  |  6  | IOPort 7  | LShft |       |
- *   | SNES Port2  |  7  | GND       |  GND  |       |
+ *   | SNES Port1  |  6  | IOPort 7  | LShft |       |
+ *   | SNES Port1  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Input  |  1  | +5V       |  +5V  |       |
  *   | SNES Input  |  2  | Clock     | LShft | IO 25 |
@@ -106,6 +106,9 @@ typedef struct SNESDriver_t
     rmt_config_t stClock;          ///< Clock signal configuration
     rmt_item32_t stClockItem[17];  ///< Clock signal data
 
+    rmt_config_t stP0Data;          ///< Port 0 data configuration
+    rmt_item32_t stP0DataItem[17];  ///< Port 0 data
+
 } SNESDriver;
 
 /**
@@ -119,6 +122,8 @@ static void _SNESReadInputThread(void* pArg);
 static void _SNESDebugThread(void* pArg);
 #endif
 static void _InitSNESSigGen(void);
+
+void IRAM_ATTR Port0ISRHandler(void* pArg);
 
 /**
  * @fn     void InitSNES(void)
@@ -175,7 +180,57 @@ void InitSNES(void)
     _stDriver.bIsRunning    = true;
     _stDriver.u16InputData  = 0xffff;
 
-    // Data.
+    // Port 1 latch.
+    stGPIOConf.intr_type    = GPIO_PIN_INTR_POSEDGE;
+    stGPIOConf.pin_bit_mask = GPIO_SNES_PORT0_LATCH_BIT;
+    stGPIOConf.mode         = GPIO_MODE_INPUT;
+    stGPIOConf.pull_up_en   = 1;
+    ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
+
+    gpio_install_isr_service(0);
+    gpio_isr_handler_add(GPIO_SNES_PORT0_LATCH_PIN, Port0ISRHandler, NULL);
+
+    // Port 1 data.
+    _stDriver.stP0Data.rmt_mode      = RMT_MODE_TX;
+    _stDriver.stP0Data.channel       = RMT_CHANNEL_2;
+    _stDriver.stP0Data.clk_div       = 80;
+    _stDriver.stP0Data.gpio_num      = GPIO_SNES_PORT0_DATA_PIN;
+    _stDriver.stP0Data.mem_block_num = 1;
+
+    _stDriver.stP0Data.tx_config.loop_en        = 0;
+    _stDriver.stP0Data.tx_config.idle_level     = RMT_IDLE_LEVEL_HIGH;
+    _stDriver.stP0Data.tx_config.idle_output_en = 1;
+
+    rmt_config(&_stDriver.stP0Data);
+    rmt_driver_install(_stDriver.stP0Data.channel, 0, 0);
+
+    // This is a hack because the interrupt is coming in a little bit
+    // too late.
+    _stDriver.stP0DataItem[0].duration0 = 2;
+    _stDriver.stP0DataItem[0].level0    = 1;
+    _stDriver.stP0DataItem[0].duration1 = 2;
+    _stDriver.stP0DataItem[0].level1    = 1;
+
+    // Static test signal.
+    for (uint8_t u8Index = 1; u8Index < 17; u8Index++)
+    {
+        uint8_t u8Level;
+        if (0 == u8Index % 2)
+        {
+            u8Level = 1;
+        }
+        else
+        {
+            u8Level = 0;
+        }
+
+        _stDriver.stP0DataItem[u8Index].duration0 = 6;
+        _stDriver.stP0DataItem[u8Index].level0    = u8Level;
+        _stDriver.stP0DataItem[u8Index].duration1 = 6;
+        _stDriver.stP0DataItem[u8Index].level1    = u8Level;
+    }
+
+    // Input data.
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
     stGPIOConf.mode         = GPIO_MODE_INPUT;
     stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA_BIT;
@@ -309,11 +364,11 @@ static void _SNESDebugThread(void* pArg)
         {
             if ((u16Temp >> u8Index) & 1)
             {
-                acDebug[u8Index] = '1';
+                acDebug[u8Index] = '0';
             }
             else
             {
-                acDebug[u8Index] = '0';
+                acDebug[u8Index] = '1';
             }
         }
         acDebug[12] = '\0';
@@ -356,7 +411,7 @@ static void _InitSNESSigGen(void)
     _stDriver.stLatchItem[0].duration1 = 0;
     _stDriver.stLatchItem[0].level1    = 0;
 
-    // Initialise clock signal.
+    // Initialise input signal.
     _stDriver.stClock.rmt_mode      = RMT_MODE_TX;
     _stDriver.stClock.channel       = RMT_CHANNEL_1;
     _stDriver.stClock.clk_div       = 80;
@@ -382,4 +437,15 @@ static void _InitSNESSigGen(void)
         _stDriver.stClockItem[u8Index].duration1 = 6;
         _stDriver.stClockItem[u8Index].level1    = 1;
     }
+}
+
+/**
+ * @fn       void IRAM_ATTR Port0ISRHandler(void* pArg)
+ * @brief    Controller port 0 interrupt service routine
+ * @details  Triggered on every latch impulse.
+ */
+void IRAM_ATTR Port0ISRHandler(void* pArg)
+{
+    (void)pArg;
+    rmt_write_items(_stDriver.stP0Data.channel, _stDriver.stP0DataItem, 17, 0);
 }
