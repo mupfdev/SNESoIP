@@ -20,14 +20,14 @@
  *   | Location    | Pin | Desc.     | Conn. | ESP32 |
  *   +-------------+-----+-----------+-------+-------+
  *   | SNES Port0  |  1  | +5V       |  +5V  |       |
- *   | SNES Port0  |  2  | Clock     | LShft | IO 18 |
- *   | SNES Port0  |  3  | Latch     | LShft | IO 19 |
- *   | SNES Port0  |  4  | Data      | LShft | IO 23 |
+ *   | SNES Port0  |  2  | Clock     | LShft | IO 14 |
+ *   | SNES Port0  |  3  | Latch     | LShft | IO 15 |
+ *   | SNES Port0  |  4  | Data      | LShft | IO 12 |
  *   | SNES Port0  |  6  | IOPort 6  | LShft |       |
  *   +-------------+-----+-----------+-------+-------+
- *   | SNES Port1  |  2  | Clock     | LShft |       |
- *   | SNES Port1  |  3  | Latch     | LShft |       |
- *   | SNES Port1  |  4  | Data      | LShft |       |
+ *   | SNES Port1  |  2  | Clock     | LShft | IO 18 |
+ *   | SNES Port1  |  3  | Latch     | LShft | IO  5 |
+ *   | SNES Port1  |  4  | Data      | LShft | IO 19 |
  *   | SNES Port1  |  6  | IOPort 7  | LShft |       |
  *   | SNES Port1  |  7  | GND       |  GND  |       |
  *   +-------------+-----+-----------+-------+-------+
@@ -85,6 +85,7 @@
 #include "esp_log.h"
 #include "driver/rmt.h"
 #include "driver/gpio.h"
+#include "driver/spi_slave.h"
 #include "rom/ets_sys.h"
 #include "SNES.h"
 
@@ -101,13 +102,16 @@ typedef struct SNESDriver_t
     bool     bIOPortBit6;   ///< Programmable I/O Port bit 6
     bool     bIOPortBit7;   ///< Programmable I/O Port bit 7
 
+    spi_bus_config_t             stPort0Bus;  ///< HSPI bus configuration
+    spi_slave_interface_config_t stPort0;     ///< HSPI interface configuration
+
+    spi_bus_config_t             stPort1Bus;  ///< VSPI bus configuration
+    spi_slave_interface_config_t stPort1;     ///< VSPI interface configuration
+
     rmt_config_t stLatch;          ///< Latch signal configuration
     rmt_item32_t stLatchItem[1];   ///< Latch signal data
     rmt_config_t stClock;          ///< Clock signal configuration
     rmt_item32_t stClockItem[17];  ///< Clock signal data
-
-    rmt_config_t stP0Data;          ///< Port 0 data configuration
-    rmt_item32_t stP0DataItem[17];  ///< Port 0 data
 
 } SNESDriver;
 
@@ -123,7 +127,10 @@ static void _SNESDebugThread(void* pArg);
 #endif
 static void _InitSNESSigGen(void);
 
-void IRAM_ATTR Port0ISRHandler(void* pArg);
+static void IRAM_ATTR Port0Setup(spi_slave_transaction_t *stTrans);
+static void IRAM_ATTR Port0Trans(spi_slave_transaction_t *stTrans);
+static void IRAM_ATTR Port1Setup(spi_slave_transaction_t *stTrans);
+static void IRAM_ATTR Port1Trans(spi_slave_transaction_t *stTrans);
 
 /**
  * @fn     void InitSNES(void)
@@ -180,63 +187,64 @@ void InitSNES(void)
     _stDriver.bIsRunning    = true;
     _stDriver.u16InputData  = 0xffff;
 
-    // Port 1 latch.
-    stGPIOConf.intr_type    = GPIO_PIN_INTR_POSEDGE;
-    stGPIOConf.pin_bit_mask = GPIO_SNES_PORT0_LATCH_BIT;
-    stGPIOConf.mode         = GPIO_MODE_INPUT;
+    // GPIO configuration.
+    stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
+    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
+    stGPIOConf.pin_bit_mask =
+        SNES_PORT0_DATA_BIT | SNES_PORT1_DATA_BIT;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
-    gpio_install_isr_service(0);
-    gpio_isr_handler_add(GPIO_SNES_PORT0_LATCH_PIN, Port0ISRHandler, NULL);
-
-    // Port 1 data.
-    _stDriver.stP0Data.rmt_mode      = RMT_MODE_TX;
-    _stDriver.stP0Data.channel       = RMT_CHANNEL_2;
-    _stDriver.stP0Data.clk_div       = 80;
-    _stDriver.stP0Data.gpio_num      = GPIO_SNES_PORT0_DATA_PIN;
-    _stDriver.stP0Data.mem_block_num = 1;
-
-    _stDriver.stP0Data.tx_config.loop_en        = 0;
-    _stDriver.stP0Data.tx_config.idle_level     = RMT_IDLE_LEVEL_HIGH;
-    _stDriver.stP0Data.tx_config.idle_output_en = 1;
-
-    rmt_config(&_stDriver.stP0Data);
-    rmt_driver_install(_stDriver.stP0Data.channel, 0, 0);
-
-    // This is a hack because the interrupt is coming in a little bit
-    // too late.
-    _stDriver.stP0DataItem[0].duration0 = 2;
-    _stDriver.stP0DataItem[0].level0    = 1;
-    _stDriver.stP0DataItem[0].duration1 = 2;
-    _stDriver.stP0DataItem[0].level1    = 1;
-
-    // Static test signal.
-    for (uint8_t u8Index = 1; u8Index < 17; u8Index++)
-    {
-        uint8_t u8Level;
-        if (0 == u8Index % 2)
-        {
-            u8Level = 1;
-        }
-        else
-        {
-            u8Level = 0;
-        }
-
-        _stDriver.stP0DataItem[u8Index].duration0 = 6;
-        _stDriver.stP0DataItem[u8Index].level0    = u8Level;
-        _stDriver.stP0DataItem[u8Index].duration1 = 6;
-        _stDriver.stP0DataItem[u8Index].level1    = u8Level;
-    }
-
-    // Input data.
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
     stGPIOConf.mode         = GPIO_MODE_INPUT;
-    stGPIOConf.pin_bit_mask = GPIO_SNES_INPUT_DATA_BIT;
+    stGPIOConf.pin_bit_mask =
+        SNES_INPUT_DATA_BIT  |
+        SNES_PORT0_CLOCK_BIT | SNES_PORT1_CLOCK_BIT |
+        SNES_PORT0_LATCH_BIT | SNES_PORT1_LATCH_BIT;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
+    // Controller port 0 (HSPI).
+    _stDriver.stPort0Bus.mosi_io_num     = -1;
+    _stDriver.stPort0Bus.miso_io_num     = SNES_PORT0_DATA_PIN;
+    _stDriver.stPort0Bus.sclk_io_num     = SNES_PORT0_CLOCK_PIN;
+    _stDriver.stPort0Bus.quadwp_io_num   = -1;
+    _stDriver.stPort0Bus.quadhd_io_num   = -1;
+    _stDriver.stPort0Bus.max_transfer_sz =  0;
+    _stDriver.stPort0Bus.flags           =
+        SPICOMMON_BUSFLAG_SLAVE | SPICOMMON_BUSFLAG_NATIVE_PINS;
+    _stDriver.stPort0Bus.intr_flags      = ESP_INTR_FLAG_IRAM;
+
+    _stDriver.stPort0.spics_io_num       = SNES_PORT0_LATCH_PIN;
+    _stDriver.stPort0.flags              = SPI_SLAVE_BIT_LSBFIRST;
+    _stDriver.stPort0.queue_size         = 1;
+    _stDriver.stPort0.mode               = 0;
+    _stDriver.stPort0.post_setup_cb      = Port0Setup;
+    _stDriver.stPort0.post_trans_cb      = Port0Trans;
+
+    ESP_ERROR_CHECK(spi_slave_initialize(HSPI_HOST, &_stDriver.stPort0Bus, &_stDriver.stPort0, 0));
+
+    // Controller port 1 (VSPI).
+    _stDriver.stPort1Bus.mosi_io_num     = -1;
+    _stDriver.stPort1Bus.miso_io_num     = SNES_PORT1_DATA_PIN;
+    _stDriver.stPort1Bus.sclk_io_num     = SNES_PORT1_CLOCK_PIN;
+    _stDriver.stPort1Bus.quadwp_io_num   = -1;
+    _stDriver.stPort1Bus.quadhd_io_num   = -1;
+    _stDriver.stPort1Bus.max_transfer_sz =  0;
+    _stDriver.stPort1Bus.flags           =
+        SPICOMMON_BUSFLAG_SLAVE | SPICOMMON_BUSFLAG_NATIVE_PINS;
+    _stDriver.stPort1Bus.intr_flags      = ESP_INTR_FLAG_IRAM;
+
+    _stDriver.stPort1.spics_io_num       = SNES_PORT1_LATCH_PIN;
+    _stDriver.stPort1.flags              = SPI_SLAVE_BIT_LSBFIRST;
+    _stDriver.stPort1.queue_size         = 1;
+    _stDriver.stPort1.mode               = 0;
+    _stDriver.stPort1.post_setup_cb      = Port1Setup;
+    _stDriver.stPort1.post_trans_cb      = Port1Trans;
+
+    ESP_ERROR_CHECK(spi_slave_initialize(VSPI_HOST, &_stDriver.stPort1Bus, &_stDriver.stPort1, 0));
+
+    // Initialise latch and clock signal generator.
     _InitSNESSigGen();
 
     xTaskCreate(
@@ -313,9 +321,9 @@ static void _SNESReadInputThread(void* pArg)
             ets_delay_us(6);
             if (u8Bit < 12)
             {
-                if (gpio_get_level(GPIO_SNES_INPUT_DATA_PIN))
+                if (gpio_get_level(SNES_INPUT_DATA_PIN))
                 {
-                    if (gpio_get_level(GPIO_SNES_INPUT_DATA_PIN))
+                    if (gpio_get_level(SNES_INPUT_DATA_PIN))
                     {
                         u16Temp[u8Attempt] |= 1 << u8Bit;
                     }
@@ -335,6 +343,13 @@ static void _SNESReadInputThread(void* pArg)
             if (u16Temp[0] == u16Temp[1] && u16Temp[1] == u16Temp[2])
             {
                 _stDriver.u16InputData = u16Temp[0];
+                // DEBUG
+                spi_slave_transaction_t t;
+                memset(&t, 0, sizeof(t));
+                t.length    = 16;
+                t.trans_len = 16;
+                t.tx_buffer = &_stDriver.u16InputData;
+                spi_slave_transmit(VSPI_HOST, &t, portMAX_DELAY);
             }
             u8Attempt = 0;
         }
@@ -396,7 +411,7 @@ static void _InitSNESSigGen(void)
     _stDriver.stLatch.rmt_mode      = RMT_MODE_TX;
     _stDriver.stLatch.channel       = RMT_CHANNEL_0;
     _stDriver.stLatch.clk_div       = 80;
-    _stDriver.stLatch.gpio_num      = GPIO_SNES_INPUT_LATCH_PIN;
+    _stDriver.stLatch.gpio_num      = SNES_INPUT_LATCH_PIN;
     _stDriver.stLatch.mem_block_num = 1;
 
     _stDriver.stLatch.tx_config.loop_en        = 0;
@@ -415,7 +430,7 @@ static void _InitSNESSigGen(void)
     _stDriver.stClock.rmt_mode      = RMT_MODE_TX;
     _stDriver.stClock.channel       = RMT_CHANNEL_1;
     _stDriver.stClock.clk_div       = 80;
-    _stDriver.stClock.gpio_num      = GPIO_SNES_INPUT_CLOCK_PIN;
+    _stDriver.stClock.gpio_num      = SNES_INPUT_CLOCK_PIN;
     _stDriver.stClock.mem_block_num = 1;
 
     _stDriver.stClock.tx_config.loop_en        = 0;
@@ -439,13 +454,22 @@ static void _InitSNESSigGen(void)
     }
 }
 
-/**
- * @fn       void IRAM_ATTR Port0ISRHandler(void* pArg)
- * @brief    Controller port 0 interrupt service routine
- * @details  Triggered on every latch impulse.
- */
-void IRAM_ATTR Port0ISRHandler(void* pArg)
+static void IRAM_ATTR Port0Setup(spi_slave_transaction_t *stTrans)
 {
-    (void)pArg;
-    rmt_write_items(_stDriver.stP0Data.channel, _stDriver.stP0DataItem, 17, 0);
+    (void)stTrans;
+}
+
+static void IRAM_ATTR Port0Trans(spi_slave_transaction_t *stTrans)
+{
+    (void)stTrans;
+}
+
+static void IRAM_ATTR Port1Setup(spi_slave_transaction_t *stTrans)
+{
+    (void)stTrans;
+}
+
+static void IRAM_ATTR Port1Trans(spi_slave_transaction_t *stTrans)
+{
+    (void)stTrans;
 }
