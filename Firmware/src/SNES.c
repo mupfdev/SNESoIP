@@ -102,6 +102,7 @@ typedef struct SNESDriver_t
     bool     bIOPortBit6;   ///< Programmable I/O Port bit 6
     bool     bIOPortBit7;   ///< Programmable I/O Port bit 7
 
+    uint32_t                     u32Port0Tx;
     spi_bus_config_t             stPort0Bus;  ///< HSPI bus configuration
     spi_slave_interface_config_t stPort0;     ///< HSPI interface configuration
 
@@ -112,6 +113,9 @@ typedef struct SNESDriver_t
     rmt_item32_t stLatchItem[1];   ///< Latch signal data
     rmt_config_t stClock;          ///< Clock signal configuration
     rmt_item32_t stClockItem[17];  ///< Clock signal data
+
+    rmt_config_t stDebug;
+    rmt_item32_t stDebugItem[1];
 
 } SNESDriver;
 
@@ -142,6 +146,9 @@ static void IRAM_ATTR Port1Trans(spi_slave_transaction_t *stTrans);
  * going data latch pulse on pin 3.  This instructs the parallel-in
  * serial-out shift register in the controller to latch the state of all
  * buttons internally.
+ *
+ * Remark: It is possible to trigger the latch and clock manually to
+ * achieve higher transfer rates.
  *
  * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
  * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
@@ -189,9 +196,10 @@ void InitSNES(void)
 
     // GPIO configuration.
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
-    stGPIOConf.mode         = GPIO_MODE_OUTPUT;
+    stGPIOConf.mode         = GPIO_MODE_INPUT_OUTPUT;
     stGPIOConf.pin_bit_mask =
         SNES_PORT0_DATA_BIT | SNES_PORT1_DATA_BIT;
+    stGPIOConf.pull_down_en = 1;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
@@ -201,6 +209,7 @@ void InitSNES(void)
         SNES_INPUT_DATA_BIT  |
         SNES_PORT0_CLOCK_BIT | SNES_PORT1_CLOCK_BIT |
         SNES_PORT0_LATCH_BIT | SNES_PORT1_LATCH_BIT;
+    stGPIOConf.pull_down_en = 0;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
@@ -211,14 +220,13 @@ void InitSNES(void)
     _stDriver.stPort0Bus.quadwp_io_num   = -1;
     _stDriver.stPort0Bus.quadhd_io_num   = -1;
     _stDriver.stPort0Bus.max_transfer_sz =  0;
-    _stDriver.stPort0Bus.flags           =
-        SPICOMMON_BUSFLAG_SLAVE | SPICOMMON_BUSFLAG_NATIVE_PINS;
+    _stDriver.stPort0Bus.flags           = SPICOMMON_BUSFLAG_SLAVE;
     _stDriver.stPort0Bus.intr_flags      = ESP_INTR_FLAG_IRAM;
 
     _stDriver.stPort0.spics_io_num       = SNES_PORT0_LATCH_PIN;
     _stDriver.stPort0.flags              = SPI_SLAVE_BIT_LSBFIRST;
     _stDriver.stPort0.queue_size         = 1;
-    _stDriver.stPort0.mode               = 0;
+    _stDriver.stPort0.mode               = 2;
     _stDriver.stPort0.post_setup_cb      = Port0Setup;
     _stDriver.stPort0.post_trans_cb      = Port0Trans;
 
@@ -231,14 +239,13 @@ void InitSNES(void)
     _stDriver.stPort1Bus.quadwp_io_num   = -1;
     _stDriver.stPort1Bus.quadhd_io_num   = -1;
     _stDriver.stPort1Bus.max_transfer_sz =  0;
-    _stDriver.stPort1Bus.flags           =
-        SPICOMMON_BUSFLAG_SLAVE | SPICOMMON_BUSFLAG_NATIVE_PINS;
+    _stDriver.stPort1Bus.flags           = SPICOMMON_BUSFLAG_SLAVE;
     _stDriver.stPort1Bus.intr_flags      = ESP_INTR_FLAG_IRAM;
 
     _stDriver.stPort1.spics_io_num       = SNES_PORT1_LATCH_PIN;
     _stDriver.stPort1.flags              = SPI_SLAVE_BIT_LSBFIRST;
     _stDriver.stPort1.queue_size         = 1;
-    _stDriver.stPort1.mode               = 0;
+    _stDriver.stPort1.mode               = 2;
     _stDriver.stPort1.post_setup_cb      = Port1Setup;
     _stDriver.stPort1.post_trans_cb      = Port1Trans;
 
@@ -344,12 +351,14 @@ static void _SNESReadInputThread(void* pArg)
             {
                 _stDriver.u16InputData = u16Temp[0];
                 // DEBUG
+                _stDriver.u32Port0Tx = u16Temp[0];
+
                 spi_slave_transaction_t t;
                 memset(&t, 0, sizeof(t));
                 t.length    = 16;
                 t.trans_len = 16;
-                t.tx_buffer = &_stDriver.u16InputData;
-                spi_slave_transmit(VSPI_HOST, &t, portMAX_DELAY);
+                t.tx_buffer = &_stDriver.u32Port0Tx;
+                spi_slave_queue_trans(VSPI_HOST, &t, 0);
             }
             u8Attempt = 0;
         }
@@ -426,7 +435,7 @@ static void _InitSNESSigGen(void)
     _stDriver.stLatchItem[0].duration1 = 0;
     _stDriver.stLatchItem[0].level1    = 0;
 
-    // Initialise input signal.
+    // Initialise clock signal.
     _stDriver.stClock.rmt_mode      = RMT_MODE_TX;
     _stDriver.stClock.channel       = RMT_CHANNEL_1;
     _stDriver.stClock.clk_div       = 80;
