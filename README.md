@@ -1,6 +1,6 @@
-# SNESoIP: The SNES Wi-Fi adapter
-
 ![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
+
+# SNESoIP: The SNES Wi-Fi adapter
 
 ## Status
 
