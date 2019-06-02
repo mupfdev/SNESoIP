@@ -1,6 +1,11 @@
-![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
+# SNESoIP: The SNES Wi-Fi adapter
 
-# SNESoIP: The SNES Wi-Fi adapter #
+## Status
+
+In the first revisions I made some design flaws.  Looking back, it's
+difficult for me to understand why it worked so well.  However, this
+time I want to make it technically correct.  Therefore is the project is
+currently in a state of re-design.
 
 ## Introduction
 
@@ -14,6 +19,7 @@ Possible applications would be bulletin board systems, multi-user
 dungeons, IRC, etc.
 
 ![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
+![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
 
 I'm not planning to build and/or sell these devices but the device
 should be fairly easy to recreate.  Especially because I try to use
@@ -24,7 +30,8 @@ flash cartridge like the [sd2snes](http://sd2snes.de/blog/) or the Super
 Everdrive.
 
 If you want to help with the further development of this project, join
-us on our [Discord server](https://discord.gg/araBwyp).
+us on our [Discord server](https://discord.gg/araBwyp) or in the
+[Retro.Live community](https://discord.gg/TuBCs4H).
 
 ## Annotation
 
@@ -49,9 +56,9 @@ impact on my life and was, in a manner of speaking, the foundation for
 my career as a software developer for embedded systems.
 
 As you can imagine, this project is personal. And I always had the urge
-to finish what I started almost six years ago.
+to finish what I started almost 6 years ago.
 
-We'll see where 2019 is going.
+We'll see how it goes.
 
 ### Press and Media
 
@@ -79,7 +86,11 @@ Espressif Systems.
 
 ## Licence and Credits
 
-This project is licenced under the "THE BEER-WARE LICENCE".  See the
-file LICENCE.md for details.
+This project is licenced under the "THE BEER-WARE LICENCE".
+
+The IRC client is based on [sic](https://tools.suckless.org/sic/), an extremely simple IRC
+client and is licenced under the terms of the MIT/X Consortium License.
+
+See the file LICENCE.md for details.
 
 "Nintendo" is a registered trademark of Nintendo of America Inc.

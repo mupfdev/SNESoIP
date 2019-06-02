@@ -4,3 +4,6 @@
 [submodule "Tools/libSFX"]
 	path = Tools/libSFX
 	url = https://github.com/Optiroc/libSFX.git
+[submodule "ROMs/SNESterm"]
+	path = ROMs/SNESterm
+	url = https://github.com/mupfelofen-de/SNESterm.git

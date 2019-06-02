@@ -1,6 +1,7 @@
 .pio
 .pioenvs
 .piolibdeps
+.todo
 GPATH
 GRTAGS
 GTAGS
