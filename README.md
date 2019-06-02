@@ -1,5 +1,7 @@
 # SNESoIP: The SNES Wi-Fi adapter
 
+![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
+
 ## Status
 
 In the first revisions I made some design flaws.  Looking back, it's
@@ -19,7 +21,6 @@ Possible applications would be bulletin board systems, multi-user
 dungeons, IRC, etc.
 
 ![SNESoIP prototype](Archive/Rev2/hardware/images/rev02-small.jpg?raw=true)
-![SNESoIP logo](Media/.SNESoIP-Logo-small.png?raw=true)
 
 I'm not planning to build and/or sell these devices but the device
 should be fairly easy to recreate.  Especially because I try to use
