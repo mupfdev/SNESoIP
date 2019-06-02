@@ -1,7 +1,7 @@
 /**
- * @file       Client.h
- * @brief      Client
- * @details    A TCP client to interact with the main server
+ * @file       ExchangeClient.h
+ * @brief      IP exchange client
+ * @details    A TCP client to interact with the IP exchange server
  * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
@@ -10,4 +10,4 @@
 
 #include <stdbool.h>
 
-void InitClient(void);
+void InitExchangeClient(void);

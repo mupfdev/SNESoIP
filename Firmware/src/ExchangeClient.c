@@ -1,6 +1,7 @@
 /**
- * @file       Client.c
- * @brief      Client
+ * @file       ExchangeClient.c
+ * @brief      IP exchange client
+ * @details    A TCP client to interact with the IP exchange server
  * @ingroup    Firmware
  * @author     Michael Fitzmayer
  * @copyright  "THE BEER-WARE LICENCE" (Revision 42)
@@ -15,14 +16,14 @@
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
-#include <lwip/netdb.h>
-#include "Client.h"
+#include "lwip/netdb.h"
+#include "ExchangeClient.h"
 
 /**
- * @struct  Client
- * @brief   Client data
+ * @struct  ExchangeClient
+ * @brief   ExchangeClient data
  */
-typedef struct Client_t
+typedef struct ExchangeClient_t
 {
     bool    bIsRunning;
     uint8_t u8Stage;
@@ -30,34 +31,34 @@ typedef struct Client_t
     uint8_t u8OpponentID;
     uint8_t u8IpAddr[4];
 
-} Client;
+} ExchangeClient;
 
 /**
- * @var    _stClient
- * @brief  Client private data
+ * @var    _stExchangeClient
+ * @brief  IP exchange client private data
  */
-static Client _stClient;
+static ExchangeClient _stExchangeClient;
 
-static void _ClientThread(void* pArg);
+static void _ExchangeClientThread(void* pArg);
 
 /**
- * @fn     void InitClient(void)
- * @brief  Initialise client
+ * @fn     void InitExchangeClient(void)
+ * @brief  Initialise IP exchange client
  */
-void InitClient(void)
+void InitExchangeClient(void)
 {
-    ESP_LOGI("Client", "Initialise client.");
-    memset(&_stClient, 0, sizeof(struct Client_t));
-    xTaskCreate(_ClientThread, "ClientThread", 4096, NULL, 3, NULL);
+    ESP_LOGI("ExchangeClient", "Initialise IP exchange client.");
+    memset(&_stExchangeClient, 0, sizeof(struct ExchangeClient_t));
+    xTaskCreate(_ExchangeClientThread, "ExchangeClientThread", 4096, NULL, 3, NULL);
 }
 
 /**
- * @fn     void _ClientThread(void* pArg)
- * @brief  Client thread
+ * @fn     void _ExchangeClientThread(void* pArg)
+ * @brief  IP exchange client thread
  * @param  pArg
  *         Unused
  */
-static void _ClientThread(void* pArg)
+static void _ExchangeClientThread(void* pArg)
 {
     struct sockaddr_in stDestAddr;
 
@@ -78,43 +79,43 @@ static void _ClientThread(void* pArg)
     nSock = socket(nAddrFamily, SOCK_STREAM, nIPProtocol);
     if (0 > nSock)
     {
-        ESP_LOGE("Client", "Unable to create socket: errno %d", errno);
+        ESP_LOGE("ExchangeClient", "Unable to create socket: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("Client", "Socket created successfully.");
+        ESP_LOGI("ExchangeClient", "Socket created successfully.");
     }
 
     nErr = connect(nSock, (struct sockaddr *)&stDestAddr, sizeof(stDestAddr));
     if (0 != nErr)
     {
-        ESP_LOGE("Client", "Unable to connect: errno %d", errno);
+        ESP_LOGE("ExchangeClient", "Unable to connect: errno %d", errno);
     }
     else
     {
-        ESP_LOGI("Client", "Successfully connected");
+        ESP_LOGI("ExchangeClient", "Successfully connected");
     }
 
-    _stClient.bIsRunning = true;
-    while (_stClient.bIsRunning)
+    _stExchangeClient.bIsRunning = true;
+    while (_stExchangeClient.bIsRunning)
     {
         int  nLen;
         char acCommand[7] = { 0 };
 
-        if (1 == _stClient.u8Stage)
+        if (1 == _stExchangeClient.u8Stage)
         {
-            ESP_LOGI("Client", "Requesting IP address");
+            ESP_LOGI("ExchangeClient", "Requesting IP address");
             memcpy(acCommand, "GetIP\r\n", 7);
             nErr = send(nSock, acCommand, 7, 0);
         }
-        if (2 == _stClient.u8Stage)
+        if (2 == _stExchangeClient.u8Stage)
         {
             memcpy(acCommand, "Bye\r\n", 5);
             nErr = send(nSock, acCommand, 5, 0);
         }
         if (0 > nErr)
         {
-            ESP_LOGE("Client", "Error occured during sending: errno %d", errno);
+            ESP_LOGE("ExchangeClient", "Error occured during sending: errno %d", errno);
             continue;
         }
 
@@ -128,46 +129,46 @@ static void _ClientThread(void* pArg)
         }
         else
         {
-            if (0 == _stClient.u8Stage)
+            if (0 == _stExchangeClient.u8Stage)
             {
                 char acCommand[7] = { 'H', 'e', 'l', 'l', 'o' };
                 if (0 == memcmp(acCommand, &acRxBuffer, 5))
                 {
-                    ESP_LOGI("Client", "Client ID received: %d", acRxBuffer[5]);
-                    _stClient.u8ClientID = acRxBuffer[5];
-                    _stClient.u8Stage    = 1;
+                    ESP_LOGI("ExchangeClient", "Client ID received: %d", acRxBuffer[5]);
+                    _stExchangeClient.u8ClientID = acRxBuffer[5];
+                    _stExchangeClient.u8Stage    = 1;
                 }
             }
-            else if (1 == _stClient.u8Stage)
+            else if (1 == _stExchangeClient.u8Stage)
             {
                 char acCommand[4] = { 'I', 'P', 'O', 'K' };
                 if (0 == memcmp(acCommand, &acRxBuffer, 4))
                 {
-                    _stClient.u8OpponentID = acRxBuffer[4];
-                    _stClient.u8IpAddr[0]  = acRxBuffer[5];
-                    _stClient.u8IpAddr[1]  = acRxBuffer[6];
-                    _stClient.u8IpAddr[2]  = acRxBuffer[7];
-                    _stClient.u8IpAddr[3]  = acRxBuffer[8];
+                    _stExchangeClient.u8OpponentID = acRxBuffer[4];
+                    _stExchangeClient.u8IpAddr[0]  = acRxBuffer[5];
+                    _stExchangeClient.u8IpAddr[1]  = acRxBuffer[6];
+                    _stExchangeClient.u8IpAddr[2]  = acRxBuffer[7];
+                    _stExchangeClient.u8IpAddr[3]  = acRxBuffer[8];
 
-                    ESP_LOGI("Client", "IP from player %d received: %d.%d.%d.%d",
-                             _stClient.u8OpponentID,
-                             _stClient.u8IpAddr[0],
-                             _stClient.u8IpAddr[1],
-                             _stClient.u8IpAddr[2],
-                             _stClient.u8IpAddr[3]);
-                    _stClient.u8Stage = 2;
+                    ESP_LOGI("ExchangeClient", "IP from player %d received: %d.%d.%d.%d",
+                             _stExchangeClient.u8OpponentID,
+                             _stExchangeClient.u8IpAddr[0],
+                             _stExchangeClient.u8IpAddr[1],
+                             _stExchangeClient.u8IpAddr[2],
+                             _stExchangeClient.u8IpAddr[3]);
+                    _stExchangeClient.u8Stage = 2;
                 }
                 else
                 {
-                    ESP_LOGI("Client", "Waiting for opponent");
+                    ESP_LOGI("ExchangeClient", "Waiting for opponent");
                 }
             }
-            else if (2 == _stClient.u8Stage)
+            else if (2 == _stExchangeClient.u8Stage)
             {
                 char acCommand[5] = { 'C', 'y', 'a', '\r', '\n' };
                 if (0 == memcmp(acCommand, &acRxBuffer, 5))
                 {
-                    _stClient.bIsRunning = false;
+                    _stExchangeClient.bIsRunning = false;
                     continue;
                 }
             }
@@ -176,7 +177,7 @@ static void _ClientThread(void* pArg)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    ESP_LOGI("Client", "Shutting down socket.");
+    ESP_LOGI("ExchangeClient", "Shutting down socket.");
     shutdown(nSock, 0);
     close(nSock);
 
