@@ -102,10 +102,11 @@ typedef struct SNESDriver_t
     bool     bIOPortBit6;   ///< Programmable I/O Port bit 6
     bool     bIOPortBit7;   ///< Programmable I/O Port bit 7
 
-    uint32_t                     u32Port0Tx;
+    uint32_t                     u32Port0Tx;  ///< Port 0 TX buffer
     spi_bus_config_t             stPort0Bus;  ///< HSPI bus configuration
     spi_slave_interface_config_t stPort0;     ///< HSPI interface configuration
 
+    uint32_t                     u32Port1Tx;  ///< Port 1 TX buffer
     spi_bus_config_t             stPort1Bus;  ///< VSPI bus configuration
     spi_slave_interface_config_t stPort1;     ///< VSPI interface configuration
 
@@ -139,67 +140,23 @@ static void IRAM_ATTR Port1Trans(spi_slave_transaction_t *stTrans);
 /**
  * @fn     void InitSNES(void)
  * @brief  Initialise SNES I/O driver
- * @details
- * @code{.unparsed}
- *
- * Every 16.67ms / (60Hz), the SNES CPU sends out a 12µs wide, positive
- * going data latch pulse on pin 3.  This instructs the parallel-in
- * serial-out shift register in the controller to latch the state of all
- * buttons internally.
- *
- * Remark: It is possible to trigger the latch and clock manually to
- * achieve higher transfer rates.
- *
- * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
- * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
- * cycle.  The controllers serially shift the latched button states out
- * of pin 4 on very rising edge of the clock, and the CPU samples the
- * data on every falling edge.
- *
- * At the end of the 16 cycle sequence, the serial data line is driven
- * low until the next data latch pulse.  Only 4 of the 16 clock cycles
- * are shown for brevity:
- *
- *                    |<------------16.67ms------------>|
- *
- *                    12µs
- *                 -->|   |<--
- *
- *                     ---                               ---
- *                    |   |                             |   |
- * Data Latch      ---     -----------------/ /----------    --------...
- *
- * Data clock      ----------   -   -   -  -/ /----------------   -  ...
- *                           | | | | | | | |                   | | | |
- *                            -   -   -   -                     -   -
- *                            1   2   3   4                     1   2
- *
- * Serial Data         ----     ---     ----/ /           ---
- *                    |    |   |   |   |                 |
- * (Buttons B      ---      ---     ---        ----------
- *  & Select       norm      B      SEL           norm
- *  pressed).      low                            low
- *                         12µs
- *                      -->|   |<--
- *
- * Source: repairfaq.org
- *
- * @endcode
  */
 void InitSNES(void)
 {
     gpio_config_t stGPIOConf;
 
     memset(&_stDriver, 0, sizeof(struct SNESDriver_t));
-    _stDriver.bIsRunning    = true;
-    _stDriver.u16InputData  = 0xffff;
+    _stDriver.bIsRunning   = true;
+    _stDriver.u16InputData = 0xffff;
+    _stDriver.u32Port0Tx   = 0xffffffff;
+    _stDriver.u32Port1Tx   = 0xffffffff;
 
     // GPIO configuration.
     stGPIOConf.intr_type    = GPIO_PIN_INTR_DISABLE;
     stGPIOConf.mode         = GPIO_MODE_INPUT_OUTPUT;
     stGPIOConf.pin_bit_mask =
         SNES_PORT0_DATA_BIT | SNES_PORT1_DATA_BIT;
-    stGPIOConf.pull_down_en = 1;
+    stGPIOConf.pull_down_en = 0;
     stGPIOConf.pull_up_en   = 1;
     ESP_ERROR_CHECK(gpio_config(&stGPIOConf));
 
@@ -306,9 +263,84 @@ void SendLatch(void)
 /**
  * @fn       void _SNESReadInputThread(void* pArg)
  * @brief    Read SNES controller input
- * @details  The data is retrieved three times as often as on a SNES.
+ * @details
+ * @code{.unparsed}
+ *
+ * Most games use the so called auto-joypad mode.  In this mode every
+ * 16.67ms or about 60Hz, the SNES CPU sends out a 12µs wide, positive
+ * going data latch pulse on pin 3 of the controller port.  This
+ * instructs the parallel-in serial-out shift register in the controller
+ * to latch the state of all buttons internally.
+ *
+ * Remark: It is possible to trigger the latch and clock manually to
+ * achieve higher transfer rates.
+ *
+ * 6µs after the fall of the data latch pulse, the CPU sends out 16 data
+ * clock pulses on pin 2.  These are 50% duty cycle with 12µs per full
+ * cycle.  The controllers serially shift the latched button states out
+ * of pin 4 on very rising edge of the clock, and the CPU samples the
+ * data on every falling edge.
+ *
+ * At the end of the 16 cycle sequence, the serial data line is driven
+ * low until the next data latch pulse.
+ *
+ * But because the clock is normally high, the first transition it makes
+ * after the latch signal is a high-to-low transition.  Since data for
+ * the first button will be latched on this transition, it's data must
+ * actually be driven earlier.  The SNES controllers drive data for the
+ * first button at the falling edge of the latch.
+
+ * The protocol used looks like SPI.  However, using the SPI slave
+ * driver from esp-idf to transmit data to the controller ports requires
+ * a little hack.  Here's what happens if you try it:
+ *
+ * Data latch (used as CS):
+ *
+ *        12µs
+ *     >-------<
+ *     +---+---+    6µs
+ *     |       |   >---<
+ * +---+       +---+---+-------------------+
+ *
+ * Clock signal:
+ *
+ * +-----------+---+   +---+   +---+   +---+
+ *                 |   |   |   |   |   |   |
+ *                 |   |   |   |   |   |   |
+ *                 +---+   +---+   +---+   +
+ *
+ * MISO starts sending the first data bit half a clock cycle too late:
+ *
+ * +---------------+       +----------------+
+ *                 |       |
+ *                 |       |
+ *                 +---+---+
+ *
+ * To solve this problem a XNOR-gate between the latch and the clock
+ * signal is used to generate a new SPI clock:
+ *
+ *     +---+---+   +---+   +---+   +---+   +
+ *     |       |   |   |   |   |   |   |   |
+ *     |       |   |   |   |   |   |   |   |
+ * +---+       +---+   +---+   +---+   +---+
+ *
+ * (Thanks to Stéphane Marty (https://www.youtube.com/user/dexsilicium)
+ * for the tipp!)
+ *
+ * But using this new SPI clock results in a different unwanted
+ * behaviour; the data is sent one clock cycle too early (first bit on
+ * the rising edge of the latch pulse).
+ *
+ * To compensate, I added a 17th dummy bit at the beginning of the
+ * transmission.
+ *
+ * tbc.
+ *
+ * @endcode
+ *           The data is retrieved three times as often as on a SNES.
  *           Signal fluctuations, probably caused by wrong timing, are
- *           compensated by comparing the results.  @param pArg Unused
+ *           compensated by comparing the results.
+ * @param    pArg Unused
  * @todo     Use the RMT module driver to read the data in non-blocking
  *           mode.
  */
@@ -316,6 +348,13 @@ static void _SNESReadInputThread(void* pArg)
 {
     uint16_t u16Temp[3] = { 0xffff, 0xffff, 0xffff };
     uint8_t  u8Attempt = 0;
+    spi_slave_transaction_t stTrans0;
+    spi_slave_transaction_t stTrans1;
+
+    memset(&stTrans0, 0, sizeof(stTrans0));
+    stTrans0.length    = 17;
+    stTrans0.trans_len = 17;
+    stTrans0.tx_buffer = &_stDriver.u32Port0Tx;
 
     while (_stDriver.bIsRunning)
     {
@@ -350,16 +389,12 @@ static void _SNESReadInputThread(void* pArg)
             if (u16Temp[0] == u16Temp[1] && u16Temp[1] == u16Temp[2])
             {
                 _stDriver.u16InputData = u16Temp[0];
-                // DEBUG
-                _stDriver.u32Port0Tx = u16Temp[0];
-
-                spi_slave_transaction_t t;
-                memset(&t, 0, sizeof(t));
-                t.length    = 16;
-                t.trans_len = 16;
-                t.tx_buffer = &_stDriver.u32Port0Tx;
-                spi_slave_queue_trans(VSPI_HOST, &t, 0);
             }
+            _stDriver.u32Port0Tx = _stDriver.u16InputData;
+            _stDriver.u32Port0Tx = _stDriver.u32Port0Tx << 1;
+            _stDriver.u32Port0Tx &= ~(1 << 0);
+            spi_slave_queue_trans(VSPI_HOST, &stTrans0, 0);
+
             u8Attempt = 0;
         }
 
